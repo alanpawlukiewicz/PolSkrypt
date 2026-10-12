@@ -10,5 +10,6 @@ namespace PPL.Expressions
         T VisitGroupingExpression(Grouping expression);
         T VisitLiteralExpression(Literal expression);
         T VisitUnaryExpression(Unary expression);
+        T VisitConditionalExpression(Conditional expression);
     }
 }

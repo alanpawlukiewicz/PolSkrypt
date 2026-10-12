@@ -55,10 +55,14 @@ public class Program
     {
         Scanner scanner = new Scanner(source);
         List<Token> tokens = scanner.ScanTokens();
+        Parser parser = new Parser(tokens);
+        Expr expr = parser.Parse();
 
-        foreach (Token token in tokens)
+        if (ErrorHandler.HadError)
         {
-            Console.WriteLine(token);
+            return;
         }
+
+        Console.WriteLine(new AstPrinter().Print(expr));
     }
 }

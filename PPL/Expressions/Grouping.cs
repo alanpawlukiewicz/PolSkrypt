@@ -1,10 +1,10 @@
 using PPL.Expressions;
 
-public class Grouping : Expression
+public class Grouping : Expr
 {
-    private readonly Expression _expression;
-    public Expression Expression { get { return _expression; } }
-    public Grouping(Expression expression)
+    private readonly Expr _expression;
+    public Expr Expression { get { return _expression; } }
+    public Grouping(Expr expression)
     {
         _expression = expression;
     }

@@ -1,10 +1,10 @@
 using PPL.Expressions;
 
-public class Literal : Expression
+public class Literal : Expr
 {
-    private readonly object _value;
-    public object Value { get { return _value; } }
-    public Literal(object value)
+    private readonly object? _value;
+    public object? Value { get { return _value; } }
+    public Literal(object? value)
     {
         _value = value;
     }

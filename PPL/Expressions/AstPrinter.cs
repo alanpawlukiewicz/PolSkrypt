@@ -6,17 +6,17 @@ namespace PPL.Expressions
 {
     public class AstPrinter : IVisitor<string>
     {
-        public string Print(Expression expression)
+        public string Print(Expr expression)
         {
             return expression.Accept(this);
         }
 
-        private string Parenthesize(string name, List<Expression> exprs)
+        private string Parenthesize(string name, List<Expr> exprs)
         {
             StringBuilder builder = new StringBuilder();
 
             builder.Append("(").Append(name);
-            foreach (Expression expr in exprs)
+            foreach (Expr expr in exprs)
             {
                 builder.Append(" ");
                 builder.Append(expr.Accept(this));
@@ -28,12 +28,12 @@ namespace PPL.Expressions
 
         public string VisitBinaryExpression(Binary expression)
         {
-            return Parenthesize(expression.Operator.Lexeme, new List<Expression> { expression.Left, expression.Right });
+            return Parenthesize(expression.Operator.Lexeme, new List<Expr> { expression.Left, expression.Right });
         }
 
         public string VisitGroupingExpression(Grouping expression)
         {
-            return Parenthesize("group", new List<Expression> { expression.Expression });
+            return Parenthesize("group", new List<Expr> { expression.Expression });
         }
 
         public string VisitLiteralExpression(Literal expression)
@@ -43,7 +43,12 @@ namespace PPL.Expressions
 
         public string VisitUnaryExpression(Unary expression)
         {
-            return Parenthesize(expression.Operator.Lexeme, new List<Expression> { expression.Right });
+            return Parenthesize(expression.Operator.Lexeme, new List<Expr> { expression.Right });
+        }
+
+        public string VisitConditionalExpression(Conditional expression)
+        {
+            throw new NotImplementedException();
         }
     }
 }

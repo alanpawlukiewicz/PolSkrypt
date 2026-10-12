@@ -1,15 +1,15 @@
 ﻿namespace PPL.Expressions
 {
-    public class Binary : Expression
+    public class Binary : Expr
     {
-        private readonly Expression _left;
+        private readonly Expr _left;
         private readonly Token _operator;
-        private readonly Expression _right;
+        private readonly Expr _right;
 
-        public Expression Left { get { return _left; } }
-        public Expression Right { get { return _right; } }
+        public Expr Left { get { return _left; } }
+        public Expr Right { get { return _right; } }
         public Token Operator { get { return _operator; } }
-        public Binary(Expression left, Token op, Expression right)
+        public Binary(Expr left, Token op, Expr right)
         {
             _left = left;
             _operator = op;

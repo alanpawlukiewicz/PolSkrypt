@@ -1,13 +1,13 @@
 using PPL;
 using PPL.Expressions;
 
-public class Unary : Expression
+public class Unary : Expr
 {
     private readonly Token _operator;
-    private readonly Expression _right;
-    public Expression Right { get { return _right; } }
+    private readonly Expr _right;
+    public Expr Right { get { return _right; } }
     public Token Operator { get { return _operator; } }
-    public Unary(Token op, Expression right)
+    public Unary(Token op, Expr right)
     {
         _operator = op;
         _right = right;
