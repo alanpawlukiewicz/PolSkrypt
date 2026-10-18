@@ -51,16 +51,16 @@ public class Program
             Console.Write("> ");
             string? line = Console.ReadLine();
             if (line == null) break;
-            Run(line);
+            Run(line, true);
             ErrorHandler.HadError = false;
         }
     }
 
-    private static void Run(string source)
+    private static void Run(string source, bool promptMode = false)
     {
         Scanner scanner = new Scanner(source);
         List<Token> tokens = scanner.ScanTokens();
-        Parser parser = new Parser(tokens);
+        Parser parser = new Parser(tokens, promptMode);
         var stmts = parser.Parse();
 
         if (ErrorHandler.HadError)

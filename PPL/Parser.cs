@@ -11,11 +11,13 @@ namespace PPL
     public class Parser
     {
         private readonly List<Token> _tokens;
+        private readonly bool _promptMode;
         private int _current = 0;
 
-        public Parser(List<Token> tokens)
+        public Parser(List<Token> tokens, bool promptMode)
         {
             _tokens = tokens;
+            _promptMode = promptMode;
         }
 
         public List<Stmt> Parse()
@@ -80,6 +82,11 @@ namespace PPL
                 return new Block(Block());
             }
 
+            if (_promptMode)
+            {
+                return PrintWithoutKeywordStatement();
+            }
+
             return ExpressionStatement();
         }
 
@@ -100,6 +107,16 @@ namespace PPL
         {
             Expr value = Expression();
             Consume(TokenType.SEMICOLON, "Oczekiwano ';' po wartości.");
+            return new Print(value);
+        }
+
+        private Stmt PrintWithoutKeywordStatement()
+        {
+            Expr value = Expression();
+            if (Check(TokenType.SEMICOLON))
+            {
+                Advance();
+            }
             return new Print(value);
         }
 

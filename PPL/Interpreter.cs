@@ -12,6 +12,7 @@ namespace PPL
     public class Interpreter : IExprVisitor<object?>, IStmtVisitor<object?>
     {
         private Env _environment = new Env();
+
         public void Interpret(List<Stmt> statements)
         {
             try
@@ -36,6 +37,7 @@ namespace PPL
         {
             return expr.Accept(this);
         }
+
         public object? VisitBinaryExpression(Binary expression)
         {
             object? left = Evaluate(expression.Left);
