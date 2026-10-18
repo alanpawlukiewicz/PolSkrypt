@@ -1,3 +1,4 @@
+using PPL.Constants;
 using PPL.Expressions;
 
 public class Literal : Expr
@@ -9,7 +10,7 @@ public class Literal : Expr
         _value = value;
     }
 
-    public override T Accept<T>(IVisitor<T> visitor)
+    public override T Accept<T>(IExprVisitor<T> visitor)
     {
         return visitor.VisitLiteralExpression(this);
     }

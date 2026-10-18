@@ -1,10 +1,11 @@
-﻿using System;
+﻿using PPL.Constants;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace PPL.Expressions
 {
-    public class AstPrinter : IVisitor<string>
+    public class AstPrinter : IExprVisitor<string>
     {
         public string Print(Expr expression)
         {
@@ -38,7 +39,7 @@ namespace PPL.Expressions
 
         public string VisitLiteralExpression(Literal expression)
         {
-            return expression.Value?.ToString() ?? "null";
+            return expression.Value?.ToString() ?? KeyWord.NULL;
         }
 
         public string VisitUnaryExpression(Unary expression)
@@ -47,6 +48,16 @@ namespace PPL.Expressions
         }
 
         public string VisitConditionalExpression(Conditional expression)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string VisitVariableExpression(Variable expression)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string VisitAssignExpression(Assign expression)
         {
             throw new NotImplementedException();
         }

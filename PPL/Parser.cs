@@ -1,6 +1,7 @@
 ﻿using PPL.Enums;
 using PPL.Exceptions;
 using PPL.Expressions;
+using PPL.Statements;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -17,17 +18,96 @@ namespace PPL
             _tokens = tokens;
         }
 
-        public Expr Parse()
+        public List<Stmt> Parse()
+        {
+            List<Stmt> statements = new();
+            while (!IsAtEnd())
+            {
+                statements.AddRange(Declaration());
+            }
+
+            return statements;
+        }
+
+        private List<Stmt> Declaration()
         {
             try
             {
-                return Expression();
+                if (Match(TokenType.VAR))
+                {
+                    return VarDeclaration();
+                }
 
+                return new List<Stmt> { Statement() };
             }
-            catch (ParseException err)
+            catch (ParseException)
             {
-                return null;
+                Synchronize();
+                return new();
             }
+        }
+
+        private List<Stmt> VarDeclaration()
+        {
+            var declarations = new List<Stmt>() { };
+            do
+            {
+                var name = Consume(TokenType.IDENTIFIER, "Oczekiwano nazwy zmiennej.");
+
+                Expr? initializer = null;
+                if (Match(TokenType.EQUAL))
+                {
+                    initializer = Assignment();
+                }
+
+                declarations.Add(new Var(name, initializer));
+            }
+            while (Match(TokenType.COMMA));
+
+            Consume(TokenType.SEMICOLON, "Oczekiwano ';' po deklaracji zmiennej.");
+
+            return declarations;
+        }
+
+        private Stmt Statement()
+        {
+            if (Match(TokenType.PRINT))
+            {
+                return PrintStatement();
+            }
+            if (Match(TokenType.LEFT_BRACE))
+            {
+                return new Block(Block());
+            }
+
+            return ExpressionStatement();
+        }
+
+        private List<Stmt> Block()
+        {
+            List<Stmt> statements = new();
+
+            while (!Check(TokenType.RIGHT_BRACE) && !IsAtEnd())
+            {
+                statements.AddRange(Declaration());
+            }
+
+            Consume(TokenType.RIGHT_BRACE, "Oczekiwano '}' po bloku.");
+            return statements;
+        }
+
+        private Stmt PrintStatement()
+        {
+            Expr value = Expression();
+            Consume(TokenType.SEMICOLON, "Oczekiwano ';' po wartości.");
+            return new Print(value);
+        }
+
+        private Stmt ExpressionStatement()
+        {
+            Expr value = Expression();
+            Consume(TokenType.SEMICOLON, "Oczekiwano ';' po wartości.");
+            return new StmtExpression(value);
         }
 
         private Expr Expression()
@@ -37,12 +117,31 @@ namespace PPL
 
         private Expr Comma()
         {
-            Expr expr = Ternary();
-            while (Match(TokenType.COMMA))
+            Expr expr = Assignment();
+            if (Match(TokenType.COMMA))
             {
                 Token op = Previous();
-                Expr right = Ternary();
+                Expr right = Assignment();
                 expr = new Binary(expr, op, right);
+            }
+            return expr;
+        }
+
+        private Expr Assignment()
+        {
+            Expr expr = Ternary();
+            if (Match(TokenType.EQUAL))
+            {
+                Token equals = Previous();
+                Expr value = Assignment();
+
+                if (expr is Variable)
+                {
+                    Token name = ((Variable)expr).Name;
+                    return new Assign(name, value);
+                }
+
+                ErrorHandler.Error(equals, "Nieprawidłowy cel przypisania.");
             }
             return expr;
         }
@@ -95,7 +194,10 @@ namespace PPL
 
         private Token Advance()
         {
-            if (!IsAtEnd()) _current++;
+            if (!IsAtEnd())
+            {
+                _current++;
+            }
             return Previous();
         }
 
@@ -130,7 +232,7 @@ namespace PPL
         {
             Expr expr = Factor();
 
-            while (Match(TokenType.MINUS, TokenType.PLUS))
+            while (Match(TokenType.MINUS, TokenType.PLUS, TokenType.DOT))
             {
                 Token op = Previous();
                 Expr right = Factor();
@@ -171,6 +273,10 @@ namespace PPL
             if (Match(TokenType.NUMBER, TokenType.STRING))
             {
                 return new Literal(Previous().Literal);
+            }
+            if (Match(TokenType.IDENTIFIER))
+            {
+                return new Variable(Previous());
             }
             if (Match(TokenType.LEFT_PAREN))
             {

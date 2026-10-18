@@ -1,12 +1,13 @@
 ﻿using PPL;
 using PPL.Enums;
 using PPL.Expressions;
+using System.Runtime.CompilerServices;
 
 public class Program
 {
+    private static readonly Interpreter _interpreter = new Interpreter();
     public static void Main(string[] args)
     {
-
         if (args.Length > 1)
         {
             Environment.Exit(64);
@@ -37,6 +38,10 @@ public class Program
         {
             Environment.Exit(65);
         }
+        if (ErrorHandler.HadRuntimeError)
+        {
+            Environment.Exit(70);
+        }
     }
 
     private static void RunPrompt()
@@ -56,13 +61,13 @@ public class Program
         Scanner scanner = new Scanner(source);
         List<Token> tokens = scanner.ScanTokens();
         Parser parser = new Parser(tokens);
-        Expr expr = parser.Parse();
+        var stmts = parser.Parse();
 
         if (ErrorHandler.HadError)
         {
             return;
         }
 
-        Console.WriteLine(new AstPrinter().Print(expr));
+        _interpreter.Interpret(stmts);
     }
 }

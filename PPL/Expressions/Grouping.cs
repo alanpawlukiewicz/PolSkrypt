@@ -9,7 +9,7 @@ public class Grouping : Expr
         _expression = expression;
     }
 
-    public override T Accept<T>(IVisitor<T> visitor)
+    public override T Accept<T>(IExprVisitor<T> visitor)
     {
         return visitor.VisitGroupingExpression(this);
     }

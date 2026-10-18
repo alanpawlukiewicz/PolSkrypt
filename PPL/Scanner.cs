@@ -1,6 +1,7 @@
 ﻿using PPL.Enums;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -24,7 +25,7 @@ namespace PPL
             {"funkcja", TokenType.FUN},
             {"dla", TokenType.FOR},
             {"jeśli", TokenType.IF},
-            {"nieważny", TokenType.NULL},
+            {"wartość_pusta", TokenType.NULL},
             {"lub", TokenType.OR},
             {"wyświetl", TokenType.PRINT},
             {"zwróc", TokenType.RETURN},
@@ -202,7 +203,7 @@ namespace PPL
                 }
             }
 
-            AddToken(TokenType.NUMBER, double.Parse(_source.Substring(_start, _current - _start)));
+            AddToken(TokenType.NUMBER, double.Parse(_source.Substring(_start, _current - _start), CultureInfo.InvariantCulture));
         }
 
         private char PeekNext()
