@@ -23,7 +23,7 @@ namespace PPL
 
         public void Define(string name, object? value)
         {
-            if (_values.TryGetValue(name, out var matchingName))
+            if (_values.ContainsKey(name))
             {
                 return;
             }
