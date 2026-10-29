@@ -59,5 +59,10 @@ namespace PPL.Expressions
         {
             throw new NotImplementedException();
         }
+
+        public string VisitLogicalExpression(Logical expression)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

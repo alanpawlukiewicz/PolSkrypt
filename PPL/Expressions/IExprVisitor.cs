@@ -9,5 +9,6 @@
         T VisitConditionalExpression(Conditional expression);
         T VisitVariableExpression(Variable expression);
         T VisitAssignExpression(Assign expression);
+        T VisitLogicalExpression(Logical expression);
     }
 }

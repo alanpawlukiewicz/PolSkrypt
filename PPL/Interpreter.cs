@@ -279,5 +279,27 @@ namespace PPL
 
             return null;
         }
+
+        public object? VisitLogicalExpression(Logical expression)
+        {
+            var left = Evaluate(expression.Left);
+
+            if (expression.Operator.Type == TokenType.OR)
+            {
+                if (IsTruthy(left))
+                {
+                    return left;
+                }
+            }
+            else
+            {
+                if (!IsTruthy(left))
+                {
+                    return left;
+                }
+            }
+
+            return Evaluate(expression.Right);
+        }
     }
 }

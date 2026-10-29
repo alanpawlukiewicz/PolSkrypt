@@ -182,7 +182,7 @@ namespace PPL
 
         private Expr Ternary()
         {
-            Expr expr = Equality();
+            Expr expr = Or();
             while (Match(TokenType.QUESTION_MARK))
             {
                 Expr thenStatement = Expression();
@@ -190,6 +190,34 @@ namespace PPL
                 Expr elseStatement = Ternary();
                 expr = new Conditional(expr, thenStatement, elseStatement);
             }
+            return expr;
+        }
+
+        private Expr Or()
+        {
+            Expr expr = And();
+
+            while (Match(TokenType.OR))
+            {
+                Token op = Previous();
+                Expr right = And();
+                expr = new Logical(expr, op, right);
+            }
+
+            return expr;
+        }
+
+        private Expr And()
+        {
+            Expr expr = Equality();
+
+            while (Match(TokenType.AND))
+            {
+                Token op = Previous();
+                Expr right = Equality();
+                expr = new Logical(expr, op, right);
+            }
+
             return expr;
         }
 
