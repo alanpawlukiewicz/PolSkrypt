@@ -133,6 +133,7 @@ namespace PPL
             if (Check(TokenType.SEMICOLON))
             {
                 Advance();
+                return new StmtExpression(value);
             }
             return new Print(value);
         }
