@@ -78,6 +78,10 @@ namespace PPL
             {
                 return WhileStatement();
             }
+            if (Match(TokenType.FOR))
+            {
+                return ForStatement();
+            }
             if (Match(TokenType.PRINT))
             {
                 return PrintStatement();
@@ -116,6 +120,50 @@ namespace PPL
             Stmt body = Statement();
 
             return new While(condition, body);
+        }
+
+        private Stmt ForStatement()
+        {
+            Consume(TokenType.LEFT_PAREN, "Oczekiwano '(' po 'dla'.");
+            List<Stmt>? initializer = Match(TokenType.SEMICOLON) 
+                ? null
+                : Match(TokenType.VAR) 
+                    ? VarDeclaration() 
+                    : new List<Stmt>{ ExpressionStatement() };
+
+            Expr? condition = Check(TokenType.SEMICOLON) ? null : Expression();
+            Consume(TokenType.SEMICOLON, "Oczekiwano ';' po warunku pętli.");
+
+            Expr? increment = Check(TokenType.RIGHT_PAREN) ? null : Expression();
+            Consume(TokenType.RIGHT_PAREN, "Oczekiwano ')'.");
+
+            Stmt body = Statement();
+
+            if (increment != null)
+            {
+                body = new Block(new List<Stmt> { body, new StmtExpression(increment)});
+            }
+
+            if (condition == null)
+            {
+                condition = new Literal(true);
+            }
+
+            body = new While(condition, body);
+
+            if (initializer != null)
+            {
+                var newBlock = new Block();
+                foreach (var init in initializer)
+                {
+                    newBlock.AddStatement(init);
+                }
+                newBlock.AddStatement(body);
+
+                body = newBlock;
+            }
+
+            return body;
         }
 
         private Stmt PrintStatement()

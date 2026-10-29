@@ -11,6 +11,16 @@
             _statements = statements;
         }
 
+        public Block()
+        {
+            _statements = new() { };
+        }
+
+        public void AddStatement(Stmt statement)
+        {
+            _statements.Add(statement);
+        }
+
         public override T Accept<T>(IStmtVisitor<T> visitor)
         {
             return visitor.VisitBlockStmt(this);
