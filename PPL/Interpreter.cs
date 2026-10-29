@@ -208,16 +208,6 @@ namespace PPL
             return value.ToString() ?? string.Empty;
         }
 
-        public void VisitExpressionStmt(StmtExpression statement)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void VisitPrintStmt(Print statement)
-        {
-            throw new NotImplementedException();
-        }
-
         object? IStmtVisitor<object?>.VisitExpressionStmt(StmtExpression statement)
         {
             Evaluate(statement.Expression);
@@ -277,6 +267,20 @@ namespace PPL
             {
                 _environment = previous;
             }
+        }
+
+        public object? VisitIfStmt(If statement)
+        {
+            if (IsTruthy(Evaluate(statement.Condition)))
+            {
+                Execute(statement.ThenBranch);
+            }
+            else if (statement.ElseBranch != null)
+            {
+                Execute(statement.ElseBranch);
+            }
+
+            return null;
         }
     }
 }

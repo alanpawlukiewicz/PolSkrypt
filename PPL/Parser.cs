@@ -73,6 +73,10 @@ namespace PPL
 
         private Stmt Statement()
         {
+            if (Match(TokenType.IF))
+            {
+                return IfStatement();
+            }
             if (Match(TokenType.PRINT))
             {
                 return PrintStatement();
@@ -108,6 +112,22 @@ namespace PPL
             Expr value = Expression();
             Consume(TokenType.SEMICOLON, "Oczekiwano ';' po wartości.");
             return new Print(value);
+        }
+
+        private Stmt IfStatement()
+        {
+            Consume(TokenType.LEFT_PAREN, "Oczekiwano znaku '(' po 'jeżeli'");
+            Expr condition = Expression();
+            Consume(TokenType.RIGHT_PAREN, "Oczekiwano znaku ')' po warunku jeżeli");
+
+            Stmt thenBranch = Statement();
+            Stmt? elseBranch = null;
+            if (Match(TokenType.ELSE))
+            {
+                elseBranch = Statement();
+            }
+
+            return new If(condition, thenBranch, elseBranch);
         }
 
         private Stmt PrintWithoutKeywordStatement()

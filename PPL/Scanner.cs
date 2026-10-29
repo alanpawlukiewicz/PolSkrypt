@@ -24,7 +24,7 @@ namespace PPL
             {"fałsz", TokenType.FALSE},
             {"funkcja", TokenType.FUN},
             {"dla", TokenType.FOR},
-            {"jeśli", TokenType.IF},
+            {"jeżeli", TokenType.IF},
             {"wartość_pusta", TokenType.NULL},
             {"lub", TokenType.OR},
             {"wyświetl", TokenType.PRINT},

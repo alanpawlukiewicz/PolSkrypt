@@ -11,5 +11,6 @@ namespace PPL.Statements
         T VisitPrintStmt(Print statement);
         T VisitVarStmt(Var statement);
         T VisitBlockStmt(Block statement);
+        T VisitIfStmt(If statement);
     }
 }
