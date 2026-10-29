@@ -74,6 +74,10 @@ namespace PPL
             {
                 return IfStatement();
             }
+            if (Match(TokenType.WHILE))
+            {
+                return WhileStatement();
+            }
             if (Match(TokenType.PRINT))
             {
                 return PrintStatement();
@@ -102,6 +106,16 @@ namespace PPL
 
             Consume(TokenType.RIGHT_BRACE, "Oczekiwano '}' po bloku.");
             return statements;
+        }
+
+        private Stmt WhileStatement()
+        {
+            Consume(TokenType.LEFT_PAREN, "Oczekiwano '(' po 'podczas_gdy'.");
+            Expr condition = Expression();
+            Consume(TokenType.RIGHT_PAREN, "Oczekiwano ')' po warunku podczas_gdy.");
+            Stmt body = Statement();
+
+            return new While(condition, body);
         }
 
         private Stmt PrintStatement()

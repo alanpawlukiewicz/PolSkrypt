@@ -301,5 +301,15 @@ namespace PPL
 
             return Evaluate(expression.Right);
         }
+
+        public object? VisitWhileStmt(While statement)
+        {
+            while(IsTruthy(Evaluate(statement.Condition)))
+            {
+                Execute(statement.Body);
+            }
+
+            return null;
+        }
     }
 }

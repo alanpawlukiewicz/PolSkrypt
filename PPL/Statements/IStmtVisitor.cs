@@ -7,5 +7,6 @@
         T VisitVarStmt(Var statement);
         T VisitBlockStmt(Block statement);
         T VisitIfStmt(If statement);
+        T VisitWhileStmt(While statement);
     }
 }
