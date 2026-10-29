@@ -1,8 +1,5 @@
 ﻿using PPL.Enums;
 using PPL.Exceptions;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace PPL
 {
@@ -37,7 +34,7 @@ namespace PPL
             {
                 Report(token.Line, $" na '{token.Lexeme}'", message);
             }
-            
+
         }
 
         public static void RuntimeError(RuntimeException ex)

@@ -1,9 +1,5 @@
 ﻿using PPL.Enums;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace PPL
 {
@@ -79,7 +75,7 @@ namespace PPL
                     // Handle comments
                     if (CheckNext('/'))
                     {
-                        while (Peek() != '\n' && !IsAtEnd()) 
+                        while (Peek() != '\n' && !IsAtEnd())
                             Advance();
                     }
                     if (CheckNext('*'))
@@ -191,7 +187,7 @@ namespace PPL
             {
                 Advance();
             }
-            
+
             if (Peek() == '.' && char.IsDigit(PeekNext()))
             {
                 // Ignore the "."

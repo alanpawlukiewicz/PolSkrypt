@@ -3,9 +3,6 @@ using PPL.Enums;
 using PPL.Exceptions;
 using PPL.Expressions;
 using PPL.Statements;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace PPL
 {
@@ -43,7 +40,7 @@ namespace PPL
             object? left = Evaluate(expression.Left);
             object? right = Evaluate(expression.Right);
 
-            switch(expression.Operator.Type)
+            switch (expression.Operator.Type)
             {
                 case TokenType.MINUS:
                     CheckNumberOperands(expression.Operator, left, right);
@@ -132,7 +129,7 @@ namespace PPL
         {
             object? right = Evaluate(expression.Right);
 
-            switch(expression.Operator.Type)
+            switch (expression.Operator.Type)
             {
                 case TokenType.MINUS:
                     CheckNumberOperand(expression.Operator, right);
@@ -258,7 +255,7 @@ namespace PPL
             {
                 _environment = env;
 
-                foreach(var stmt in stmts)
+                foreach (var stmt in stmts)
                 {
                     Execute(stmt);
                 }

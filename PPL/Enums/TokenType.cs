@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace PPL.Enums
+﻿namespace PPL.Enums
 {
     public enum TokenType
     {
