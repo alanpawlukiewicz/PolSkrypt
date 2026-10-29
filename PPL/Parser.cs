@@ -90,6 +90,10 @@ namespace PPL
             {
                 return new Block(Block());
             }
+            if (Match(TokenType.BREAK))
+            {
+                return Break();
+            }
 
             if (_promptMode)
             {
@@ -120,6 +124,13 @@ namespace PPL
             Stmt body = Statement();
 
             return new While(condition, body);
+        }
+
+        private Stmt Break()
+        {
+            Consume(TokenType.SEMICOLON, "Oczekiwano ';' po 'przerwij'.");
+
+            return new Break();
         }
 
         private Stmt ForStatement()

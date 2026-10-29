@@ -254,7 +254,6 @@ namespace PPL
             try
             {
                 _environment = env;
-
                 foreach (var stmt in stmts)
                 {
                     Execute(stmt);
@@ -304,12 +303,24 @@ namespace PPL
 
         public object? VisitWhileStmt(While statement)
         {
-            while(IsTruthy(Evaluate(statement.Condition)))
+            try
             {
-                Execute(statement.Body);
+                while (IsTruthy(Evaluate(statement.Condition)))
+                {
+                    Execute(statement.Body);
+                }
             }
+            catch (BreakException)
+            {
+            }
+            
 
             return null;
+        }
+
+        public object? VisitBreakStmt(Break statement)
+        {
+            throw new BreakException();
         }
     }
 }

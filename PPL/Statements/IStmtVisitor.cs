@@ -8,5 +8,6 @@
         T VisitBlockStmt(Block statement);
         T VisitIfStmt(If statement);
         T VisitWhileStmt(While statement);
+        T VisitBreakStmt(Break statement);
     }
 }

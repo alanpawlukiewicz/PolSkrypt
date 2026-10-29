@@ -29,7 +29,8 @@ namespace PPL
             {"to", TokenType.THIS},
             {"prawda", TokenType.TRUE},
             {"zmienna", TokenType.VAR},
-            {"podczas_gdy", TokenType.WHILE}
+            {"podczas_gdy", TokenType.WHILE},
+            {"przerwij", TokenType.BREAK }
         };
 
         public Scanner(string source)
