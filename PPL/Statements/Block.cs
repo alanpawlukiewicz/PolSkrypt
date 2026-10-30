@@ -1,4 +1,6 @@
-﻿namespace PPL.Statements
+﻿using PPL.Contracts;
+
+namespace PPL.Statements
 {
     public class Block : Stmt
     {

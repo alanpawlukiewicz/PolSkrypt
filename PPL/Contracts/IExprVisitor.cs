@@ -1,4 +1,6 @@
-﻿namespace PPL.Expressions
+﻿using PPL.Expressions;
+
+namespace PPL.Contracts
 {
     public interface IExprVisitor<T>
     {

@@ -1,4 +1,6 @@
-﻿namespace PPL.Statements
+﻿using PPL.Statements;
+
+namespace PPL.Contracts
 {
     public interface IStmtVisitor<T>
     {

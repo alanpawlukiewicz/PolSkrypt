@@ -1,4 +1,6 @@
-﻿namespace PPL.Expressions
+﻿using PPL.Contracts;
+
+namespace PPL.Expressions
 {
     public class Binary : Expr
     {
