@@ -1,4 +1,4 @@
-﻿using PPL.Statements;
+﻿using PPL.Parsing.Statements;
 
 namespace PPL.Contracts
 {
