@@ -167,11 +167,11 @@ namespace PPL.Parsing
         private Stmt ForStatement()
         {
             Consume(TokenType.LEFT_PAREN, "Oczekiwano '(' po 'dla'.");
-            List<Stmt>? initializer = Match(TokenType.SEMICOLON) 
+            List<Stmt>? initializer = Match(TokenType.SEMICOLON)
                 ? null
-                : Match(TokenType.VAR) 
-                    ? VarDeclaration() 
-                    : new List<Stmt>{ ExpressionStatement() };
+                : Match(TokenType.VAR)
+                    ? VarDeclaration()
+                    : new List<Stmt> { ExpressionStatement() };
 
             Expr? condition = Check(TokenType.SEMICOLON) ? null : Expression();
             Consume(TokenType.SEMICOLON, "Oczekiwano ';' po warunku pętli.");
@@ -183,7 +183,7 @@ namespace PPL.Parsing
 
             if (increment != null)
             {
-                body = new Block(new List<Stmt> { body, new StmtExpression(increment)});
+                body = new Block(new List<Stmt> { body, new StmtExpression(increment) });
             }
 
             if (condition == null)

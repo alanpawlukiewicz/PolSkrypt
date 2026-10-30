@@ -1,5 +1,4 @@
-﻿using PPL.Errors;
-using PPL.Lexing;
+﻿using PPL.Lexing;
 
 namespace PPL.Errors.Exceptions
 {

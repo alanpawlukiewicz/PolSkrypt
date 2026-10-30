@@ -1,5 +1,4 @@
 ﻿using PPL.Contracts;
-using PPL.Interpretation;
 
 namespace PPL.Interpretation.Callables
 {
