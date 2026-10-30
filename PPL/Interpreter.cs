@@ -1,4 +1,6 @@
-﻿using PPL.Constants;
+﻿using PPL.Callables;
+using PPL.Constants;
+using PPL.Contracts;
 using PPL.Enums;
 using PPL.Exceptions;
 using PPL.Expressions;
@@ -8,7 +10,14 @@ namespace PPL
 {
     public class Interpreter : IExprVisitor<object?>, IStmtVisitor<object?>
     {
+        private readonly Env _globals = new Env();
+        public Env Globals => _globals;
         private Env _environment = new Env();
+
+        public Interpreter()
+        {
+            _globals.Define("zegar", new ClockCallable());
+        }
 
         public void Interpret(List<Stmt> statements)
         {
@@ -248,7 +257,7 @@ namespace PPL
             return null;
         }
 
-        private void ExecuteBlock(List<Stmt> stmts, Env env)
+        public void ExecuteBlock(List<Stmt> stmts, Env env)
         {
             Env previous = _environment;
             try
@@ -321,6 +330,38 @@ namespace PPL
         public object? VisitBreakStmt(Break statement)
         {
             throw new BreakException();
+        }
+
+        public object? VisitCallExpression(Call expression)
+        {
+            var callee = Evaluate(expression.Callee);
+
+            List<object?> arguments = new() { };
+            foreach (var argument in expression.Arguments)
+            {
+                arguments.Add(Evaluate(argument));
+            }
+
+            if (callee is not ICallable)
+            {
+                throw new RuntimeException(expression.Paren, "Można tylko wywoływać funkcje oraz klasy.");
+            }
+
+            ICallable fun = (ICallable)callee;
+            if (arguments.Count != fun.Arity)
+            {
+                throw new RuntimeException(expression.Paren,
+                    $"Oczekiwano {fun.Arity} argumentów, ale otrzymano {arguments.Count}.");
+            }
+            return fun.Call(this, arguments);
+        }
+
+        public object? VisitFunctionStmt(Function statement)
+        {
+            FunctionCallable fun = new FunctionCallable(statement);
+            _environment.Define(statement.Name.Lexeme, fun);
+
+            return null;
         }
     }
 }

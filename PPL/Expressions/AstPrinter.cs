@@ -64,5 +64,10 @@ namespace PPL.Expressions
         {
             throw new NotImplementedException();
         }
+
+        public string VisitCallExpression(Call expression)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

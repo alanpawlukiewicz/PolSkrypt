@@ -1,4 +1,5 @@
-﻿using PPL.Enums;
+﻿using PPL.Constants;
+using PPL.Enums;
 using PPL.Exceptions;
 using PPL.Expressions;
 using PPL.Statements;
@@ -32,6 +33,10 @@ namespace PPL
         {
             try
             {
+                if (Match(TokenType.FUN))
+                {
+                    return new List<Stmt> { Function("funkcja") };
+                }
                 if (Match(TokenType.VAR))
                 {
                     return VarDeclaration();
@@ -44,6 +49,31 @@ namespace PPL
                 Synchronize();
                 return new();
             }
+        }
+
+        private Function Function(string kind)
+        {
+            Token name = Consume(TokenType.IDENTIFIER,
+                $"Oczekiwano nazwy dla '{kind}'.");
+            Consume(TokenType.LEFT_PAREN, $"Oczekiwano '(' po nazwie dla '{kind}'");
+            List<Token> parameters = new List<Token> { };
+            if (!Check(TokenType.RIGHT_PAREN))
+            {
+                do
+                {
+                    if (parameters.Count >= FunctionConstants.MAX_PARAMS_COUNT)
+                    {
+                        ErrorHandler.Error(Peek(), $"Funkcja nie może mieć więcej niż {FunctionConstants.MAX_PARAMS_COUNT} argumentów.");
+                    }
+
+                    parameters.Add(Consume(TokenType.IDENTIFIER, "Oczekiwano nazwy parametru."));
+                } while (Match(TokenType.COMMA));
+            }
+
+            Consume(TokenType.RIGHT_PAREN, "Oczekiwano ')' po parametrach.");
+            Consume(TokenType.LEFT_BRACE, $"Oczekiwano '{{' przed ciałem '{kind}'");
+            List<Stmt> body = Block();
+            return new Function(name, parameters, body);
         }
 
         private List<Stmt> VarDeclaration()
@@ -220,19 +250,7 @@ namespace PPL
 
         private Expr Expression()
         {
-            return Comma();
-        }
-
-        private Expr Comma()
-        {
-            Expr expr = Assignment();
-            if (Match(TokenType.COMMA))
-            {
-                Token op = Previous();
-                Expr right = Assignment();
-                expr = new Binary(expr, op, right);
-            }
-            return expr;
+            return Assignment();
         }
 
         private Expr Assignment()
@@ -398,7 +416,46 @@ namespace PPL
                 Expr right = Unary();
                 return new Unary(op, right);
             }
-            return Primary();
+            return Call();
+        }
+
+        private Expr Call()
+        {
+            Expr expr = Primary();
+
+            while (true)
+            {
+                if (Match(TokenType.LEFT_PAREN))
+                {
+                    expr = FinishCall(expr);
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return expr;
+        }
+
+        private Expr FinishCall(Expr callee)
+        {
+            List<Expr> arguments = new() { };
+            if (!Check(TokenType.RIGHT_PAREN))
+            {
+                do
+                {
+                    if (arguments.Count >= FunctionConstants.MAX_PARAMS_COUNT)
+                    {
+                        ErrorHandler.Error(Peek(), $"Funkcja nie może mieć więcej niż {FunctionConstants.MAX_PARAMS_COUNT} argumentów.");
+                    }
+                    arguments.Add(Expression());
+                } while (Match(TokenType.COMMA));
+            }
+
+            Token paren = Consume(TokenType.RIGHT_PAREN, "Oczekiwano ')' po liscie argumentów.");
+
+            return new Call(callee, paren, arguments);
         }
 
         private Expr Primary()
