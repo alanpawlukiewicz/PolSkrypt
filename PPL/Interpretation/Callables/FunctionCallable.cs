@@ -7,17 +7,19 @@ namespace PPL.Interpretation.Callables
     public class FunctionCallable : ICallable
     {
         private readonly Function _declaration;
+        private readonly Env _closure;
 
-        public FunctionCallable(Function declaration)
+        public FunctionCallable(Function declaration, Env closure)
         {
             _declaration = declaration;
+            _closure = closure;
         }
 
         public int Arity => _declaration.Parameters.Count;
 
         public object? Call(Interpreter interpreter, List<object?> arguments)
         {
-            Env environment = new Env(interpreter.Globals);
+            Env environment = new Env(_closure);
 
             for (int i = 0; i < _declaration.Parameters.Count; i++)
             {

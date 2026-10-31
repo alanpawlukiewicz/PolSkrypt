@@ -360,7 +360,7 @@ namespace PPL.Interpretation
 
         public object? VisitFunctionStmt(Function statement)
         {
-            FunctionCallable fun = new FunctionCallable(statement);
+            FunctionCallable fun = new FunctionCallable(statement, _environment);
             _environment.Define(statement.Name.Lexeme, fun);
 
             return null;
