@@ -113,10 +113,6 @@ namespace PPL.Parsing
             {
                 return ForStatement();
             }
-            if (Match(TokenType.PRINT))
-            {
-                return PrintStatement();
-            }
             if (Match(TokenType.LEFT_BRACE))
             {
                 return new Block(Block());
@@ -219,13 +215,6 @@ namespace PPL.Parsing
             }
 
             return body;
-        }
-
-        private Stmt PrintStatement()
-        {
-            Expr value = Expression();
-            Consume(TokenType.SEMICOLON, "Oczekiwano ';' po wartości.");
-            return new Print(value);
         }
 
         private Stmt IfStatement()
@@ -518,7 +507,6 @@ namespace PPL.Parsing
                     case TokenType.FOR:
                     case TokenType.IF:
                     case TokenType.WHILE:
-                    case TokenType.PRINT:
                     case TokenType.RETURN:
                         return;
                 }

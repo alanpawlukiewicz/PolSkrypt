@@ -23,7 +23,6 @@ namespace PPL.Lexing
             {"jeżeli", TokenType.IF},
             {"wartość_pusta", TokenType.NULL},
             {"lub", TokenType.OR},
-            {"wyświetl", TokenType.PRINT},
             {"zwróć", TokenType.RETURN},
             {"super", TokenType.SUPER},
             {"to", TokenType.THIS},
