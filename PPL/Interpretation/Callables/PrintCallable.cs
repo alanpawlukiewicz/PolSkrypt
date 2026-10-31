@@ -38,5 +38,10 @@ namespace PPL.Interpretation.Callables
             Console.WriteLine();
             return null;
         }
+
+        public override string ToString()
+        {
+            return FunctionConstants.NATIVE_FN_STRING;
+        }
     }
 }

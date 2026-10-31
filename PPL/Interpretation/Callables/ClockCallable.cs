@@ -1,4 +1,5 @@
-﻿using PPL.Contracts;
+﻿using PPL.Constants;
+using PPL.Contracts;
 
 namespace PPL.Interpretation.Callables
 {
@@ -13,7 +14,7 @@ namespace PPL.Interpretation.Callables
 
         public override string ToString()
         {
-            return "<natywna funkcja>";
+            return FunctionConstants.NATIVE_FN_STRING;
         }
     }
 }
