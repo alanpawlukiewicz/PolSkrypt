@@ -13,5 +13,6 @@ namespace PPL.Contracts
         T VisitAssignExpression(Assign expression);
         T VisitLogicalExpression(Logical expression);
         T VisitCallExpression(Call expression);
+        T VisitAnonFunctionExpression(AnonFunction expression);
     }
 }

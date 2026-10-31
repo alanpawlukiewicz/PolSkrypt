@@ -52,11 +52,11 @@ namespace PPL.Parsing
             }
         }
 
-        private Function Function(string kind)
+        private Stmt Function(string kind)
         {
             Token name = Consume(TokenType.IDENTIFIER,
                 $"Oczekiwano nazwy dla '{kind}'.");
-            Consume(TokenType.LEFT_PAREN, $"Oczekiwano '(' po nazwie dla '{kind}'");
+            Consume(TokenType.LEFT_PAREN, $"Oczekiwano '(' po nazwie dla '{kind}'.");
             List<Token> parameters = new List<Token> { };
             if (!Check(TokenType.RIGHT_PAREN))
             {
@@ -441,7 +441,7 @@ namespace PPL.Parsing
             return expr;
         }
 
-        private Expr FinishCall(Expr callee)
+        private Call FinishCall(Expr callee)
         {
             List<Expr> arguments = new() { };
             if (!Check(TokenType.RIGHT_PAREN))
@@ -479,6 +479,27 @@ namespace PPL.Parsing
                 Expr expr = Expression();
                 Consume(TokenType.RIGHT_PAREN, "Oczekiwano ')' po wyrażeniu.");
                 return new Grouping(expr);
+            }
+            if (Match(TokenType.FUN))
+            {
+                Consume(TokenType.LEFT_PAREN, "Oczekiwano '('.");
+                List<Token> parameters = new();
+                if (!Check(TokenType.RIGHT_PAREN))
+                {
+                    do
+                    {
+                        if (parameters.Count >= FunctionConstants.MAX_PARAMS_COUNT)
+                        {
+                            ErrorHandler.Error(Peek(), $"Funkcja nie może mieć więcej niż {FunctionConstants.MAX_PARAMS_COUNT} parametrów.");
+                        }
+                        parameters.Add(Consume(TokenType.IDENTIFIER, "Oczekiwano nazwy parametru."));
+                    } while (Match(TokenType.COMMA));
+                }
+
+                Consume(TokenType.RIGHT_PAREN, "Oczekiwano ')' po liscie argumentów.");
+                Consume(TokenType.LEFT_BRACE, "Oczekiwano '{'.");
+                var block = Block();
+                return new AnonFunction(parameters, block);
             }
             throw new ParseException(Peek(), "Oczekiwano wyrażenia.");
         }

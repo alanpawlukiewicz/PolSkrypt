@@ -6,6 +6,7 @@ using PPL.Interpretation.Callables;
 using PPL.Lexing;
 using PPL.Parsing.Expressions;
 using PPL.Parsing.Statements;
+using System.Xml.Linq;
 
 namespace PPL.Interpretation
 {
@@ -373,6 +374,11 @@ namespace PPL.Interpretation
             var value = statement.Value == null ? null : Evaluate(statement.Value);
 
             throw new ReturnException(value);
+        }
+
+        public object? VisitAnonFunctionExpression(AnonFunction expression)
+        {
+            return new AnonFunctionCallable(expression, _environment);
         }
     }
 }
