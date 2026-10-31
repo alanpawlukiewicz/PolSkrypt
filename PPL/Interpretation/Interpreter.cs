@@ -351,7 +351,7 @@ namespace PPL.Interpretation
             }
 
             ICallable fun = (ICallable)callee;
-            if (arguments.Count != fun.Arity)
+            if (fun.Arity != null && arguments.Count != fun.Arity)
             {
                 throw new RuntimeException(expression.Paren,
                     $"Oczekiwano {fun.Arity} argumentów, ale otrzymano {arguments.Count}.");

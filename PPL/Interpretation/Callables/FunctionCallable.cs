@@ -15,7 +15,7 @@ namespace PPL.Interpretation.Callables
             _closure = closure;
         }
 
-        public int Arity => _declaration.Parameters.Count;
+        public int? Arity => _declaration.Parameters.Count;
 
         public object? Call(Interpreter interpreter, List<object?> arguments)
         {

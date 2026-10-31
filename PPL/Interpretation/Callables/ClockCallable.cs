@@ -4,7 +4,7 @@ namespace PPL.Interpretation.Callables
 {
     public class ClockCallable : ICallable
     {
-        public int Arity => 0;
+        public int? Arity => 0;
 
         public object? Call(Interpreter interpreter, List<object?> arguments)
         {

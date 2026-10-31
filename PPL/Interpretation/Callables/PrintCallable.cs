@@ -5,27 +5,37 @@ namespace PPL.Interpretation.Callables
 {
     public class PrintCallable : ICallable
     {
-        public int Arity => 1;
+        public int? Arity => null;
 
-        public object? Call(Interpreter interpreter, List<object?> arguments)
+        private string Stringify(object? value)
         {
-            var value = arguments[0];
             if (value == null)
             {
-                value = KeyWord.NULL;
+                return KeyWord.NULL;
             }
 
             if (value is double)
             {
-                value = value.ToString()!;
+                string text = value.ToString()!;
+
+                return text;
             }
 
             if (value is bool)
             {
-                value = (bool)value ? KeyWord.TRUE : KeyWord.FALSE;
+                return (bool)value ? KeyWord.TRUE : KeyWord.FALSE;
             }
 
-            Console.WriteLine(value.ToString() ?? string.Empty);
+            return value.ToString() ?? string.Empty;
+        }
+
+        public object? Call(Interpreter interpreter, List<object?> arguments)
+        {
+            foreach(var argument in arguments)
+            {
+                Console.Write($"{Stringify(argument)} ");
+            }
+            Console.WriteLine();
             return null;
         }
     }
