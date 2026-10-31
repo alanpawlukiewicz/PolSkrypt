@@ -2,9 +2,9 @@
 
 namespace PPL.Errors.Exceptions
 {
-    public class ParseException : Exception
+    public class ParseException : RuntimeException
     {
-        public ParseException(Token token, string message) : base(message)
+        public ParseException(Token token, string message) : base(token, message)
         {
             ErrorHandler.Error(token, message);
         }

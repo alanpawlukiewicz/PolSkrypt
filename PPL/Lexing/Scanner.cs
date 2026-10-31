@@ -24,7 +24,7 @@ namespace PPL.Lexing
             {"wartość_pusta", TokenType.NULL},
             {"lub", TokenType.OR},
             {"wyświetl", TokenType.PRINT},
-            {"zwróc", TokenType.RETURN},
+            {"zwróć", TokenType.RETURN},
             {"super", TokenType.SUPER},
             {"to", TokenType.THIS},
             {"prawda", TokenType.TRUE},

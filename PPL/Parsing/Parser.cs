@@ -121,9 +121,13 @@ namespace PPL.Parsing
             {
                 return new Block(Block());
             }
+            if (Match(TokenType.RETURN))
+            {
+                return ReturnStatement();
+            }
             if (Match(TokenType.BREAK))
             {
-                return Break();
+                return BreakStatement();
             }
 
             if (_promptMode)
@@ -132,6 +136,15 @@ namespace PPL.Parsing
             }
 
             return ExpressionStatement();
+        }
+
+        private Stmt ReturnStatement()
+        {
+            Token keyword = Previous();
+            Expr? value = Check(TokenType.SEMICOLON) ? null : Expression();
+            Consume(TokenType.SEMICOLON, "Oczekiwano ';' po wartości zwróconej.");
+
+            return new Return(keyword, value);
         }
 
         private List<Stmt> Block()
@@ -157,7 +170,7 @@ namespace PPL.Parsing
             return new While(condition, body);
         }
 
-        private Stmt Break()
+        private Stmt BreakStatement()
         {
             Consume(TokenType.SEMICOLON, "Oczekiwano ';' po 'przerwij'.");
 

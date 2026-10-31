@@ -13,10 +13,11 @@ namespace PPL.Interpretation
     {
         private readonly Env _globals = new Env();
         public Env Globals => _globals;
-        private Env _environment = new Env();
+        private Env _environment;
 
         public Interpreter()
         {
+            _environment = _globals;
             _globals.Define("zegar", new ClockCallable());
         }
 
@@ -363,6 +364,13 @@ namespace PPL.Interpretation
             _environment.Define(statement.Name.Lexeme, fun);
 
             return null;
+        }
+
+        public object? VisitReturnStmt(Return statement)
+        {
+            var value = statement.Value == null ? null : Evaluate(statement.Value);
+
+            throw new ReturnException(value);
         }
     }
 }

@@ -12,5 +12,6 @@ namespace PPL.Contracts
         T VisitWhileStmt(While statement);
         T VisitBreakStmt(Break statement);
         T VisitFunctionStmt(Function statement);
+        T VisitReturnStmt(Return statement);
     }
 }

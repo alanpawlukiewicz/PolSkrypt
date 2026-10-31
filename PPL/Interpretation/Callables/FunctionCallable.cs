@@ -1,4 +1,5 @@
 ﻿using PPL.Contracts;
+using PPL.Errors.Exceptions;
 using PPL.Parsing.Statements;
 
 namespace PPL.Interpretation.Callables
@@ -23,7 +24,15 @@ namespace PPL.Interpretation.Callables
                 environment.Define(_declaration.Parameters[i].Lexeme, arguments[i]);
             }
 
-            interpreter.ExecuteBlock(_declaration.Body, environment);
+            try
+            {
+                interpreter.ExecuteBlock(_declaration.Body, environment);
+            }
+            catch (ReturnException returnValue)
+            {
+                return returnValue.Value;
+            }
+            
 
             return null;
         }
