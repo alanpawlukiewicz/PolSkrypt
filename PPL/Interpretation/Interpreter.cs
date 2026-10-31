@@ -20,6 +20,7 @@ namespace PPL.Interpretation
             _environment = _globals;
             _globals.Define("zegar", new ClockCallable());
             _globals.Define("wypisz", new PrintCallable());
+            _globals.Define("wprowadź", new InputCallable());
         }
 
         public void Interpret(List<Stmt> statements)
