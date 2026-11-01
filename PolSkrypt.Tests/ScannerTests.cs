@@ -77,5 +77,20 @@ namespace PolSkrypt.Tests
             tokens[0].Type.Should().Be(TokenType.NUMBER);
             tokens[0].Literal.Should().Be(expectedValue);
         }
+
+        [Theory]
+        [InlineData("\"hello\"", "hello")]
+        [InlineData("\"world\"", "world")]
+        public void ScanTokens_ShouldReturnCorrectTokenStringLiterals(string literal, string expectedValue)
+        {
+            // Arrange
+            var scanner = new Scanner(literal);
+            // Act
+            var tokens = scanner.ScanTokens();
+            // Assert
+            tokens.Count.Should().Be(2); // One token for the string and one for EOF
+            tokens[0].Type.Should().Be(TokenType.STRING);
+            tokens[0].Literal.Should().Be(expectedValue);
+        }
     }
 }
