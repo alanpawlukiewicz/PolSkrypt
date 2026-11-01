@@ -1,0 +1,38 @@
+name: Release
+
+on:
+  push:
+    tags: [ 'v*' ]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rid: [ win-x64, linux-x64, osx-arm64 ]
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Publish
+        run: >
+          dotnet publish PolSkrypt/PolSkrypt.csproj
+          -c Release -r ${{ matrix.rid }}
+          --self-contained true
+          -p:PublishSingleFile=true
+          -o out/${{ matrix.rid }}
+
+      - name: Zip
+        run: cd out/${{ matrix.rid }} && zip -r ../../PolSkrypt-${{ matrix.rid }}.zip .
+
+      - name: Create release
+        uses: softprops/action-gh-release@v3
+        with:
+          files: PolSkrypt-${{ matrix.rid }}.zip
