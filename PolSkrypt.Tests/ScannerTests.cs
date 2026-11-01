@@ -122,5 +122,23 @@ namespace PolSkrypt.Tests
                 tokens[i].Type.Should().Be(expectedTypes[i]);
             }
         }
+
+        [Theory]
+        [InlineData("5\n3\n4", new[] { 1, 2, 3 })]
+        [InlineData("5 1 3\n3\n4 5", new[] { 1, 1, 1, 2, 3, 3 })]
+        [InlineData("zmienna a = 3;\n\n zmienna b;", new[] { 1, 1, 1, 1, 1, 3, 3, 3 })]
+        [InlineData("1 \n \n \n \n \n 2", new[] { 1, 6 })]
+        public void ScanTokens_ShouldReturnCorrectLines(string source, int[] expectedLines)
+        {
+            // Arrange
+            var scanner = new Scanner(source);
+            // Act
+            var tokens = scanner.ScanTokens();
+            // Assert
+            for (int i = 0; i < expectedLines.Length; i++)
+            {
+                tokens[i].Line.Should().Be(expectedLines[i]);
+            }
+        }
     }
 }
