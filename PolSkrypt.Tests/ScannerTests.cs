@@ -92,5 +92,18 @@ namespace PolSkrypt.Tests
             tokens[0].Type.Should().Be(TokenType.STRING);
             tokens[0].Literal.Should().Be(expectedValue);
         }
+
+        [Fact]
+        public void ScanTokens_ShouldReturnCorrectTokenNullLiteral()
+        {
+            // Arrange
+            var scanner = new Scanner("wartość_pusta");
+            // Act
+            var tokens = scanner.ScanTokens();
+            // Assert
+            tokens.Count.Should().Be(2); // One token for the string and one for EOF
+            tokens[0].Type.Should().Be(TokenType.NULL);
+            tokens[0].Literal.Should().Be(null);
+        }
     }
 }
