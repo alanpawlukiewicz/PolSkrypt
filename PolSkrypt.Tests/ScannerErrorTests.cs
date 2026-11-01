@@ -8,9 +8,6 @@ using System.Text;
 namespace PolSkrypt.Tests
 {
     // Claude: Fix the test class to ensure that it does not run in parallel with other tests that may affect the ErrorHandler state.
-    [CollectionDefinition("ErrorHandler", DisableParallelization = true)]
-    public class ErrorHandlerCollection { }
-
     [Collection("ErrorHandler")]
     public class ScannerErrorTests : IDisposable
     {
