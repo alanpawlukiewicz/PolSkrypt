@@ -77,19 +77,10 @@ namespace PolSkrypt.Interpretation
 
                     throw new RuntimeException(expression.Operator, "Operandy muszą być liczbami.");
                 case TokenType.DOT:
-                    object? parsedRight = new();
-                    if (right is double)
-                    {
-                        parsedRight = right.ToString();
-                    }
-                    if (right is string)
-                    {
-                        parsedRight = (string)right;
-                    }
-                    if (left is string && parsedRight is string)
-                    {
-                        return (string)left + parsedRight;
-                    }
+                    string? parsedRight = right is double ? right.ToString() : (string?)right;
+                    string? parsedLeft = left is double ? left.ToString() : (string?)left;
+                    
+                    return (parsedLeft ?? KeyWord.NULL) + (parsedRight ?? KeyWord.NULL);
 
                     throw new RuntimeException(expression.Operator, "Operandy muszą być liczbami lub ciągami znaków.");
                 case TokenType.GREATER:
