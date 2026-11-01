@@ -13,7 +13,7 @@ namespace PolSkrypt.Parsing
         private readonly bool _promptMode;
         private int _current = 0;
 
-        public Parser(List<Token> tokens, bool promptMode)
+        public Parser(List<Token> tokens, bool promptMode = false)
         {
             _tokens = tokens;
             _promptMode = promptMode;
