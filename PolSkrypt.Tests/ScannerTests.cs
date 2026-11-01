@@ -50,5 +50,17 @@ namespace PolSkrypt.Tests
             tokens.Count.Should().Be(1);
             tokens[0].Type.Should().Be(TokenType.EOF);
         }
+
+        [Fact]
+        public void ScanTokens_ShouldHandleOnlyWhitespace()
+        {
+            // Arrange
+            var scanner = new Scanner("   \n\t  ");
+            // Act
+            var tokens = scanner.ScanTokens();
+            // Assert
+            tokens.Count.Should().Be(1);
+            tokens[0].Type.Should().Be(TokenType.EOF);
+        }
     }
 }
