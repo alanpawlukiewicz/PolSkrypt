@@ -62,5 +62,20 @@ namespace PolSkrypt.Tests
             tokens.Count.Should().Be(1);
             tokens[0].Type.Should().Be(TokenType.EOF);
         }
+
+        [Theory]
+        [InlineData("5", 5.0)]
+        [InlineData("3.14", 3.14)]
+        public void ScanTokens_ShouldReturnCorrectTokenNumericLiterals(string literal, double expectedValue)
+        {
+            // Arrange
+            var scanner = new Scanner(literal);
+            // Act
+            var tokens = scanner.ScanTokens();
+            // Assert
+            tokens.Count.Should().Be(2); // One token for the number and one for EOF
+            tokens[0].Type.Should().Be(TokenType.NUMBER);
+            tokens[0].Literal.Should().Be(expectedValue);
+        }
     }
 }
