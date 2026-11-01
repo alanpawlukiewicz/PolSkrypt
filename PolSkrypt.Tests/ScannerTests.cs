@@ -140,5 +140,17 @@ namespace PolSkrypt.Tests
                 tokens[i].Line.Should().Be(expectedLines[i]);
             }
         }
+
+        [Fact]
+        public void ScanTokens_ShouldHandleUnterminatedString()
+        {
+            // Arrange
+            var scanner = new Scanner("\"This is an unterminated string");
+            // Act
+            var tokens = scanner.ScanTokens();
+            // Assert
+            tokens.Count.Should().Be(1); // Only EOF token should be present
+            tokens[0].Type.Should().Be(TokenType.EOF);
+        }
     }
 }
