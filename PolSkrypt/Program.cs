@@ -10,6 +10,7 @@ public class Program
     {
         if (args.Length > 1)
         {
+            Console.WriteLine("Użycie: PolSkrypt [plik.pols]");
             Environment.Exit(64);
         }
         else if (args.Length == 1)
@@ -30,9 +31,8 @@ public class Program
 
     private static void RunFile(string filePath)
     {
-        byte[] bytes = File.ReadAllBytes(filePath);
-        var str = System.Text.Encoding.Default.GetString(bytes);
-        Run(str);
+        string source = File.ReadAllText(filePath, System.Text.Encoding.UTF8);
+        Run(source);
 
         if (ErrorHandler.HadError)
         {
