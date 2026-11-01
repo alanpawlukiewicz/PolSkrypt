@@ -22,6 +22,7 @@ namespace PolSkrypt.Interpretation
         {
             if (_values.ContainsKey(name))
             {
+                _values[name] = value;
                 return;
             }
             _values.Add(name, value);
