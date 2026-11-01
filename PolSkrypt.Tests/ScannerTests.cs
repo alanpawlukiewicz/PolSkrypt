@@ -38,5 +38,17 @@ namespace PolSkrypt.Tests
                 tokens[i].Type.Should().Be(expectedTokenTypes[i]);
             }
         }
+
+        [Fact]
+        public void ScanTokens_ShouldHandleEmptySource()
+        {
+            // Arrange
+            var scanner = new Scanner(string.Empty);
+            // Act
+            var tokens = scanner.ScanTokens();
+            // Assert
+            tokens.Count.Should().Be(1);
+            tokens[0].Type.Should().Be(TokenType.EOF);
+        }
     }
 }
