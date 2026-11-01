@@ -9,7 +9,7 @@ namespace PolSkrypt.Interpretation.Callables
 
         public object? Call(Interpreter interpreter, List<object?> arguments)
         {
-            return DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            return (double)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         }
 
         public override string ToString()
