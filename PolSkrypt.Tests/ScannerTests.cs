@@ -105,5 +105,22 @@ namespace PolSkrypt.Tests
             tokens[0].Type.Should().Be(TokenType.NULL);
             tokens[0].Literal.Should().Be(null);
         }
+
+        [Theory]
+        [InlineData("// This is a commen", new[] { TokenType.EOF })]
+        [InlineData("// This is a comment \n 5", new[] { TokenType.NUMBER, TokenType.EOF })]
+        [InlineData("/* This is a comment\n5 dwdwada /// // */", new[] { TokenType.EOF })]
+        public void ScanTokens_ShouldIgnoreComments(string comment, TokenType[] expectedTypes)
+        {
+            // Arrange
+            var scanner = new Scanner(comment);
+            // Act
+            var tokens = scanner.ScanTokens();
+            // Assert
+            for (int i = 0; i < expectedTypes.Length; i++)
+            {
+                tokens[i].Type.Should().Be(expectedTypes[i]);
+            }
+        }
     }
 }

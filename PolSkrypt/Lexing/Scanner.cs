@@ -78,7 +78,7 @@ namespace PolSkrypt.Lexing
                         while (Peek() != '\n' && !IsAtEnd())
                             Advance();
                     }
-                    if (CheckNext('*'))
+                    else if (CheckNext('*'))
                     {
                         while (!(Peek() == '*' && CheckNext('/')) && !IsAtEnd())
                         {
