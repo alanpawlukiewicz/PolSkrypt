@@ -30,7 +30,7 @@ jobs:
           -o out/${{ matrix.rid }}
 
       - name: Zip
-        run: cd out/${{ matrix.rid }} && zip -r ../../NAZWA-${{ matrix.rid }}.zip .
+        run: cd out/${{ matrix.rid }} && zip -r ../../PolSkrypt-${{ matrix.rid }}.zip .
 
       - name: Create release
         uses: softprops/action-gh-release@v3
