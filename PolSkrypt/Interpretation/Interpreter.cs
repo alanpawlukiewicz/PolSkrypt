@@ -69,6 +69,9 @@ namespace PolSkrypt.Interpretation
                 case TokenType.STAR:
                     CheckNumberOperands(expression.Operator, left, right);
                     return (double?)left * (double?)right;
+                case TokenType.PERCENT:
+                    CheckNumberOperands(expression.Operator, left, right);
+                    return (double?)left % (double?)right;
                 case TokenType.PLUS:
                     if (left is double && right is double)
                     {

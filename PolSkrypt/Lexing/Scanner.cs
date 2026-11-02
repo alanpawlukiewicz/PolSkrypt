@@ -69,6 +69,7 @@ namespace PolSkrypt.Lexing
                 case '+': AddToken(TokenType.PLUS); break;
                 case ';': AddToken(TokenType.SEMICOLON); break;
                 case '*': AddToken(TokenType.STAR); break;
+                case '%': AddToken(TokenType.PERCENT); break;
                 case '?': AddToken(TokenType.QUESTION_MARK); break;
                 case ':': AddToken(TokenType.COLON); break;
                 case '/':
