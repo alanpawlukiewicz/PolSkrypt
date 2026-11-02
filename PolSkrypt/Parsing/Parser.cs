@@ -272,6 +272,21 @@ namespace PolSkrypt.Parsing
 
                 ErrorHandler.Error(equals, "Nieprawidłowy cel przypisania.");
             }
+            else if (Match(TokenType.PERCENT_EQUAL, TokenType.PLUS_EQUAL, 
+                TokenType.MINUS_EQUAL, TokenType.STAR_EQUAL, TokenType.SLASH_EQUAL,
+                TokenType.DOT_EQUAL))
+            {
+                Token op = Previous();
+                Expr value = Assignment();
+
+                if (expr is Variable)
+                {
+                    Token name = ((Variable)expr).Name;
+                    return new CompoundAssignment(name, op, value);
+                }
+
+                ErrorHandler.Error(op, "Nieprawidłowy cel przypisania.");
+            }
             return expr;
         }
 

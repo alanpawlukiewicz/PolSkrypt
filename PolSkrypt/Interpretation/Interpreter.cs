@@ -73,19 +73,10 @@ namespace PolSkrypt.Interpretation
                     CheckNumberOperands(expression.Operator, left, right);
                     return (double?)left % (double?)right;
                 case TokenType.PLUS:
-                    if (left is double && right is double)
-                    {
-                        return (double)left + (double)right;
-                    }
-
-                    throw new RuntimeException(expression.Operator, "Operandy muszą być liczbami.");
+                    CheckNumberOperands(expression.Operator, left, right);
+                    return (double?)left + (double?)right;
                 case TokenType.DOT:
-                    string? parsedRight = right is double ? right.ToString() : (string?)right;
-                    string? parsedLeft = left is double ? left.ToString() : (string?)left;
-                    
-                    return (parsedLeft ?? KeyWord.NULL) + (parsedRight ?? KeyWord.NULL);
-
-                    throw new RuntimeException(expression.Operator, "Operandy muszą być liczbami lub ciągami znaków.");
+                    return Stringify(left) + Stringify(right);
                 case TokenType.GREATER:
                     CheckNumberOperands(expression.Operator, left, right);
                     return (double?)left > (double?)right;
@@ -373,6 +364,43 @@ namespace PolSkrypt.Interpretation
         public object? VisitAnonFunctionExpression(AnonFunction expression)
         {
             return new AnonFunctionCallable(expression, _environment);
+        }
+
+        public object? VisitCompoundAssignmentExpression(CompoundAssignment expression)
+        {
+            var currentValue = _environment.Get(expression.Name);
+            var value = Evaluate(expression.Value);
+            object? newValue = null;
+            switch (expression.Operator.Type)
+            {
+                case TokenType.PLUS_EQUAL:
+                    CheckNumberOperands(expression.Operator, currentValue, value);
+                    newValue = (double?)currentValue + (double?)value;
+                    break;
+                case TokenType.MINUS_EQUAL:
+                    CheckNumberOperands(expression.Operator, currentValue, value);
+                    newValue = (double?)currentValue - (double?)value;
+                    break;
+                case TokenType.STAR_EQUAL:
+                    CheckNumberOperands(expression.Operator, currentValue, value);
+                    newValue = (double?)currentValue * (double?)value;
+                    break;
+                case TokenType.SLASH_EQUAL:
+                    CheckNumberOperands(expression.Operator, currentValue, value);
+                    newValue = (double?)currentValue / (double?)value;
+                    break;
+                case TokenType.PERCENT_EQUAL:
+                    CheckNumberOperands(expression.Operator, currentValue, value);
+                    newValue = (double?)currentValue % (double?)value;
+                    break;
+                case TokenType.DOT_EQUAL:
+                    newValue = Stringify(currentValue) + Stringify(value);
+                    break;
+            }
+
+            _environment.Assign(expression.Name, newValue);
+
+            return newValue;
         }
     }
 }

@@ -64,12 +64,57 @@ namespace PolSkrypt.Lexing
                 case '{': AddToken(TokenType.LEFT_BRACE); break;
                 case '}': AddToken(TokenType.RIGHT_BRACE); break;
                 case ',': AddToken(TokenType.COMMA); break;
-                case '.': AddToken(TokenType.DOT); break;
-                case '-': AddToken(TokenType.MINUS); break;
-                case '+': AddToken(TokenType.PLUS); break;
+                case '.':
+                    if (CheckNext('='))
+                    {
+                        AddToken(TokenType.DOT_EQUAL);
+                    }
+                    else
+                    {
+                        AddToken(TokenType.DOT);
+                    }
+                    break;
+                case '-':
+                    if (CheckNext('='))
+                    {
+                        AddToken(TokenType.MINUS_EQUAL);
+                    }
+                    else
+                    {
+                        AddToken(TokenType.MINUS);
+                    }
+                    break;
+                case '+':
+                    if (CheckNext('='))
+                    {
+                        AddToken(TokenType.PLUS_EQUAL);
+                    }
+                    else
+                    {
+                        AddToken(TokenType.PLUS);
+                    }
+                    break;
                 case ';': AddToken(TokenType.SEMICOLON); break;
-                case '*': AddToken(TokenType.STAR); break;
-                case '%': AddToken(TokenType.PERCENT); break;
+                case '*':
+                    if (CheckNext('='))
+                    {
+                        AddToken(TokenType.STAR_EQUAL);
+                    }
+                    else
+                    {
+                        AddToken(TokenType.STAR);
+                    }
+                    break;
+                case '%':
+                    if (CheckNext('='))
+                    {
+                        AddToken(TokenType.PERCENT_EQUAL);
+                    }
+                    else
+                    {
+                        AddToken(TokenType.PERCENT);
+                    }
+                    break;
                 case '?': AddToken(TokenType.QUESTION_MARK); break;
                 case ':': AddToken(TokenType.COLON); break;
                 case '/':
@@ -86,6 +131,10 @@ namespace PolSkrypt.Lexing
                             if (Peek() == '\n') _line++;
                             Advance();
                         }
+                    }
+                    else if (CheckNext('='))
+                    {
+                        AddToken(TokenType.SLASH_EQUAL);
                     }
                     else
                     {
@@ -129,11 +178,6 @@ namespace PolSkrypt.Lexing
                     }
                     break;
             }
-        }
-
-        private void AddToken(TokenType type)
-        {
-            AddToken(type, null);
         }
 
         private void AddToken(TokenType type, object? literal = null)
