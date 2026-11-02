@@ -9,6 +9,7 @@ a numeracja wersji zgodna z [Semantic Versioning](https://semver.org/lang/pl/).
 
 ### Dodano
 - Operator reszty dzielenia `%`.
+- Operatory złożonego przypisanie `+=`, `-=`, `.=`, `*=`, `/=`, `%=`
 
 ## [0.1.0] - 2026-11-01
 
