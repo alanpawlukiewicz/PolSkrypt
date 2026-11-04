@@ -434,7 +434,19 @@ namespace PolSkrypt.Parsing
                 Expr right = Unary();
                 return new Unary(op, right);
             }
-            return Call();
+            return Exponentiation();
+        }
+
+        private Expr Exponentiation()
+        {
+            Expr expr = Call();
+            while (Match(TokenType.STAR_STAR))
+            {
+                Token op = Previous();
+                Expr right = Exponentiation();
+                expr = new Binary(expr, op, right);
+            }
+            return expr;
         }
 
         private Expr Call()

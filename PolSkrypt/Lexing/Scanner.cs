@@ -100,6 +100,10 @@ namespace PolSkrypt.Lexing
                     {
                         AddToken(TokenType.STAR_EQUAL);
                     }
+                    else if (CheckNext('*'))
+                    {
+                        AddToken(TokenType.STAR_STAR);
+                    }
                     else
                     {
                         AddToken(TokenType.STAR);

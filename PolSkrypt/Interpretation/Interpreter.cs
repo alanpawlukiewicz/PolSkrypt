@@ -82,6 +82,9 @@ namespace PolSkrypt.Interpretation
                     return (double?)left + (double?)right;
                 case TokenType.DOT:
                     return Stringify(left) + Stringify(right);
+                case TokenType.STAR_STAR:
+                    CheckNumberOperands(expression.Operator, left, right);
+                    return Math.Pow((double?)left ?? 0, (double?)right ?? 0);
                 case TokenType.GREATER:
                     CheckNumberOperands(expression.Operator, left, right);
                     return (double?)left > (double?)right;
