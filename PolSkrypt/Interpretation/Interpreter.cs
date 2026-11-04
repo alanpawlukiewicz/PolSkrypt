@@ -428,11 +428,11 @@ namespace PolSkrypt.Interpretation
 
             if (_locals.TryGetValue(expression, out int depth))
             {
-                _environment.AssignAt(depth, expression.Name, value);
+                _environment.AssignAt(depth, expression.Name, newValue);
             }
             else
             {
-                _globals.Assign(expression.Name, value);
+                _globals.Assign(expression.Name, newValue);
             }
 
             return newValue;
