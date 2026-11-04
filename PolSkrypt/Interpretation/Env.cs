@@ -59,5 +59,27 @@ namespace PolSkrypt.Interpretation
 
             throw new RuntimeException(name, $"Niezidentyfikowana zmienna '{name.Lexeme}'.");
         }
+
+        public object? GetAt(int distance, Token name)
+        {
+            return Ancestor(distance, name)._values[name.Lexeme];
+        }
+
+        public Env Ancestor(int distance, Token name)
+        {
+            Env environment = this;
+            for (int i = 0; i < distance; i++)
+            {
+                environment = environment._enclosing 
+                    ?? throw new RuntimeException(name, $"Niezidentyfikowana zmienna '{name.Lexeme}'.");
+            }
+
+            return environment;
+        }
+
+        public void AssignAt(int distance, Token name, object? value)
+        {
+            Ancestor(distance, name)._values[name.Lexeme] = value;
+        }
     }
 }

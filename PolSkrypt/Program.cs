@@ -68,6 +68,14 @@ public class Program
             return;
         }
 
+        Resolver resolver = new Resolver(_interpreter);
+        resolver.Resolve(stmts);
+
+        if (ErrorHandler.HadError)
+        {
+            return;
+        }
+
         _interpreter.Interpret(stmts);
     }
 }

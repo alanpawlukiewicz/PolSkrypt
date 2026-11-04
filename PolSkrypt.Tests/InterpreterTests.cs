@@ -3,6 +3,7 @@ using PolSkrypt.Constants;
 using PolSkrypt.Errors.Exceptions;
 using PolSkrypt.Interpretation;
 using PolSkrypt.Lexing;
+using PolSkrypt.Parsing;
 using PolSkrypt.Parsing.Expressions;
 using PolSkrypt.Parsing.Statements;
 using Xunit;
@@ -48,8 +49,22 @@ namespace PolSkrypt.Tests
             return writer.ToString();
         }
 
+        // Resolver musi przejść po AST przed wykonaniem - wypełnia mapę _locals interpretera.
+        // Węzły AST muszą być tymi samymi obiektami, które potem wykonuje interpreter.
+        private static Interpreter CreateResolved(params Stmt[] statements)
+        {
+            var interpreter = new Interpreter();
+            new Resolver(interpreter).Resolve(statements.ToList());
+            return interpreter;
+        }
+
         private static string Run(Interpreter interpreter, params Stmt[] statements)
-            => CaptureOutput(() => interpreter.Interpret(statements.ToList()));
+            => CaptureOutput(() =>
+            {
+                var list = statements.ToList();
+                new Resolver(interpreter).Resolve(list);
+                interpreter.Interpret(list);
+            });
 
         private static string Run(params Stmt[] statements) => Run(new Interpreter(), statements);
 
@@ -664,7 +679,6 @@ namespace PolSkrypt.Tests
         [Fact]
         public void Function_WithReturn_ReturnsValue()
         {
-            var interpreter = new Interpreter();
             // funkcja dodaj(a, b) { zwróć a + b; }
             var function = new Function(
                 T(TokenType.IDENTIFIER, "dodaj"),
@@ -673,6 +687,7 @@ namespace PolSkrypt.Tests
                 {
                     new Return(T(TokenType.RETURN, "zwróć"), Bin(Ident("a"), TokenType.PLUS, "+", Ident("b")))
                 });
+            var interpreter = CreateResolved(function);
             interpreter.VisitFunctionStmt(function);
             var call = new Call(
                 Ident("dodaj"),
@@ -698,7 +713,6 @@ namespace PolSkrypt.Tests
         [Fact]
         public void Function_Recursion_ComputesFactorial()
         {
-            var interpreter = new Interpreter();
             var paren = T(TokenType.RIGHT_PAREN, ")");
             // funkcja silnia(n) { jeśli (n <= 1) zwróć 1; zwróć n * silnia(n - 1); }
             var function = new Function(
@@ -718,6 +732,7 @@ namespace PolSkrypt.Tests
                                 Ident("silnia"), paren,
                                 new List<Expr> { Bin(Ident("n"), TokenType.MINUS, "-", Lit(1.0)) })))
                 });
+            var interpreter = CreateResolved(function);
             interpreter.VisitFunctionStmt(function);
             var call = new Call(Ident("silnia"), paren, new List<Expr> { Lit(5.0) });
 
@@ -757,7 +772,6 @@ namespace PolSkrypt.Tests
         [Fact]
         public void AnonFunction_CanBeAssignedAndCalled()
         {
-            var interpreter = new Interpreter();
             var paren = T(TokenType.RIGHT_PAREN, ")");
             // zmienna podwoj = funkcja(a) { zwróć a * 2; };
             var anon = new AnonFunction(
@@ -766,12 +780,77 @@ namespace PolSkrypt.Tests
                 {
                     new Return(T(TokenType.RETURN, "zwróć"), Bin(Ident("a"), TokenType.STAR, "*", Lit(2.0)))
                 });
-            interpreter.VisitVarStmt(Declare("podwoj", anon));
+            var declaration = Declare("podwoj", anon);
+            var interpreter = CreateResolved(declaration);
+            interpreter.VisitVarStmt(declaration);
 
             var result = interpreter.VisitCallExpression(
                 new Call(Ident("podwoj"), paren, new List<Expr> { Lit(21.0) }));
 
             result.Should().Be(42.0);
+        }
+
+        // ---------- Resolver + Interpreter (zakres leksykalny) ----------
+
+        [Fact]
+        public void Closure_BindsToDeclarationVisibleAtDefinition_NotLaterShadowing()
+        {
+            var paren = T(TokenType.RIGHT_PAREN, ")");
+            Stmt CallShowA() => new StmtExpression(new Call(Ident("showA"), paren, new List<Expr>()));
+            // zmienna a = "global";
+            // { funkcja showA() { wypisz a; } showA(); zmienna a = "blok"; showA(); }
+            var program = new Stmt[]
+            {
+                Declare("a", Lit("global")),
+                new Block(new List<Stmt>
+                {
+                    new Function(
+                        T(TokenType.IDENTIFIER, "showA"),
+                        new List<Token>(),
+                        new List<Stmt> { new Print(Ident("a")) }),
+                    CallShowA(),
+                    Declare("a", Lit("blok")),
+                    CallShowA()
+                })
+            };
+
+            var output = Run(program);
+
+            output.Should().Be("global" + Environment.NewLine + "global" + Environment.NewLine);
+        }
+
+        [Fact]
+        public void Closure_KeepsLocalStateBetweenCalls()
+        {
+            var paren = T(TokenType.RIGHT_PAREN, ")");
+            // funkcja stworzLicznik() { zmienna i = 0; funkcja licz() { i = i + 1; wypisz i; } zwróć licz; }
+            // zmienna c = stworzLicznik(); c(); c();
+            var program = new Stmt[]
+            {
+                new Function(
+                    T(TokenType.IDENTIFIER, "stworzLicznik"),
+                    new List<Token>(),
+                    new List<Stmt>
+                    {
+                        Declare("i", Lit(0.0)),
+                        new Function(
+                            T(TokenType.IDENTIFIER, "licz"),
+                            new List<Token>(),
+                            new List<Stmt>
+                            {
+                                new StmtExpression(AssignTo("i", Bin(Ident("i"), TokenType.PLUS, "+", Lit(1.0)))),
+                                new Print(Ident("i"))
+                            }),
+                        new Return(T(TokenType.RETURN, "zwróć"), Ident("licz"))
+                    }),
+                Declare("c", new Call(Ident("stworzLicznik"), paren, new List<Expr>())),
+                new StmtExpression(new Call(Ident("c"), paren, new List<Expr>())),
+                new StmtExpression(new Call(Ident("c"), paren, new List<Expr>()))
+            };
+
+            var output = Run(program);
+
+            output.Should().Be("1" + Environment.NewLine + "2" + Environment.NewLine);
         }
 
         // ---------- Interpret error handling ----------

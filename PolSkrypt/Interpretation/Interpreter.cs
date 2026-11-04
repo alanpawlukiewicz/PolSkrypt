@@ -6,7 +6,6 @@ using PolSkrypt.Interpretation.Callables;
 using PolSkrypt.Lexing;
 using PolSkrypt.Parsing.Expressions;
 using PolSkrypt.Parsing.Statements;
-using System.Xml.Linq;
 
 namespace PolSkrypt.Interpretation
 {
@@ -15,6 +14,7 @@ namespace PolSkrypt.Interpretation
         private readonly Env _globals = new Env();
         public Env Globals => _globals;
         private Env _environment;
+        private readonly Dictionary<Expr, int> _locals = new();
 
         public Interpreter()
         {
@@ -47,6 +47,11 @@ namespace PolSkrypt.Interpretation
         private object? Evaluate(Expr expr)
         {
             return expr.Accept(this);
+        }
+
+        public void Resolve(Expr expr, int depth)
+        {
+            _locals[expr] = depth;
         }
 
         public object? VisitBinaryExpression(Binary expression)
@@ -219,7 +224,19 @@ namespace PolSkrypt.Interpretation
 
         public object? VisitVariableExpression(Variable expression)
         {
-            return _environment.Get(expression.Name);
+            return LookUpVariable(expression.Name, expression);
+        }
+
+        private object? LookUpVariable(Token name, Expr expression)
+        {
+            if (_locals.TryGetValue(expression, out int depth))
+            {
+                return _environment.GetAt(depth, name);
+            }
+            else
+            {
+                return _globals.Get(name);
+            }
         }
 
         public object? VisitVarStmt(Var statement)
@@ -237,7 +254,15 @@ namespace PolSkrypt.Interpretation
         public object? VisitAssignExpression(Assign expression)
         {
             object? value = Evaluate(expression.Value);
-            _environment.Assign(expression.Name, value);
+            if (_locals.TryGetValue(expression, out int depth))
+            {
+                _environment.AssignAt(depth, expression.Name, value);
+            }
+            else
+            {
+                _globals.Assign(expression.Name, value);
+            }
+
             return value;
         }
 
@@ -319,7 +344,7 @@ namespace PolSkrypt.Interpretation
 
         public object? VisitBreakStmt(Break statement)
         {
-            throw new BreakException();
+            throw new BreakException(statement.KeyWord, "Wyrzucono 'przerwij' poza pętlą.");
         }
 
         public object? VisitCallExpression(Call expression)
@@ -398,7 +423,14 @@ namespace PolSkrypt.Interpretation
                     break;
             }
 
-            _environment.Assign(expression.Name, newValue);
+            if (_locals.TryGetValue(expression, out int depth))
+            {
+                _environment.AssignAt(depth, expression.Name, value);
+            }
+            else
+            {
+                _globals.Assign(expression.Name, value);
+            }
 
             return newValue;
         }
