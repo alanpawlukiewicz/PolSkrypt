@@ -168,9 +168,9 @@ namespace PolSkrypt.Parsing
 
         private Stmt BreakStatement()
         {
+            Token keyword = Previous();
             Consume(TokenType.SEMICOLON, "Oczekiwano ';' po 'przerwij'.");
-
-            return new Break();
+            return new Break(keyword);
         }
 
         private Stmt ForStatement()

@@ -193,7 +193,7 @@ namespace PolSkrypt.Tests
                             new Binary(new Variable(T(TokenType.IDENTIFIER, "i")), T(TokenType.LESS, "<"), new Literal(3)),
                             new Block(new List<Stmt>
                             {
-                                new Break(),
+                                new Break(T(TokenType.BREAK, "przerwij")),
                                 new StmtExpression(new Assign(
                                     T(TokenType.IDENTIFIER, "i"),
                                     new Binary(new Variable(T(TokenType.IDENTIFIER, "i")), T(TokenType.PLUS, "+"), new Literal(1))))

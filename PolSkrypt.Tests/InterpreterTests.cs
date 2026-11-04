@@ -581,7 +581,7 @@ namespace PolSkrypt.Tests
                 new Block(new List<Stmt>
                 {
                     new StmtExpression(AssignTo("i", Bin(Ident("i"), TokenType.PLUS, "+", Lit(1.0)))),
-                    new If(Bin(Ident("i"), TokenType.EQUAL_EQUAL, "==", Lit(5.0)), new Break(), null)
+                    new If(Bin(Ident("i"), TokenType.EQUAL_EQUAL, "==", Lit(5.0)), new Break(T(TokenType.BREAK, "przerwij")), null)
                 }));
 
             Run(interpreter, Declare("i", Lit(0.0)), loop);
@@ -594,7 +594,7 @@ namespace PolSkrypt.Tests
         {
             var interpreter = new Interpreter();
 
-            Action act = () => interpreter.VisitBreakStmt(new Break());
+            Action act = () => interpreter.VisitBreakStmt(new Break(T(TokenType.BREAK, "przerwij")));
 
             act.Should().Throw<BreakException>();
         }

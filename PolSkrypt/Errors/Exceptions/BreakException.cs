@@ -2,9 +2,9 @@
 
 namespace PolSkrypt.Errors.Exceptions
 {
-    public class BreakException : Exception
+    public class BreakException : RuntimeException
     {
-        public BreakException()
+        public BreakException(Token token, string message) : base(token, message)
         {
         }
     }
