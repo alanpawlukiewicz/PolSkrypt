@@ -1,6 +1,6 @@
 # Referencja języka PolSkrypt
 
-Wersja dokumentu: 0.1.0
+Wersja dokumentu: 0.2.0
 
 ## Spis treści
 
@@ -33,16 +33,7 @@ Wielkość liter ma znaczenie (`x` i `X` to różne zmienne).
 
 Nie mogą być używane jako identyfikatory:
 
-`zmienna` `jeżeli` `w_przeciwnym_przypadku` `podczas_gdy` `dla` `prawda` `fałsz` `wartość_pusta` `lub` `oraz` `zwróć` `przerwij`
-
-### Literały
-
-| Rodzaj | Przykłady | Opis |
-|--------|-----------|-------|
-| Liczba | `0`, `42`, `-7`, `3.14` | zmienna typu double oparta o standard IEEE 754 |
-| Napis | `"tekst"` | zmienna typu string z brakiem ograniczenia liczby znaków |
-| Logiczny | `prawda`, `fałsz` | |
-| Pusty | `wartość_pusta` | |
+`zmienna` `jeżeli` `w_przeciwnym_wypadku` `podczas_gdy` `dla` `prawda` `fałsz` `wartość_pusta` `lub` `oraz` `zwróć` `przerwij`
 
 ### Instrukcje i średniki
 
@@ -74,7 +65,86 @@ funkcja dodaj(a, b) {
 
 ## 2. Typy danych
 
-PolSkrypt jest językiem typowanym dynamicznie.
+PolSkrypt jest językiem typowanym dynamicznie: typ ma wartość, a nie zmienna. Ta sama zmienna może w różnych momentach przechowywać wartości różnych typów.
+
+```text
+zmienna x = 5;       // liczba
+x = "pięć";          // teraz napis
+```
+
+### Zestawienie typów
+
+| Typ | Literały | Opis |
+|-----|----------|------|
+| Liczba | `0`, `42`, `-7`, `3.14` | liczba zmiennoprzecinkowa podwójnej precyzji (double, IEEE 754); nie ma osobnego typu całkowitego |
+| Napis | `"tekst"` | ciąg znaków bez ograniczenia długości |
+| Logiczny | `prawda`, `fałsz` | dwie wartości logiczne |
+| Pusty | `wartość_pusta` | oznacza brak wartości |
+| Funkcja | `funkcja (a, b) { ... }` | funkcje są wartościami pierwszej klasy: można je przypisywać do zmiennych i przekazywać dalej |
+
+### Liczba
+
+Wszystkie liczby są typu double, więc `1` i `1.0` to ta sama wartość. Dzielenie przez 0 jest błędem (nie daje nieskończoności).
+
+### Napis
+
+Napisy nie są niejawnie zamieniane na liczby ani odwrotnie. Operator `+` działa wyłącznie na liczbach. Do łączenia napisów służy operator `.`, który przekształca liczby na napisy.
+
+```text
+wypisz(1 + 2);        // wypisze: 3
+wypisz("a" . 1);      // wypisze: a1
+wypisz("a" + 1);      // błąd
+```
+
+### Pusty
+
+`wartość_pusta` jest jedyną wartością swojego typu. Zwraca ją funkcja, w której nie wykonano `zwróć`. Porównanie `wartość_pusta == wartość_pusta` daje `prawda`. Użycie jej w operacji arytmetycznej jest błędem (`wartość_pusta + 1`).
+
+### Porównywanie wartości różnych typów
+
+Operator `==` porównuje zarówno wartości, jak i typy, więc wartości różnych typów nigdy nie są równe:
+
+```text
+wypisz(1 == "1");     // wypisze: fałsz
+wypisz(0 == fałsz);   // wypisze: fałsz
+```
+
+### Prawdziwość wartości
+
+Wszędzie tam, gdzie język oczekuje warunku, wartość dowolnego typu jest interpretowana jako logiczna. Dotyczy to warunków w `jeżeli`, `podczas_gdy`, `dla`, wyrażenia warunkowego `? :` oraz operatorów `oraz` i `lub`.
+
+Zasady są następujące:
+
+1. `wartość_pusta` jest **fałszem**.
+2. Wartość logiczna jest sobą: `prawda` jest prawdą, `fałsz` jest fałszem.
+3. **Każda inna wartość jest prawdą.**
+
+| Wartość | Interpretacja |
+|---------|---------------|
+| `fałsz` | fałsz |
+| `wartość_pusta` | fałsz |
+| `prawda` | prawda |
+| `0` | prawda |
+| `-1`, `3.14` | prawda |
+| `""` (pusty napis) | prawda |
+| `"tekst"` | prawda |
+| funkcja | prawda |
+
+#### Wpływ na operatory `oraz` i `lub`
+
+Operatory `oraz` i `lub` zwracają jeden z operandów, a nie zawsze wartość logiczną. Prawdziwość decyduje tylko o tym, który operand zostanie zwrócony:
+
+- `a lub b` zwraca `a`, jeśli `a` jest prawdą, w przeciwnym razie `b`.
+- `a oraz b` zwraca `a`, jeśli `a` jest fałszem, w przeciwnym razie `b`.
+
+```text
+wypisz(wartość_pusta lub 3);   // wypisze: 3
+wypisz(0 lub 3);               // wypisze: 0 (zero jest prawdą)
+wypisz(0 oraz 3);              // wypisze: 3
+wypisz(fałsz oraz 3);          // wypisze: fałsz
+```
+
+---
 
 ## 3. Zmienne i zasięg
 
@@ -97,9 +167,9 @@ zmienna nazwa = wyrażenie;
 zmienna x = 1;
 {
     zmienna x = 2;
-    wypisz(x);   # wypisze: 2
+    wypisz(x);   // wypisze: 2
 }
-wypisz(x);       # wypisze: 1
+wypisz(x);       // wypisze: 1
 ```
 
 ---
@@ -111,6 +181,7 @@ wypisz(x);       # wypisze: 1
 | Typ | Operatory | Łączność |
 |------|-----------|----------|
 | Wyrażenie | `()` | lewostronna |
+| Potęgowy | `**` | prawostronna |
 | Jednoargumentowy | `-` `!` | prawostronna |
 | Multiplikatywny | `*` `/` `%` | lewostronna |
 | Dodatek | `+` `-` `.` | lewostronna |
@@ -119,7 +190,7 @@ wypisz(x);       # wypisze: 1
 | Logiczne AND | `oraz` | lewostronna |
 | Logiczne OR | `lub` | lewostronna |
 | Wyrażenie warunkowe | `? :` | prawostronna |
-| Przypisanie | `=` | prawostronna |
+| Proste i złożone przypisanie | `=` `*=` `/=` `%=` `+=` `-=` | prawostronna |
 | Przecinek | `,` | lewostronna |
 
 ### Operatory arytmetyczne
@@ -136,10 +207,13 @@ wypisz(x);       # wypisze: 1
 | `.` | liczba, liczba | napis | konkatenacja z przekształconymi liczbami na ciągi znaków |
 | `/` | liczba, liczba | liczba | dzielenie przez 0 powoduje błąd |
 | `*` | liczba, liczba | liczba | |
+| `-` | liczba, liczba | liczba | |
+| `%` | liczba, liczba | liczba | |
+| `**` | liczba, liczba | liczba | |
 
 ### Operatory logiczne
 
-`&&` i `||` używają **skróconego obliczania** (short-circuit) i zwracają
+`oraz` i `lub` używają **skróconego obliczania** (short-circuit) i zwracają
 jeden z operandów, a nie zawsze `bool`:
 
 ```text
@@ -156,9 +230,9 @@ wypisz(5 oraz 7);  // wypisze: 7
 
 | Wyrażenie | Wynik |
 |-----------|-------|
-| `1 / 0` | błąd` |
+| `1 / 0` | *błąd* |
 | `wartość_pusta == wartość_pusta` | `prawda` |
-| `wartość_pusta + 1` | błąd |
+| `wartość_pusta + 1` | *błąd* |
 
 ---
 
@@ -196,7 +270,7 @@ Dostępne wyłącznie wewnątrz pętli; użycie poza nią spowoduje błąd.
 
 ```text
 funkcja dodaj(a, b) {
-    zwróc a + b;
+    zwróć a + b;
 }
 
 wypisz(dodaj(2, 3));   // wypisze: 5
@@ -209,7 +283,7 @@ wypisz(dodaj(2, 3));   // wypisze: 5
 ```text
 zmienna x = funkcja (a, b) {
     zwróc a + b;
-}
+};
 
 wypisz(x(1, 2));   // wypisze: 3
 ```
@@ -229,5 +303,5 @@ wypisz(x(1, 2));   // wypisze: 3
 | Funkcja | Opis | Przykład | Wynik |
 |---------|------|----------|-------|
 | `wypisz(x, ...)` | wypisuje wartości oddzielone spacją | `print(1, "a");` | `1 a` |
-| `wprowadź()` | pozwala na wprowadzenie wartości zmiennej z klawiatury w postaci napisu | `zmienna a = wypisz();` | |
+| `wprowadź()` | pozwala na wprowadzenie wartości zmiennej z klawiatury w postaci napisu | `zmienna a = wprowadź();` | |
 | `zegar()` | zwraca obecną godzinę UTC w sekundach w postaci liczby | `wypisz(zegar());` | `1793629096` |
