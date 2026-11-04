@@ -1,0 +1,19 @@
+dla (zmienna i = 0; i <= 100; i += 1)
+{
+    jeżeli (i % 3 == 0 oraz i % 5 == 0)
+    {
+        wypisz("FizzBuzz");
+    }
+    w_przeciwnym_wypadku jeżeli (i % 3 == 0)
+    {
+        wypisz("Fizz");
+    }
+    w_przeciwnym_wypadku jeżeli (i % 5 == 0)
+    {
+        wypisz("Buzz");
+    }
+    w_przeciwnym_wypadku
+    {
+        wypisz(i);
+    }
+}
