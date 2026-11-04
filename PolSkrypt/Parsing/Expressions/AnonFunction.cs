@@ -3,7 +3,7 @@ using PolSkrypt.Lexing;
 using PolSkrypt.Parsing.Expressions;
 using PolSkrypt.Parsing.Statements;
 
-public class AnonFunction : Expr
+public class AnonFunction : Expr, IFunction
 {
     public List<Token> Parameters { get; }
     public List<Stmt> Body { get; }

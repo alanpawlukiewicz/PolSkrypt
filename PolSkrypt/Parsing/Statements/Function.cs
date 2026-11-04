@@ -3,7 +3,7 @@ using PolSkrypt.Lexing;
 
 namespace PolSkrypt.Parsing.Statements
 {
-    public class Function : Stmt
+    public class Function : Stmt, IFunction
     {
         private readonly Token _name;
         private readonly List<Token> _parameters;
