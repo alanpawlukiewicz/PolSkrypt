@@ -13,5 +13,6 @@ namespace PolSkrypt.Contracts
         T VisitBreakStmt(Break statement);
         T VisitFunctionStmt(Function statement);
         T VisitReturnStmt(Return statement);
+        T VisitClassStmt(Class statement);
     }
 }

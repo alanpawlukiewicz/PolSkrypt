@@ -34,6 +34,10 @@ namespace PolSkrypt.Parsing
         {
             try
             {
+                if (Match(TokenType.CLASS))
+                {
+                    return new List<Stmt> { ClassDeclaration() };
+                }
                 if (Match(TokenType.FUN))
                 {
                     return new List<Stmt> { Function("funkcja") };
@@ -52,7 +56,22 @@ namespace PolSkrypt.Parsing
             }
         }
 
-        private Stmt Function(string kind)
+        private Stmt ClassDeclaration()
+        {
+            Token name = Consume(TokenType.IDENTIFIER, "Oczekiwano nazwy klasy.");
+            Consume(TokenType.LEFT_BRACE, "Oczekiwano '{' po nazwie klasy.");
+            List<Function> methods = new() { };
+            while (!Check(TokenType.RIGHT_BRACE) && !IsAtEnd())
+            {
+                methods.Add(Function("metoda"));
+            }
+
+            Consume(TokenType.RIGHT_BRACE, "Oczekiwano '}' po ciele klasy.");
+
+            return new Class(name, methods);
+        }
+
+        private Function Function(string kind)
         {
             Token name = Consume(TokenType.IDENTIFIER,
                 $"Oczekiwano nazwy dla '{kind}'.");

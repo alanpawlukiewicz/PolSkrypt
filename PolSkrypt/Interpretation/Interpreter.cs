@@ -437,5 +437,14 @@ namespace PolSkrypt.Interpretation
 
             return newValue;
         }
+
+        public object? VisitClassStmt(Class statement)
+        {
+            _environment.Define(statement.Name.Lexeme, null);
+            RuntimeClass classStmt = new RuntimeClass(statement.Name.Lexeme);
+            _environment.Assign(statement.Name, classStmt);
+
+            return null;
+        }
     }
 }

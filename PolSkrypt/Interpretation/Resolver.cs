@@ -278,5 +278,13 @@ namespace PolSkrypt.Interpretation
             _inLoop = previousInLoop;
             return null;
         }
+
+        public object? VisitClassStmt(Class statement)
+        {
+            Declare(statement.Name);
+            Define(statement.Name);
+
+            return null;
+        }
     }
 }
