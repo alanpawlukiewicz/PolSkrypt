@@ -17,5 +17,6 @@ namespace PolSkrypt.Contracts
         T VisitCompoundAssignmentExpression(CompoundAssignment expression);
         T VisitGetExpression(Get expression);
         T VisitSetExpression(Set expression);
+        T VisitSelfExpression(Self expression);
     }
 }

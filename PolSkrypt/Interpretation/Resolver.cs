@@ -286,11 +286,16 @@ namespace PolSkrypt.Interpretation
             Declare(statement.Name);
             Define(statement.Name);
 
+            BeginScope();
+            _scopes.Peek()["ja"] = true;
+
             foreach (var method in statement.Methods)
             {
                 FunctionType declaration = FunctionType.METHOD;
                 ResolveFunction(method, declaration);
             }
+            
+            EndScope();
 
             return null;
         }
@@ -305,6 +310,13 @@ namespace PolSkrypt.Interpretation
         {
             Resolve(expression.Value);
             Resolve(expression.Object);
+
+            return null;
+        }
+
+        public object? VisitSelfExpression(Self expression)
+        {
+            ResolveLocal(expression, expression.Keyword);
 
             return null;
         }

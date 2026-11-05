@@ -43,5 +43,12 @@ namespace PolSkrypt.Interpretation.Callables
         {
             return $"<funkcja {_declaration.Name.Lexeme}>";
         }
+
+        public FunctionCallable Bind(Instance instance)
+        {
+            Env environment = new Env(_closure);
+            environment.Define("ja", instance);
+            return new FunctionCallable(_declaration, environment);
+        }
     }
 }

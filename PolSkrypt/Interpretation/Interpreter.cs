@@ -480,5 +480,10 @@ namespace PolSkrypt.Interpretation
 
             throw new RuntimeException(expression.Name, "Tylko instancje mają atrybuty.");
         }
+
+        public object? VisitSelfExpression(Self expression)
+        {
+            return LookUpVariable(expression.Keyword, expression);
+        }
     }
 }

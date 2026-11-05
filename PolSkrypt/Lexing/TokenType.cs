@@ -20,7 +20,7 @@
 
         // Keywords.
         AND, CLASS, ELSE, FALSE, FUN, FOR, IF, NULL, OR,
-        RETURN, SUPER, THIS, TRUE, VAR, WHILE, BREAK,
+        RETURN, SUPER, SELF, TRUE, VAR, WHILE, BREAK,
 
         EOF
     }

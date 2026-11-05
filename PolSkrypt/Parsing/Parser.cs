@@ -521,14 +521,9 @@ namespace PolSkrypt.Parsing
             if (Match(TokenType.FALSE)) return new Literal(false);
             if (Match(TokenType.TRUE)) return new Literal(true);
             if (Match(TokenType.NULL)) return new Literal(null);
-            if (Match(TokenType.NUMBER, TokenType.STRING))
-            {
-                return new Literal(Previous().Literal);
-            }
-            if (Match(TokenType.IDENTIFIER))
-            {
-                return new Variable(Previous());
-            }
+            if (Match(TokenType.NUMBER, TokenType.STRING)) return new Literal(Previous().Literal);
+            if (Match(TokenType.SELF)) return new Self(Previous());
+            if (Match(TokenType.IDENTIFIER)) return new Variable(Previous());
             if (Match(TokenType.LEFT_PAREN))
             {
                 Expr expr = Expression();

@@ -25,7 +25,7 @@ namespace PolSkrypt.Lexing
             {"lub", TokenType.OR},
             {"zwróć", TokenType.RETURN},
             {"super", TokenType.SUPER},
-            {"to", TokenType.THIS},
+            {"ja", TokenType.SELF},
             {"prawda", TokenType.TRUE},
             {"zmienna", TokenType.VAR},
             {"podczas_gdy", TokenType.WHILE},

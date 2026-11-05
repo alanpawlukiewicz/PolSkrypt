@@ -35,7 +35,7 @@ namespace PolSkrypt.Interpretation
 
             if (method != null)
             {
-                return method;
+                return method.Bind(this);
             }
 
             throw new RuntimeException(name, $"Nie znaleziono właściwości ani metody o nazwie '{name.Lexeme}'.");
