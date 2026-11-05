@@ -155,31 +155,31 @@ namespace PolSkrypt.Tests
         }
 
         [Fact]
-        public void Binary_Dot_ConcatenatesStrings()
+        public void Binary_Ampersand_ConcatenatesStrings()
         {
             var interpreter = new Interpreter();
 
-            var result = interpreter.VisitBinaryExpression(Bin(Lit("ala "), TokenType.DOT, ".", Lit("ma kota")));
+            var result = interpreter.VisitBinaryExpression(Bin(Lit("ala "), TokenType.AMPERSAND, "&", Lit("ma kota")));
 
             result.Should().Be("ala ma kota");
         }
 
         [Fact]
-        public void Binary_Dot_ConcatenatesStringAndNumber()
+        public void Binary_Ampersand_ConcatenatesStringAndNumber()
         {
             var interpreter = new Interpreter();
 
-            var result = interpreter.VisitBinaryExpression(Bin(Lit("liczba: "), TokenType.DOT, ".", Lit(5.0)));
+            var result = interpreter.VisitBinaryExpression(Bin(Lit("liczba: "), TokenType.AMPERSAND, "&", Lit(5.0)));
 
             result.Should().Be("liczba: 5");
         }
 
         [Fact]
-        public void Binary_Dot_WithNull_UsesNullKeyword()
+        public void Binary_Ampersand_WithNull_UsesNullKeyword()
         {
             var interpreter = new Interpreter();
 
-            var result = interpreter.VisitBinaryExpression(Bin(Lit("x"), TokenType.DOT, ".", Lit(null)));
+            var result = interpreter.VisitBinaryExpression(Bin(Lit("x"), TokenType.AMPERSAND, "&", Lit(null)));
 
             result.Should().Be("x" + KeyWord.NULL);
         }
