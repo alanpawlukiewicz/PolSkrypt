@@ -297,7 +297,7 @@ namespace PolSkrypt.Parsing
             }
             else if (Match(TokenType.PERCENT_EQUAL, TokenType.PLUS_EQUAL, 
                 TokenType.MINUS_EQUAL, TokenType.STAR_EQUAL, TokenType.SLASH_EQUAL,
-                TokenType.DOT_EQUAL))
+                TokenType.AMPERSAND_EQUAL))
             {
                 Token op = Previous();
                 Expr value = Assignment();
@@ -427,7 +427,7 @@ namespace PolSkrypt.Parsing
         {
             Expr expr = Factor();
 
-            while (Match(TokenType.MINUS, TokenType.PLUS, TokenType.DOT))
+            while (Match(TokenType.MINUS, TokenType.PLUS, TokenType.AMPERSAND))
             {
                 Token op = Previous();
                 Expr right = Factor();

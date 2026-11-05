@@ -80,7 +80,7 @@ namespace PolSkrypt.Interpretation
                 case TokenType.PLUS:
                     CheckNumberOperands(expression.Operator, left, right);
                     return (double?)left + (double?)right;
-                case TokenType.DOT:
+                case TokenType.AMPERSAND:
                     return Stringify(left) + Stringify(right);
                 case TokenType.STAR_STAR:
                     CheckNumberOperands(expression.Operator, left, right);
@@ -421,7 +421,7 @@ namespace PolSkrypt.Interpretation
                     CheckNumberOperands(expression.Operator, currentValue, value);
                     newValue = (double?)currentValue % (double?)value;
                     break;
-                case TokenType.DOT_EQUAL:
+                case TokenType.AMPERSAND_EQUAL:
                     newValue = Stringify(currentValue) + Stringify(value);
                     break;
             }

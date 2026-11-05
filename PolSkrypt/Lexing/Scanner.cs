@@ -64,14 +64,15 @@ namespace PolSkrypt.Lexing
                 case '{': AddToken(TokenType.LEFT_BRACE); break;
                 case '}': AddToken(TokenType.RIGHT_BRACE); break;
                 case ',': AddToken(TokenType.COMMA); break;
-                case '.':
+                case '.': AddToken(TokenType.DOT); break;
+                case '&':
                     if (CheckNext('='))
                     {
-                        AddToken(TokenType.DOT_EQUAL);
+                        AddToken(TokenType.AMPERSAND_EQUAL);
                     }
                     else
                     {
-                        AddToken(TokenType.DOT);
+                        AddToken(TokenType.AMPERSAND);
                     }
                     break;
                 case '-':
