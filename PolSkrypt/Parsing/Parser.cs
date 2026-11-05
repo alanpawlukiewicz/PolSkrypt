@@ -63,7 +63,23 @@ namespace PolSkrypt.Parsing
             List<Function> methods = new() { };
             while (!Check(TokenType.RIGHT_BRACE) && !IsAtEnd())
             {
-                methods.Add(Function("metoda"));
+                if (Match(TokenType.METHOD))
+                {
+                    methods.Add(Function("metoda"));
+                }
+                else
+                {
+                    Token nextToken = Peek();
+                    if (nextToken.Type == TokenType.IDENTIFIER && nextToken.Lexeme == Keywords.CONSTRUCTOR)
+                    {
+                        methods.Add(Function(Keywords.CONSTRUCTOR)); // Allow constructor declaration without method keyword
+                    }
+                    else
+                    {
+                        throw new ParseException(Peek(), "Niepoprawna składnia klasy. Oczekiwano słowa kluczowego 'metoda' w ciele klasy.");
+                    }
+                    
+                }
             }
 
             Consume(TokenType.RIGHT_BRACE, "Oczekiwano '}' po ciele klasy.");

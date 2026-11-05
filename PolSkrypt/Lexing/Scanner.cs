@@ -29,7 +29,8 @@ namespace PolSkrypt.Lexing
             {"prawda", TokenType.TRUE},
             {"zmienna", TokenType.VAR},
             {"podczas_gdy", TokenType.WHILE},
-            {"przerwij", TokenType.BREAK }
+            {"przerwij", TokenType.BREAK },
+            {"metoda",  TokenType.METHOD}
         };
 
         public Scanner(string source)
