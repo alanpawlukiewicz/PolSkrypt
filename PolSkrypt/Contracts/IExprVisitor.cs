@@ -15,5 +15,7 @@ namespace PolSkrypt.Contracts
         T VisitCallExpression(Call expression);
         T VisitAnonFunctionExpression(AnonFunction expression);
         T VisitCompoundAssignmentExpression(CompoundAssignment expression);
+        T VisitGetExpression(Get expression);
+        T VisitSetExpression(Set expression);
     }
 }

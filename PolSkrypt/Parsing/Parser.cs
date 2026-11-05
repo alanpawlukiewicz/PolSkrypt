@@ -283,10 +283,14 @@ namespace PolSkrypt.Parsing
                 Token equals = Previous();
                 Expr value = Assignment();
 
-                if (expr is Variable)
+                if (expr is Variable variable)
                 {
-                    Token name = ((Variable)expr).Name;
+                    Token name = variable.Name;
                     return new Assign(name, value);
+                }
+                else if (expr is Get get)
+                {
+                    return new Set(get.Object, get.Name, value);
                 }
 
                 ErrorHandler.Error(equals, "Nieprawidłowy cel przypisania.");
@@ -298,9 +302,9 @@ namespace PolSkrypt.Parsing
                 Token op = Previous();
                 Expr value = Assignment();
 
-                if (expr is Variable)
+                if (expr is Variable variable)
                 {
-                    Token name = ((Variable)expr).Name;
+                    Token name = variable.Name;
                     return new CompoundAssignment(name, op, value);
                 }
 
@@ -477,6 +481,11 @@ namespace PolSkrypt.Parsing
                 if (Match(TokenType.LEFT_PAREN))
                 {
                     expr = FinishCall(expr);
+                }
+                else if (Match(TokenType.DOT))
+                {
+                    Token name = Consume(TokenType.IDENTIFIER, "Oczekiwano nazwy po '.'");
+                    expr = new Get(expr, name);
                 }
                 else
                 {

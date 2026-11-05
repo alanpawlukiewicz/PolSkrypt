@@ -446,5 +446,31 @@ namespace PolSkrypt.Interpretation
 
             return null;
         }
+
+        public object? VisitGetExpression(Get expression)
+        {
+            object? obj = Evaluate(expression.Object);
+            if (obj is Instance instance)
+            {   
+                return instance.Get(expression.Name);
+            }
+
+            throw new RuntimeException(expression.Name, "Tylko instancje mają atrybuty.");
+        }
+
+        public object? VisitSetExpression(Set expression)
+        {
+            var obj = Evaluate(expression.Object);
+
+            if (obj is Instance instance)
+            {
+                var value = Evaluate(expression.Value);
+                instance.Set(expression.Name, value);
+
+                return value;
+            }
+
+            throw new RuntimeException(expression.Name, "Tylko instancje mają atrybuty.");
+        }
     }
 }

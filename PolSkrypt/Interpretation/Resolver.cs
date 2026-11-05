@@ -286,5 +286,19 @@ namespace PolSkrypt.Interpretation
 
             return null;
         }
+
+        public object? VisitGetExpression(Get expression)
+        {
+            Resolve(expression.Object);
+            return null;
+        }
+
+        public object? VisitSetExpression(Set expression)
+        {
+            Resolve(expression.Value);
+            Resolve(expression.Object);
+
+            return null;
+        }
     }
 }
