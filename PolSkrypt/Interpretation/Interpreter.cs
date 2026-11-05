@@ -441,7 +441,15 @@ namespace PolSkrypt.Interpretation
         public object? VisitClassStmt(Class statement)
         {
             _environment.Define(statement.Name.Lexeme, null);
-            ClassCallable classStmt = new ClassCallable(statement.Name.Lexeme);
+
+            Dictionary<string, FunctionCallable> methods = new Dictionary<string, FunctionCallable>();
+            foreach (var method in statement.Methods)
+            {
+                var function = new FunctionCallable(method, _environment);
+                methods[method.Name.Lexeme] = function;
+            }
+
+            ClassCallable classStmt = new ClassCallable(statement.Name.Lexeme, methods);
             _environment.Assign(statement.Name, classStmt);
 
             return null;

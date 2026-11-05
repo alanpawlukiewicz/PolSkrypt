@@ -1,5 +1,6 @@
 ﻿using PolSkrypt.Contracts;
 using PolSkrypt.Errors;
+using PolSkrypt.Interpretation.Callables;
 using PolSkrypt.Lexing;
 using PolSkrypt.Parsing.Expressions;
 using PolSkrypt.Parsing.Statements;
@@ -11,7 +12,8 @@ namespace PolSkrypt.Interpretation
         private enum FunctionType
         {
             NONE,
-            FUNCTION
+            FUNCTION,
+            METHOD
         }
 
         private readonly Interpreter _interpreter;
@@ -283,6 +285,12 @@ namespace PolSkrypt.Interpretation
         {
             Declare(statement.Name);
             Define(statement.Name);
+
+            foreach (var method in statement.Methods)
+            {
+                FunctionType declaration = FunctionType.METHOD;
+                ResolveFunction(method, declaration);
+            }
 
             return null;
         }

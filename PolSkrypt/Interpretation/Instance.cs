@@ -31,6 +31,13 @@ namespace PolSkrypt.Interpretation
                 return _fields[name.Lexeme];
             }
 
+            FunctionCallable? method = _classCallable.FindMethod(name.Lexeme);
+
+            if (method != null)
+            {
+                return method;
+            }
+
             throw new RuntimeException(name, $"Nie znaleziono właściwości ani metody o nazwie '{name.Lexeme}'.");
         }
 
