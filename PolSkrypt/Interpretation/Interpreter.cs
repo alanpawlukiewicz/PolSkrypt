@@ -194,7 +194,7 @@ namespace PolSkrypt.Interpretation
         {
             if (value == null)
             {
-                return KeyWord.NULL;
+                return Keywords.NULL;
             }
 
             if (value is double)
@@ -206,7 +206,7 @@ namespace PolSkrypt.Interpretation
 
             if (value is bool)
             {
-                return (bool)value ? KeyWord.TRUE : KeyWord.FALSE;
+                return (bool)value ? Keywords.TRUE : Keywords.FALSE;
             }
 
             return value.ToString() ?? string.Empty;
@@ -445,7 +445,7 @@ namespace PolSkrypt.Interpretation
             Dictionary<string, FunctionCallable> methods = new Dictionary<string, FunctionCallable>();
             foreach (var method in statement.Methods)
             {
-                var function = new FunctionCallable(method, _environment, method.Name.Lexeme == "konstruktor");
+                var function = new FunctionCallable(method, _environment, method.Name.Lexeme == Keywords.CONSTRUCTOR);
                 methods[method.Name.Lexeme] = function;
             }
 

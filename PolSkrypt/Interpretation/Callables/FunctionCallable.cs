@@ -1,4 +1,5 @@
-﻿using PolSkrypt.Contracts;
+﻿using PolSkrypt.Constants;
+using PolSkrypt.Contracts;
 using PolSkrypt.Errors.Exceptions;
 using PolSkrypt.Lexing;
 using PolSkrypt.Parsing.Statements;
@@ -37,7 +38,7 @@ namespace PolSkrypt.Interpretation.Callables
             {
                 if (_isInitializer)
                 {
-                    return _closure.GetAt(0, new Token(TokenType.SELF, "ja", null, 0));
+                    return _closure.GetAt(0, new Token(TokenType.SELF, Keywords.SELF, null, 0));
                 }
 
                 return returnValue.Value;
@@ -45,7 +46,7 @@ namespace PolSkrypt.Interpretation.Callables
 
             if (_isInitializer)
             {
-                return _closure.GetAt(0, new Token(TokenType.SELF, "ja", null, 0));
+                return _closure.GetAt(0, new Token(TokenType.SELF, Keywords.SELF, null, 0));
             }
 
 
@@ -60,7 +61,7 @@ namespace PolSkrypt.Interpretation.Callables
         public FunctionCallable Bind(Instance instance)
         {
             Env environment = new Env(_closure);
-            environment.Define("ja", instance);
+            environment.Define(Keywords.SELF, instance);
             return new FunctionCallable(_declaration, environment, _isInitializer);
         }
     }

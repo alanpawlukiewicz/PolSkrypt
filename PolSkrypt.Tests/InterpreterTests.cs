@@ -181,7 +181,7 @@ namespace PolSkrypt.Tests
 
             var result = interpreter.VisitBinaryExpression(Bin(Lit("x"), TokenType.AMPERSAND, "&", Lit(null)));
 
-            result.Should().Be("x" + KeyWord.NULL);
+            result.Should().Be("x" + Keywords.NULL);
         }
 
         [Theory]
@@ -512,14 +512,14 @@ namespace PolSkrypt.Tests
         {
             var output = Run(new Print(Lit(null)));
 
-            output.Should().Be(KeyWord.NULL + Environment.NewLine);
+            output.Should().Be(Keywords.NULL + Environment.NewLine);
         }
 
         [Fact]
         public void Print_Booleans_WriteTrueAndFalseKeywords()
         {
-            Run(new Print(Lit(true))).Should().Be(KeyWord.TRUE + Environment.NewLine);
-            Run(new Print(Lit(false))).Should().Be(KeyWord.FALSE + Environment.NewLine);
+            Run(new Print(Lit(true))).Should().Be(Keywords.TRUE + Environment.NewLine);
+            Run(new Print(Lit(false))).Should().Be(Keywords.FALSE + Environment.NewLine);
         }
 
         [Fact]

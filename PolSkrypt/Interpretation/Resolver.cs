@@ -1,4 +1,5 @@
-﻿using PolSkrypt.Contracts;
+﻿using PolSkrypt.Constants;
+using PolSkrypt.Contracts;
 using PolSkrypt.Errors;
 using PolSkrypt.Interpretation.Callables;
 using PolSkrypt.Lexing;
@@ -302,12 +303,12 @@ namespace PolSkrypt.Interpretation
             Define(statement.Name);
 
             BeginScope();
-            _scopes.Peek()["ja"] = true;
+            _scopes.Peek()[Keywords.SELF] = true;
 
             foreach (var method in statement.Methods)
             {
                 FunctionType declaration = FunctionType.METHOD;
-                if (method.Name.Lexeme == "konstruktor")
+                if (method.Name.Lexeme == Keywords.CONSTRUCTOR)
                 {
                     declaration = FunctionType.INITIALIZER;
                 }

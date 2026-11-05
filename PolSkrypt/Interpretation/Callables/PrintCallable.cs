@@ -11,7 +11,7 @@ namespace PolSkrypt.Interpretation.Callables
         {
             if (value == null)
             {
-                return KeyWord.NULL;
+                return Keywords.NULL;
             }
 
             if (value is double)
@@ -23,7 +23,7 @@ namespace PolSkrypt.Interpretation.Callables
 
             if (value is bool)
             {
-                return (bool)value ? KeyWord.TRUE : KeyWord.FALSE;
+                return (bool)value ? Keywords.TRUE : Keywords.FALSE;
             }
 
             return value.ToString() ?? string.Empty;

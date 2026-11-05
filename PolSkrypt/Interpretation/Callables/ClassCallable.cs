@@ -1,4 +1,5 @@
-﻿using PolSkrypt.Contracts;
+﻿using PolSkrypt.Constants;
+using PolSkrypt.Contracts;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -18,12 +19,12 @@ namespace PolSkrypt.Interpretation.Callables
 
         public string Name => _name;
 
-        public int? Arity => FindMethod("konstruktor")?.Arity ?? 0;
+        public int? Arity => FindMethod(Keywords.CONSTRUCTOR)?.Arity ?? 0;
 
         public object? Call(Interpreter interpreter, List<object?> arguments)
         {
             Instance instance = new Instance(this);
-            FunctionCallable? ctor = FindMethod("konstruktor");
+            FunctionCallable? ctor = FindMethod(Keywords.CONSTRUCTOR);
             if (ctor != null)
             {
                 ctor.Bind(instance).Call(interpreter, arguments);
