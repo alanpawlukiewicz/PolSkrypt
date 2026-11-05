@@ -445,7 +445,7 @@ namespace PolSkrypt.Interpretation
             Dictionary<string, FunctionCallable> methods = new Dictionary<string, FunctionCallable>();
             foreach (var method in statement.Methods)
             {
-                var function = new FunctionCallable(method, _environment);
+                var function = new FunctionCallable(method, _environment, method.Name.Lexeme == "konstruktor");
                 methods[method.Name.Lexeme] = function;
             }
 

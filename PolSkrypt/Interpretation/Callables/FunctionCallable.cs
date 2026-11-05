@@ -1,5 +1,6 @@
 ﻿using PolSkrypt.Contracts;
 using PolSkrypt.Errors.Exceptions;
+using PolSkrypt.Lexing;
 using PolSkrypt.Parsing.Statements;
 
 namespace PolSkrypt.Interpretation.Callables
@@ -8,11 +9,13 @@ namespace PolSkrypt.Interpretation.Callables
     {
         private readonly Function _declaration;
         private readonly Env _closure;
+        private readonly bool _isInitializer;
 
-        public FunctionCallable(Function declaration, Env closure)
+        public FunctionCallable(Function declaration, Env closure, bool isInitializer = false)
         {
             _declaration = declaration;
             _closure = closure;
+            _isInitializer = isInitializer;
         }
 
         public int? Arity => _declaration.Parameters.Count;
@@ -32,9 +35,19 @@ namespace PolSkrypt.Interpretation.Callables
             }
             catch (ReturnException returnValue)
             {
+                if (_isInitializer)
+                {
+                    return _closure.GetAt(0, new Token(TokenType.SELF, "ja", null, 0));
+                }
+
                 return returnValue.Value;
             }
-            
+
+            if (_isInitializer)
+            {
+                return _closure.GetAt(0, new Token(TokenType.SELF, "ja", null, 0));
+            }
+
 
             return null;
         }
@@ -48,7 +61,7 @@ namespace PolSkrypt.Interpretation.Callables
         {
             Env environment = new Env(_closure);
             environment.Define("ja", instance);
-            return new FunctionCallable(_declaration, environment);
+            return new FunctionCallable(_declaration, environment, _isInitializer);
         }
     }
 }

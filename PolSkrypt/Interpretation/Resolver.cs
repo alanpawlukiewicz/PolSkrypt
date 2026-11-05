@@ -13,7 +13,8 @@ namespace PolSkrypt.Interpretation
         {
             NONE,
             FUNCTION,
-            METHOD
+            METHOD,
+            INITIALIZER
         }
 
         private enum ClassType
@@ -204,6 +205,10 @@ namespace PolSkrypt.Interpretation
             }
             if (statement.Value != null)
             {
+                if (_currentFunction == FunctionType.INITIALIZER)
+                {
+                    ErrorHandler.Error(statement.KeyWord, "Nie można zwrócić wartości z konstruktora.");
+                }
                 Resolve(statement.Value);
             }
             return null;
@@ -302,6 +307,10 @@ namespace PolSkrypt.Interpretation
             foreach (var method in statement.Methods)
             {
                 FunctionType declaration = FunctionType.METHOD;
+                if (method.Name.Lexeme == "konstruktor")
+                {
+                    declaration = FunctionType.INITIALIZER;
+                }
                 ResolveFunction(method, declaration);
             }
             
