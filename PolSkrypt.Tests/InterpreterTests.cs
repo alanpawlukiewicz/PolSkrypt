@@ -426,16 +426,6 @@ namespace PolSkrypt.Tests
             act.Should().Throw<RuntimeException>();
         }
 
-        [Fact]
-        public void Var_Redeclaration_OverwritesValue()
-        {
-            var interpreter = new Interpreter();
-            interpreter.VisitVarStmt(Declare("x", Lit(1.0)));
-            interpreter.VisitVarStmt(Declare("x", Lit(2.0)));
-
-            interpreter.VisitVariableExpression((Variable)Ident("x")).Should().Be(2.0);
-        }
-
         // ---------- Blocks and scope ----------
 
         [Fact]

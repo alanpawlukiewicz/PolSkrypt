@@ -24,6 +24,12 @@ namespace PolSkrypt.Errors
             Report(line, string.Empty, message);
         }
 
+        public static void Error(string name, string message)
+        {
+            Console.Error.WriteLine($"Błąd przy {name}: {message}");
+            _hadError = true;
+        }
+
         public static void Error(Token token, string message)
         {
             if (token.Type == TokenType.EOF)

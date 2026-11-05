@@ -1,4 +1,5 @@
-﻿using PolSkrypt.Errors.Exceptions;
+﻿using PolSkrypt.Errors;
+using PolSkrypt.Errors.Exceptions;
 using PolSkrypt.Lexing;
 
 namespace PolSkrypt.Interpretation
@@ -22,7 +23,7 @@ namespace PolSkrypt.Interpretation
         {
             if (_values.ContainsKey(name))
             {
-                _values[name] = value;
+                ErrorHandler.Error(name, "Zmienna o tej nazwie już istnieje w tym zakresie.");
                 return;
             }
             _values.Add(name, value);
