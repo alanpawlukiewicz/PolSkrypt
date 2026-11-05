@@ -7,6 +7,14 @@ a numeracja wersji zgodna z [Semantic Versioning](https://semver.org/lang/pl/).
 
 ## [Niewydane]
 
+### Dodano
+- Klasy z metodami, metodami statycznymi, wyrażeniami oraz konstruktorem.
+- Słowa kluczowe `klasa`, `metoda`, `statyczna`, `ja`.
+
+### Zmieniono
+- Operator konkatenacji napisów z `.` i `.=` na `&` i `&=`.
+- Zmienne globalne teraz zwracają błąd zamiast nadpisywać wartość przy ponownej deklaracji.
+
 ## [0.2.0] 2026-11-04
 
 ### Dodano
