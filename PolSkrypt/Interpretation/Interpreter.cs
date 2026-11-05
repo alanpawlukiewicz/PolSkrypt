@@ -441,7 +441,7 @@ namespace PolSkrypt.Interpretation
         public object? VisitClassStmt(Class statement)
         {
             _environment.Define(statement.Name.Lexeme, null);
-            RuntimeClass classStmt = new RuntimeClass(statement.Name.Lexeme);
+            ClassCallable classStmt = new ClassCallable(statement.Name.Lexeme);
             _environment.Assign(statement.Name, classStmt);
 
             return null;
