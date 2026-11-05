@@ -16,10 +16,17 @@ namespace PolSkrypt.Interpretation
             METHOD
         }
 
+        private enum ClassType
+        {
+            NONE,
+            CLASS
+        }
+
         private readonly Interpreter _interpreter;
         private readonly Stack<Dictionary<string, bool>> _scopes = new();
         private FunctionType _currentFunction = FunctionType.NONE;
         private bool _inLoop = false;
+        private ClassType _currentClass = ClassType.NONE;
 
         public Resolver(Interpreter interpreter)
         {
@@ -283,6 +290,9 @@ namespace PolSkrypt.Interpretation
 
         public object? VisitClassStmt(Class statement)
         {
+            ClassType previousClass = _currentClass;
+            _currentClass = ClassType.CLASS;
+
             Declare(statement.Name);
             Define(statement.Name);
 
@@ -296,6 +306,7 @@ namespace PolSkrypt.Interpretation
             }
             
             EndScope();
+            _currentClass = previousClass;
 
             return null;
         }
@@ -316,6 +327,10 @@ namespace PolSkrypt.Interpretation
 
         public object? VisitSelfExpression(Self expression)
         {
+            if (_currentClass == ClassType.NONE)
+            {
+                ErrorHandler.Error(expression.Keyword, "Nie można użyć 'ja' poza klasą.");
+            }
             ResolveLocal(expression, expression.Keyword);
 
             return null;
