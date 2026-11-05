@@ -442,28 +442,35 @@ namespace PolSkrypt.Interpretation
         {
             _environment.Define(statement.Name.Lexeme, null);
 
-            Dictionary<string, FunctionCallable> methods = new Dictionary<string, FunctionCallable>();
+            var methods = new Dictionary<string, FunctionCallable>();
             foreach (var method in statement.Methods)
-            {
-                var function = new FunctionCallable(method, _environment, method.Name.Lexeme == Keywords.CONSTRUCTOR);
-                methods[method.Name.Lexeme] = function;
-            }
+                methods[method.Name.Lexeme] = new FunctionCallable(method, _environment, method.Name.Lexeme == Keywords.CONSTRUCTOR);
 
-            ClassCallable classStmt = new ClassCallable(statement.Name.Lexeme, methods);
-            _environment.Assign(statement.Name, classStmt);
+            var staticMethods = new Dictionary<string, FunctionCallable>();
+            foreach (var method in statement.StaticMethods)
+                staticMethods[method.Name.Lexeme] = new FunctionCallable(method, _environment, false);
 
+            var classCallable = new ClassCallable(statement.Name.Lexeme, methods, staticMethods);
+            _environment.Assign(statement.Name, classCallable);
             return null;
         }
 
         public object? VisitGetExpression(Get expression)
         {
             object? obj = Evaluate(expression.Object);
+
             if (obj is Instance instance)
-            {   
                 return instance.Get(expression.Name);
+
+            if (obj is ClassCallable klass)
+            {
+                var m = klass.FindStaticMethod(expression.Name.Lexeme);
+                if (m != null) return m;
+                throw new RuntimeException(expression.Name,
+                    $"Klasa '{klass.Name}' nie posiada metody statycznej '{expression.Name.Lexeme}'.");
             }
 
-            throw new RuntimeException(expression.Name, "Tylko instancje mają atrybuty.");
+            throw new RuntimeException(expression.Name, "Tylko instancje i klasy mają właściwości.");
         }
 
         public object? VisitSetExpression(Set expression)

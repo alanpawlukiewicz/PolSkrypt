@@ -15,7 +15,8 @@ namespace PolSkrypt.Interpretation
             NONE,
             FUNCTION,
             METHOD,
-            INITIALIZER
+            INITIALIZER,
+            STATIC_METHOD
         }
 
         private enum ClassType
@@ -314,7 +315,12 @@ namespace PolSkrypt.Interpretation
                 }
                 ResolveFunction(method, declaration);
             }
-            
+
+            foreach (var staticMethod in statement.StaticMethods)
+            {
+                ResolveFunction(staticMethod, FunctionType.STATIC_METHOD);
+            }
+
             EndScope();
             _currentClass = previousClass;
 
@@ -337,6 +343,10 @@ namespace PolSkrypt.Interpretation
 
         public object? VisitSelfExpression(Self expression)
         {
+            if (_currentFunction == FunctionType.STATIC_METHOD)
+            {
+                ErrorHandler.Error(expression.Keyword, "Nie można użyć 'ja' w metodzie statycznej.");
+            }
             if (_currentClass == ClassType.NONE)
             {
                 ErrorHandler.Error(expression.Keyword, "Nie można użyć 'ja' poza klasą.");

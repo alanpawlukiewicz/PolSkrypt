@@ -30,7 +30,8 @@ namespace PolSkrypt.Lexing
             {"zmienna", TokenType.VAR},
             {"podczas_gdy", TokenType.WHILE},
             {"przerwij", TokenType.BREAK },
-            {"metoda",  TokenType.METHOD}
+            {"metoda",  TokenType.METHOD},
+            {"statyczna", TokenType.STATIC }
         };
 
         public Scanner(string source)

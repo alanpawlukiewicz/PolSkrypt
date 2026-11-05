@@ -10,16 +10,21 @@ namespace PolSkrypt.Interpretation.Callables
     {
         private readonly string _name;
         private readonly Dictionary<string, FunctionCallable> _methods;
+        private readonly Dictionary<string, FunctionCallable> _staticMethods;
 
-        public ClassCallable(string name, Dictionary<string, FunctionCallable> methods)
+
+        public ClassCallable(string name, Dictionary<string, FunctionCallable> methods, Dictionary<string, FunctionCallable> staticMethods)
         {
             _name = name;
             _methods = methods;
+            _staticMethods = staticMethods;
         }
 
         public string Name => _name;
 
         public int? Arity => FindMethod(Keywords.CONSTRUCTOR)?.Arity ?? 0;
+
+        public FunctionCallable? FindStaticMethod(string name) => _staticMethods.TryGetValue(name, out var m) ? m : null;
 
         public object? Call(Interpreter interpreter, List<object?> arguments)
         {

@@ -61,11 +61,17 @@ namespace PolSkrypt.Parsing
             Token name = Consume(TokenType.IDENTIFIER, "Oczekiwano nazwy klasy.");
             Consume(TokenType.LEFT_BRACE, "Oczekiwano '{' po nazwie klasy.");
             List<Function> methods = new() { };
+            List<Function> staticMethods = new() { };
             while (!Check(TokenType.RIGHT_BRACE) && !IsAtEnd())
             {
                 if (Match(TokenType.METHOD))
                 {
                     methods.Add(Function("metoda"));
+                }
+                else if (Match(TokenType.STATIC))
+                {
+                    Consume(TokenType.METHOD, "Oczekiwano 'metoda' po 'statyczna'.");
+                    staticMethods.Add(Function("statyczna metoda"));
                 }
                 else
                 {
@@ -84,7 +90,7 @@ namespace PolSkrypt.Parsing
 
             Consume(TokenType.RIGHT_BRACE, "Oczekiwano '}' po ciele klasy.");
 
-            return new Class(name, methods);
+            return new Class(name, methods, staticMethods);
         }
 
         private Function Function(string kind)
