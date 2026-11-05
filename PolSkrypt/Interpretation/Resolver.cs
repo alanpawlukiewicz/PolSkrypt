@@ -97,7 +97,7 @@ namespace PolSkrypt.Interpretation
         {
             if (!_inLoop)
             {
-                ErrorHandler.Error(statement.KeyWord, "Wyrzucono 'przerwij' poza pętlą.");
+                ErrorHandler.Error(statement.Keyword, "Wyrzucono 'przerwij' poza pętlą.");
             }
             return null;
         }
@@ -202,13 +202,13 @@ namespace PolSkrypt.Interpretation
         {
             if (_currentFunction == FunctionType.NONE)
             {
-                ErrorHandler.Error(statement.KeyWord, "Nie można zwrócić wartości spoza funkcji.");
+                ErrorHandler.Error(statement.Keyword, "Nie można zwrócić wartości spoza funkcji.");
             }
             if (statement.Value != null)
             {
                 if (_currentFunction == FunctionType.INITIALIZER)
                 {
-                    ErrorHandler.Error(statement.KeyWord, "Nie można zwrócić wartości z konstruktora.");
+                    ErrorHandler.Error(statement.Keyword, "Nie można zwrócić wartości z konstruktora.");
                 }
                 Resolve(statement.Value);
             }

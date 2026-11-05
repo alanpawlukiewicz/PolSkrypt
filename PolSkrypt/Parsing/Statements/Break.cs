@@ -12,7 +12,7 @@ namespace PolSkrypt.Parsing.Statements
             _keyword = keyword;
         }
 
-        public Token KeyWord => _keyword;
+        public Token Keyword => _keyword;
 
         public override T Accept<T>(IStmtVisitor<T> visitor)
         {

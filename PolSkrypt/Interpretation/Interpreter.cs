@@ -347,7 +347,7 @@ namespace PolSkrypt.Interpretation
 
         public object? VisitBreakStmt(Break statement)
         {
-            throw new BreakException(statement.KeyWord, "Wyrzucono 'przerwij' poza pętlą.");
+            throw new BreakException(statement.Keyword, "Wyrzucono 'przerwij' poza pętlą.");
         }
 
         public object? VisitCallExpression(Call expression)
