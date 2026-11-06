@@ -1,6 +1,13 @@
 # PolSkrypt
 ![MAIN](https://github.com/alanpawlukiewicz/PolSkrypt/actions/workflows/main.yml/badge.svg) <br>
 Język skryptowy bazowany na książce [Crafting Interpreters](https://craftinginterpreters.com/).
+
+## Dokumentacja
+
+- [Referencja języka](docs/language-reference.md) – składnia, typy, operatory, funkcje i klasy
+- [Narzędzia](docs/tools.md) – analiza statyczna (resolver) i tryb promptu (REPL)
+- [Changelog](CHANGELOG.md) – historia zmian między wersjami
+
 ## Instalacja
 
 Gotowe paczki znajdziesz w zakładce [Releases](../../releases/latest). Pobierz archiwum dla swojego systemu:
@@ -16,7 +23,7 @@ Aplikacja jest w pełni samodzielna (self-contained), więc nie trzeba instalowa
 Po rozpakowaniu można uruchamiać skrypty w następujący sposób:
 
 ```
-PolSkrypt glowny.pols
+PolSkrypt plik.pols
 ```
 
-Aby komenda `PolSkrypt` działała w każdym folderze, dodaj aplikację do zmiennej `PATH`.
+Aby komenda `PolSkrypt` działała w każdym folderze, dodaj aplikację do zmiennej środowiskowej `PATH`.
