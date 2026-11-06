@@ -12,7 +12,10 @@ namespace PolSkrypt.Interpretation.Callables.NativeCallables
         {
             foreach (var argument in arguments)
             {
-                Console.Write($"{StringHelper.Stringify(argument)} ");
+                Console.Write($"{StringHelper.Stringify(argument)
+                    .Replace("\\n", "\n")
+                    .Replace("\\t", "\t")
+                    .Replace("\\r", "\r")} ");
             }
             return null;
         }
