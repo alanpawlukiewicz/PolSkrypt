@@ -488,7 +488,7 @@ namespace PolSkrypt.Parsing
             while (Match(TokenType.STAR_STAR))
             {
                 Token op = Previous();
-                Expr right = Exponentiation();
+                Expr right = Unary(); // Claude: Exponentiation is right-associative, so we call Unary() here instead of Exponentiation() to ensure correct parsing.
                 expr = new Binary(expr, op, right);
             }
             return expr;
