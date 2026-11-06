@@ -176,7 +176,8 @@ namespace PolSkrypt.Lexing
 
                 case '"': HandleString(); break;
                 default:
-                    if (char.IsDigit(c))
+                    // Claude: Finding that IsDigit returns true for characters outside '0'-'9', I will explicitly check for '0'-'9' range instead of using IsDigit.
+                    if (c >= '0' && c <= '9')
                     {
                         HandleNumber();
                     }
@@ -240,17 +241,17 @@ namespace PolSkrypt.Lexing
 
         private void HandleNumber()
         {
-            while (char.IsDigit(Peek()))
+            while (Peek() >= '0' && Peek() <= '9')
             {
                 Advance();
             }
 
-            if (Peek() == '.' && char.IsDigit(PeekNext()))
+            if (Peek() == '.' && (PeekNext() >= '0' && PeekNext() <= '9'))
             {
                 // Ignore the "."
                 Advance();
 
-                while (char.IsDigit(Peek()))
+                while (Peek() >= '0' && Peek() <= '9')
                 {
                     Advance();
                 }
