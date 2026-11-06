@@ -1,6 +1,5 @@
 ﻿using FluentAssertions;
 using PolSkrypt.Errors;
-using PolSkrypt.Errors.Exceptions;
 using PolSkrypt.Lexing;
 using PolSkrypt.Parsing;
 

@@ -3,10 +3,8 @@ using PolSkrypt.Constants;
 using PolSkrypt.Errors.Exceptions;
 using PolSkrypt.Interpretation;
 using PolSkrypt.Lexing;
-using PolSkrypt.Parsing;
 using PolSkrypt.Parsing.Expressions;
 using PolSkrypt.Parsing.Statements;
-using Xunit;
 
 namespace PolSkrypt.Tests
 {

@@ -15,8 +15,8 @@ namespace PolSkrypt.Interpretation.Callables.NativeCallables
             {
                 return d;
             }
-            
-            if(double.TryParse(argument?.ToString(), out double result))
+
+            if (double.TryParse(argument?.ToString(), out double result))
             {
                 return result;
             }

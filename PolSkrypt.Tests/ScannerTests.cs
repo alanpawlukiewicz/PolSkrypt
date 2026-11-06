@@ -7,17 +7,17 @@ namespace PolSkrypt.Tests
     {
         [Theory]
         [InlineData("zmienna x = 5;", new[] { TokenType.VAR, TokenType.IDENTIFIER, TokenType.EQUAL, TokenType.NUMBER, TokenType.SEMICOLON, TokenType.EOF })]
-        [InlineData("funkcja dodaj(a, b) { zwróć a + b; }", 
-            new[] { TokenType.FUN, TokenType.IDENTIFIER, TokenType.LEFT_PAREN, TokenType.IDENTIFIER, TokenType.COMMA, TokenType.IDENTIFIER, 
-                TokenType.RIGHT_PAREN, TokenType.LEFT_BRACE, TokenType.RETURN, TokenType.IDENTIFIER, TokenType.PLUS, TokenType.IDENTIFIER, 
+        [InlineData("funkcja dodaj(a, b) { zwróć a + b; }",
+            new[] { TokenType.FUN, TokenType.IDENTIFIER, TokenType.LEFT_PAREN, TokenType.IDENTIFIER, TokenType.COMMA, TokenType.IDENTIFIER,
+                TokenType.RIGHT_PAREN, TokenType.LEFT_BRACE, TokenType.RETURN, TokenType.IDENTIFIER, TokenType.PLUS, TokenType.IDENTIFIER,
                 TokenType.SEMICOLON, TokenType.RIGHT_BRACE, TokenType.EOF })]
-        [InlineData("jeżeli (x > 10) { wypisz(\"Większe niż 10\"); }", 
-            new[] { TokenType.IF, TokenType.LEFT_PAREN, TokenType.IDENTIFIER, TokenType.GREATER, TokenType.NUMBER, TokenType.RIGHT_PAREN, 
-                TokenType.LEFT_BRACE, TokenType.IDENTIFIER, TokenType.LEFT_PAREN, TokenType.STRING, TokenType.RIGHT_PAREN, TokenType.SEMICOLON, 
+        [InlineData("jeżeli (x > 10) { wypisz(\"Większe niż 10\"); }",
+            new[] { TokenType.IF, TokenType.LEFT_PAREN, TokenType.IDENTIFIER, TokenType.GREATER, TokenType.NUMBER, TokenType.RIGHT_PAREN,
+                TokenType.LEFT_BRACE, TokenType.IDENTIFIER, TokenType.LEFT_PAREN, TokenType.STRING, TokenType.RIGHT_PAREN, TokenType.SEMICOLON,
                 TokenType.RIGHT_BRACE, TokenType.EOF })]
-        [InlineData("podczas_gdy (i < 10) { i = i + 1; }", 
-            new[] { TokenType.WHILE, TokenType.LEFT_PAREN, TokenType.IDENTIFIER, TokenType.LESS, TokenType.NUMBER, TokenType.RIGHT_PAREN, 
-                TokenType.LEFT_BRACE, TokenType.IDENTIFIER, TokenType.EQUAL, TokenType.IDENTIFIER, TokenType.PLUS, TokenType.NUMBER, 
+        [InlineData("podczas_gdy (i < 10) { i = i + 1; }",
+            new[] { TokenType.WHILE, TokenType.LEFT_PAREN, TokenType.IDENTIFIER, TokenType.LESS, TokenType.NUMBER, TokenType.RIGHT_PAREN,
+                TokenType.LEFT_BRACE, TokenType.IDENTIFIER, TokenType.EQUAL, TokenType.IDENTIFIER, TokenType.PLUS, TokenType.NUMBER,
                 TokenType.SEMICOLON, TokenType.RIGHT_BRACE, TokenType.EOF })]
         [InlineData("dla (zmienna i = 0; i < 10; i = i + 1) { wypisz(i); }",
             new[] { TokenType.FOR, TokenType.LEFT_PAREN, TokenType.VAR, TokenType.IDENTIFIER, TokenType.EQUAL, TokenType.NUMBER, TokenType.SEMICOLON,

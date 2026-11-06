@@ -84,7 +84,7 @@ namespace PolSkrypt.Parsing
                     {
                         throw new ParseException(Peek(), "Niepoprawna składnia klasy. Oczekiwano słowa kluczowego 'metoda' w ciele klasy.");
                     }
-                    
+
                 }
             }
 
@@ -317,7 +317,7 @@ namespace PolSkrypt.Parsing
 
                 ErrorHandler.Error(equals, "Nieprawidłowy cel przypisania.");
             }
-            else if (Match(TokenType.PERCENT_EQUAL, TokenType.PLUS_EQUAL, 
+            else if (Match(TokenType.PERCENT_EQUAL, TokenType.PLUS_EQUAL,
                 TokenType.MINUS_EQUAL, TokenType.STAR_EQUAL, TokenType.SLASH_EQUAL,
                 TokenType.AMPERSAND_EQUAL))
             {

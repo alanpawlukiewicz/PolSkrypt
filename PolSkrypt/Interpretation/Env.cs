@@ -71,7 +71,7 @@ namespace PolSkrypt.Interpretation
             Env environment = this;
             for (int i = 0; i < distance; i++)
             {
-                environment = environment._enclosing 
+                environment = environment._enclosing
                     ?? throw new RuntimeException(name, $"Niezidentyfikowana zmienna '{name.Lexeme}'.");
             }
 

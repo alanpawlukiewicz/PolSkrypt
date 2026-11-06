@@ -10,7 +10,7 @@ namespace PolSkrypt.Interpretation.Callables.NativeCallables
 
         public object? Call(Interpreter interpreter, List<object?> arguments)
         {
-            foreach(var argument in arguments)
+            foreach (var argument in arguments)
             {
                 Console.Write($"{StringHelper.Stringify(argument)} ");
             }

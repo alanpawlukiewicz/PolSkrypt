@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace PolSkrypt.Constants
+﻿namespace PolSkrypt.Constants
 {
     public static class InterpreterVersion
     {

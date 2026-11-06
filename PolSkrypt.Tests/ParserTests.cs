@@ -3,9 +3,6 @@ using PolSkrypt.Lexing;
 using PolSkrypt.Parsing;
 using PolSkrypt.Parsing.Expressions;
 using PolSkrypt.Parsing.Statements;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace PolSkrypt.Tests
 {
@@ -47,8 +44,8 @@ namespace PolSkrypt.Tests
                 }
                     };
 
-                    yield return new object[]
-                    {
+            yield return new object[]
+            {
                 new Token[]
                 {
                     T(TokenType.VAR, "zmienna"), T(TokenType.IDENTIFIER, "x"), T(TokenType.EQUAL, "="),
@@ -65,7 +62,7 @@ namespace PolSkrypt.Tests
                             T(TokenType.PLUS, "+"),
                             new Binary(new Literal(2), T(TokenType.STAR, "*"), new Literal(3))))
                 }
-            };
+    };
 
             yield return new object[]
             {

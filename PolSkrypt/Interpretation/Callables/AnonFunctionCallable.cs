@@ -1,6 +1,5 @@
 ﻿using PolSkrypt.Contracts;
 using PolSkrypt.Errors.Exceptions;
-using PolSkrypt.Parsing.Expressions;
 
 namespace PolSkrypt.Interpretation.Callables
 {

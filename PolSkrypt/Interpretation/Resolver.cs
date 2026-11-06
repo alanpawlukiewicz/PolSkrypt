@@ -1,7 +1,6 @@
 ﻿using PolSkrypt.Constants;
 using PolSkrypt.Contracts;
 using PolSkrypt.Errors;
-using PolSkrypt.Interpretation.Callables;
 using PolSkrypt.Lexing;
 using PolSkrypt.Parsing.Expressions;
 using PolSkrypt.Parsing.Statements;

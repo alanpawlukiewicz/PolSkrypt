@@ -1,9 +1,6 @@
 ﻿using PolSkrypt.Contracts;
 using PolSkrypt.Lexing;
 using PolSkrypt.Parsing.Expressions;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace PolSkrypt.Parsing.Statements
 {

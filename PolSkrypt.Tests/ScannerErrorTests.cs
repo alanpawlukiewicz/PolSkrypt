@@ -1,9 +1,6 @@
 ﻿using FluentAssertions;
 using PolSkrypt.Errors;
 using PolSkrypt.Lexing;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace PolSkrypt.Tests
 {

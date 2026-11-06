@@ -1,8 +1,5 @@
 ﻿using PolSkrypt.Constants;
 using PolSkrypt.Contracts;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace PolSkrypt.Interpretation.Callables
 {

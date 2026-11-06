@@ -14,8 +14,8 @@ public class AnonFunction : Expr, IFunction
         Body = body;
     }
 
-    public override T Accept<T>(IExprVisitor<T> visitor) 
-    { 
-        return visitor.VisitAnonFunctionExpression(this); 
+    public override T Accept<T>(IExprVisitor<T> visitor)
+    {
+        return visitor.VisitAnonFunctionExpression(this);
     }
 }
