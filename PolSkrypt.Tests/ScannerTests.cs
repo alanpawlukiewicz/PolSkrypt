@@ -3,154 +3,531 @@ using PolSkrypt.Lexing;
 
 namespace PolSkrypt.Tests
 {
+    // Claude: generating new tests for Scanner class
+    /// <summary>
+    /// Tests that do not touch ErrorHandler (valid sources).
+    /// </summary>
     public class ScannerTests
     {
+        private static List<Token> Scan(string source) => new Scanner(source).ScanTokens();
+
+        private static TokenType[] Types(string source) => Scan(source).Select(t => t.Type).ToArray();
+
+        // ---------------------------------------------------------------
+        // Keywords
+        // ---------------------------------------------------------------
+
         [Theory]
-        [InlineData("zmienna x = 5;", new[] { TokenType.VAR, TokenType.IDENTIFIER, TokenType.EQUAL, TokenType.NUMBER, TokenType.SEMICOLON, TokenType.EOF })]
-        [InlineData("funkcja dodaj(a, b) { zwróć a + b; }",
-            new[] { TokenType.FUN, TokenType.IDENTIFIER, TokenType.LEFT_PAREN, TokenType.IDENTIFIER, TokenType.COMMA, TokenType.IDENTIFIER,
-                TokenType.RIGHT_PAREN, TokenType.LEFT_BRACE, TokenType.RETURN, TokenType.IDENTIFIER, TokenType.PLUS, TokenType.IDENTIFIER,
-                TokenType.SEMICOLON, TokenType.RIGHT_BRACE, TokenType.EOF })]
-        [InlineData("jeżeli (x > 10) { wypisz(\"Większe niż 10\"); }",
-            new[] { TokenType.IF, TokenType.LEFT_PAREN, TokenType.IDENTIFIER, TokenType.GREATER, TokenType.NUMBER, TokenType.RIGHT_PAREN,
-                TokenType.LEFT_BRACE, TokenType.IDENTIFIER, TokenType.LEFT_PAREN, TokenType.STRING, TokenType.RIGHT_PAREN, TokenType.SEMICOLON,
-                TokenType.RIGHT_BRACE, TokenType.EOF })]
-        [InlineData("podczas_gdy (i < 10) { i = i + 1; }",
-            new[] { TokenType.WHILE, TokenType.LEFT_PAREN, TokenType.IDENTIFIER, TokenType.LESS, TokenType.NUMBER, TokenType.RIGHT_PAREN,
-                TokenType.LEFT_BRACE, TokenType.IDENTIFIER, TokenType.EQUAL, TokenType.IDENTIFIER, TokenType.PLUS, TokenType.NUMBER,
-                TokenType.SEMICOLON, TokenType.RIGHT_BRACE, TokenType.EOF })]
-        [InlineData("dla (zmienna i = 0; i < 10; i = i + 1) { wypisz(i); }",
-            new[] { TokenType.FOR, TokenType.LEFT_PAREN, TokenType.VAR, TokenType.IDENTIFIER, TokenType.EQUAL, TokenType.NUMBER, TokenType.SEMICOLON,
-                TokenType.IDENTIFIER, TokenType.LESS, TokenType.NUMBER, TokenType.SEMICOLON, TokenType.IDENTIFIER, TokenType.EQUAL,
-                TokenType.IDENTIFIER, TokenType.PLUS, TokenType.NUMBER, TokenType.RIGHT_PAREN, TokenType.LEFT_BRACE,
-                TokenType.IDENTIFIER, TokenType.LEFT_PAREN, TokenType.IDENTIFIER, TokenType.RIGHT_PAREN, TokenType.SEMICOLON,
-                TokenType.RIGHT_BRACE, TokenType.EOF })]
-        public void ScanTokens_ShouldReturnCorrectTokens(string source, TokenType[] expectedTokenTypes)
+        [InlineData("oraz", TokenType.AND)]
+        [InlineData("klasa", TokenType.CLASS)]
+        [InlineData("w_przeciwnym_wypadku", TokenType.ELSE)]
+        [InlineData("fałsz", TokenType.FALSE)]
+        [InlineData("funkcja", TokenType.FUN)]
+        [InlineData("dla", TokenType.FOR)]
+        [InlineData("jeżeli", TokenType.IF)]
+        [InlineData("wartość_pusta", TokenType.NULL)]
+        [InlineData("lub", TokenType.OR)]
+        [InlineData("zwróć", TokenType.RETURN)]
+        [InlineData("super", TokenType.SUPER)]
+        [InlineData("ja", TokenType.SELF)]
+        [InlineData("prawda", TokenType.TRUE)]
+        [InlineData("zmienna", TokenType.VAR)]
+        [InlineData("podczas_gdy", TokenType.WHILE)]
+        [InlineData("przerwij", TokenType.BREAK)]
+        [InlineData("metoda", TokenType.METHOD)]
+        [InlineData("statyczna", TokenType.STATIC)]
+        public void ScanTokens_ShouldRecognizeEveryKeyword(string keyword, TokenType expected)
         {
-            // Arrange
-            var scanner = new Scanner(source);
-            // Act
-            var tokens = scanner.ScanTokens();
-            // Assert
-            expectedTokenTypes.Length.Should().Be(tokens.Count);
-            for (int i = 0; i < expectedTokenTypes.Length; i++)
-            {
-                tokens[i].Type.Should().Be(expectedTokenTypes[i]);
-            }
-        }
+            var tokens = Scan(keyword);
 
-        [Fact]
-        public void ScanTokens_ShouldHandleEmptySource()
-        {
-            // Arrange
-            var scanner = new Scanner(string.Empty);
-            // Act
-            var tokens = scanner.ScanTokens();
-            // Assert
-            tokens.Count.Should().Be(1);
-            tokens[0].Type.Should().Be(TokenType.EOF);
-        }
-
-        [Fact]
-        public void ScanTokens_ShouldHandleOnlyWhitespace()
-        {
-            // Arrange
-            var scanner = new Scanner("   \n\t  ");
-            // Act
-            var tokens = scanner.ScanTokens();
-            // Assert
-            tokens.Count.Should().Be(1);
-            tokens[0].Type.Should().Be(TokenType.EOF);
+            tokens.Should().HaveCount(2);
+            tokens[0].Type.Should().Be(expected);
+            tokens[0].Lexeme.Should().Be(keyword);
+            tokens[0].Literal.Should().BeNull();
         }
 
         [Theory]
-        [InlineData("5", 5.0)]
-        [InlineData("3.14", 3.14)]
-        public void ScanTokens_ShouldReturnCorrectTokenNumericLiterals(string literal, double expectedValue)
+        [InlineData("zmienna1")]
+        [InlineData("zmienna_")]
+        [InlineData("_zmienna")]
+        [InlineData("zmiennaa")]
+        [InlineData("dla_każdego")]
+        [InlineData("jaa")]
+        [InlineData("Zmienna")]   // keywords are case-sensitive
+        [InlineData("PRAWDA")]
+        [InlineData("JEŻELI")]
+        public void ScanTokens_ShouldTreatKeywordLookalikesAsIdentifiers(string text)
         {
-            // Arrange
-            var scanner = new Scanner(literal);
-            // Act
-            var tokens = scanner.ScanTokens();
-            // Assert
-            tokens.Count.Should().Be(2); // One token for the number and one for EOF
+            var tokens = Scan(text);
+
+            tokens.Should().HaveCount(2);
+            tokens[0].Type.Should().Be(TokenType.IDENTIFIER);
+            tokens[0].Lexeme.Should().Be(text);
+        }
+
+        [Theory]
+        [InlineData("x")]
+        [InlineData("_")]
+        [InlineData("__init__")]
+        [InlineData("licznik2")]
+        [InlineData("żółć")]
+        [InlineData("zażółć_gęślą_jaźń")]
+        [InlineData("ŁÓDŹ")]
+        public void ScanTokens_ShouldScanIdentifiersWithPolishLettersAndUnderscores(string identifier)
+        {
+            var tokens = Scan(identifier);
+
+            tokens.Should().HaveCount(2);
+            tokens[0].Type.Should().Be(TokenType.IDENTIFIER);
+            tokens[0].Lexeme.Should().Be(identifier);
+            tokens[0].Literal.Should().BeNull();
+        }
+
+        [Fact]
+        public void ScanTokens_ShouldSplitIdentifierOnNonIdentifierCharacter()
+        {
+            Types("abc.def").Should().Equal(
+                TokenType.IDENTIFIER, TokenType.DOT, TokenType.IDENTIFIER, TokenType.EOF);
+        }
+
+        [Fact]
+        public void ScanTokens_ShouldRecognizeSelfAndSuperInMethodCall()
+        {
+            Types("ja.pole = super.metoda();").Should().Equal(
+                TokenType.SELF, TokenType.DOT, TokenType.IDENTIFIER, TokenType.EQUAL,
+                TokenType.SUPER, TokenType.DOT, TokenType.METHOD, TokenType.LEFT_PAREN,
+                TokenType.RIGHT_PAREN, TokenType.SEMICOLON, TokenType.EOF);
+        }
+
+        // ---------------------------------------------------------------
+        // Operators and single-character tokens
+        // ---------------------------------------------------------------
+
+        [Theory]
+        [InlineData("(", TokenType.LEFT_PAREN)]
+        [InlineData(")", TokenType.RIGHT_PAREN)]
+        [InlineData("{", TokenType.LEFT_BRACE)]
+        [InlineData("}", TokenType.RIGHT_BRACE)]
+        [InlineData(",", TokenType.COMMA)]
+        [InlineData(".", TokenType.DOT)]
+        [InlineData(";", TokenType.SEMICOLON)]
+        [InlineData("?", TokenType.QUESTION_MARK)]
+        [InlineData(":", TokenType.COLON)]
+        [InlineData("+", TokenType.PLUS)]
+        [InlineData("-", TokenType.MINUS)]
+        [InlineData("*", TokenType.STAR)]
+        [InlineData("/", TokenType.SLASH)]
+        [InlineData("%", TokenType.PERCENT)]
+        [InlineData("&", TokenType.AMPERSAND)]
+        [InlineData("!", TokenType.BANG)]
+        [InlineData("=", TokenType.EQUAL)]
+        [InlineData("<", TokenType.LESS)]
+        [InlineData(">", TokenType.GREATER)]
+        public void ScanTokens_ShouldScanSingleCharacterTokens(string source, TokenType expected)
+        {
+            var tokens = Scan(source);
+
+            tokens.Should().HaveCount(2);
+            tokens[0].Type.Should().Be(expected);
+            tokens[0].Lexeme.Should().Be(source);
+        }
+
+        [Theory]
+        [InlineData("!=", TokenType.BANG_EQUAL)]
+        [InlineData("==", TokenType.EQUAL_EQUAL)]
+        [InlineData("<=", TokenType.LESS_EQUAL)]
+        [InlineData(">=", TokenType.GREATER_EQUAL)]
+        [InlineData("+=", TokenType.PLUS_EQUAL)]
+        [InlineData("-=", TokenType.MINUS_EQUAL)]
+        [InlineData("*=", TokenType.STAR_EQUAL)]
+        [InlineData("/=", TokenType.SLASH_EQUAL)]
+        [InlineData("%=", TokenType.PERCENT_EQUAL)]
+        [InlineData("&=", TokenType.AMPERSAND_EQUAL)]
+        [InlineData("**", TokenType.STAR_STAR)]
+        public void ScanTokens_ShouldScanTwoCharacterTokens(string source, TokenType expected)
+        {
+            var tokens = Scan(source);
+
+            tokens.Should().HaveCount(2);
+            tokens[0].Type.Should().Be(expected);
+            tokens[0].Lexeme.Should().Be(source);
+        }
+
+        [Theory]
+        [InlineData("===", new[] { TokenType.EQUAL_EQUAL, TokenType.EQUAL, TokenType.EOF })]
+        [InlineData("!==", new[] { TokenType.BANG_EQUAL, TokenType.EQUAL, TokenType.EOF })]
+        [InlineData("<==", new[] { TokenType.LESS_EQUAL, TokenType.EQUAL, TokenType.EOF })]
+        [InlineData("**=", new[] { TokenType.STAR_STAR, TokenType.EQUAL, TokenType.EOF })]
+        [InlineData("***", new[] { TokenType.STAR_STAR, TokenType.STAR, TokenType.EOF })]
+        [InlineData("&&", new[] { TokenType.AMPERSAND, TokenType.AMPERSAND, TokenType.EOF })]
+        [InlineData("+++", new[] { TokenType.PLUS, TokenType.PLUS, TokenType.PLUS, TokenType.EOF })]
+        [InlineData("=!", new[] { TokenType.EQUAL, TokenType.BANG, TokenType.EOF })]
+        [InlineData("x+=1", new[] { TokenType.IDENTIFIER, TokenType.PLUS_EQUAL, TokenType.NUMBER, TokenType.EOF })]
+        [InlineData("a**b", new[] { TokenType.IDENTIFIER, TokenType.STAR_STAR, TokenType.IDENTIFIER, TokenType.EOF })]
+        public void ScanTokens_ShouldUseLongestMatchForOperators(string source, TokenType[] expected)
+        {
+            Types(source).Should().Equal(expected);
+        }
+
+        [Fact]
+        public void ScanTokens_ShouldNotMergeOperatorsSeparatedBySpace()
+        {
+            Types("= =").Should().Equal(TokenType.EQUAL, TokenType.EQUAL, TokenType.EOF);
+            Types("! =").Should().Equal(TokenType.BANG, TokenType.EQUAL, TokenType.EOF);
+            Types("* *").Should().Equal(TokenType.STAR, TokenType.STAR, TokenType.EOF);
+        }
+
+        [Fact]
+        public void ScanTokens_ShouldScanTernaryExpression()
+        {
+            Types("x > 0 ? 1 : 2").Should().Equal(
+                TokenType.IDENTIFIER, TokenType.GREATER, TokenType.NUMBER, TokenType.QUESTION_MARK,
+                TokenType.NUMBER, TokenType.COLON, TokenType.NUMBER, TokenType.EOF);
+        }
+
+        [Fact]
+        public void ScanTokens_ShouldScanLogicalKeywordsInExpression()
+        {
+            Types("a oraz b lub !c").Should().Equal(
+                TokenType.IDENTIFIER, TokenType.AND, TokenType.IDENTIFIER, TokenType.OR,
+                TokenType.BANG, TokenType.IDENTIFIER, TokenType.EOF);
+        }
+
+        // ---------------------------------------------------------------
+        // Numbers
+        // ---------------------------------------------------------------
+
+        [Theory]
+        [InlineData("0", 0.0)]
+        [InlineData("007", 7.0)]
+        [InlineData("123456", 123456.0)]
+        [InlineData("0.5", 0.5)]
+        [InlineData("10.25", 10.25)]
+        [InlineData("123456789.123", 123456789.123)]
+        public void ScanTokens_ShouldParseNumbersAsDouble(string source, double expected)
+        {
+            var tokens = Scan(source);
+
+            tokens.Should().HaveCount(2);
             tokens[0].Type.Should().Be(TokenType.NUMBER);
-            tokens[0].Literal.Should().Be(expectedValue);
+            tokens[0].Literal.Should().BeOfType<double>();
+            tokens[0].Literal.Should().Be(expected);
+            tokens[0].Lexeme.Should().Be(source);
         }
 
-        [Theory]
-        [InlineData("\"hello\"", "hello")]
-        [InlineData("\"world\"", "world")]
-        public void ScanTokens_ShouldReturnCorrectTokenStringLiterals(string literal, string expectedValue)
+        [Fact]
+        public void ScanTokens_ShouldTreatTrailingDotAsSeparateDotToken()
         {
-            // Arrange
-            var scanner = new Scanner(literal);
-            // Act
-            var tokens = scanner.ScanTokens();
-            // Assert
-            tokens.Count.Should().Be(2); // One token for the string and one for EOF
+            var tokens = Scan("3.");
+
+            tokens.Select(t => t.Type).Should().Equal(TokenType.NUMBER, TokenType.DOT, TokenType.EOF);
+            tokens[0].Literal.Should().Be(3.0);
+        }
+
+        [Fact]
+        public void ScanTokens_ShouldTreatLeadingDotAsSeparateDotToken()
+        {
+            var tokens = Scan(".5");
+
+            tokens.Select(t => t.Type).Should().Equal(TokenType.DOT, TokenType.NUMBER, TokenType.EOF);
+            tokens[1].Literal.Should().Be(5.0);
+        }
+
+        [Fact]
+        public void ScanTokens_ShouldSplitNumberWithTwoDots()
+        {
+            var tokens = Scan("1.2.3");
+
+            tokens.Select(t => t.Type).Should().Equal(
+                TokenType.NUMBER, TokenType.DOT, TokenType.NUMBER, TokenType.EOF);
+            tokens[0].Literal.Should().Be(1.2);
+            tokens[2].Literal.Should().Be(3.0);
+        }
+
+        [Fact]
+        public void ScanTokens_ShouldNotTreatDotAsDecimalSeparatorBeforeIdentifier()
+        {
+            Types("5.abc").Should().Equal(
+                TokenType.NUMBER, TokenType.DOT, TokenType.IDENTIFIER, TokenType.EOF);
+        }
+
+        [Fact]
+        public void ScanTokens_ShouldSplitNumberFollowedByLetters()
+        {
+            Types("5abc").Should().Equal(TokenType.NUMBER, TokenType.IDENTIFIER, TokenType.EOF);
+        }
+
+        [Fact]
+        public void ScanTokens_ShouldTreatMinusBeforeNumberAsSeparateToken()
+        {
+            var tokens = Scan("-5");
+
+            tokens.Select(t => t.Type).Should().Equal(TokenType.MINUS, TokenType.NUMBER, TokenType.EOF);
+            tokens[1].Literal.Should().Be(5.0);
+        }
+
+        [Fact]
+        public void ScanTokens_ShouldNotThrowOnNonAsciiDigits()
+        {
+            // char.IsDigit also returns true for e.g. Arabic-Indic digits,
+            // and double.Parse then throws a FormatException.
+            Action act = () => Scan("٣");
+
+            act.Should().NotThrow();
+        }
+
+        // ---------------------------------------------------------------
+        // Strings
+        // ---------------------------------------------------------------
+
+        [Fact]
+        public void ScanTokens_ShouldScanEmptyString()
+        {
+            var tokens = Scan("\"\"");
+
+            tokens.Should().HaveCount(2);
             tokens[0].Type.Should().Be(TokenType.STRING);
-            tokens[0].Literal.Should().Be(expectedValue);
+            tokens[0].Literal.Should().Be(string.Empty);
+            tokens[0].Lexeme.Should().Be("\"\"");
         }
 
         [Fact]
-        public void ScanTokens_ShouldReturnCorrectTokenNullLiteral()
+        public void ScanTokens_ShouldKeepQuotesInLexemeButNotInLiteral()
         {
-            // Arrange
-            var scanner = new Scanner("wartość_pusta");
-            // Act
-            var tokens = scanner.ScanTokens();
-            // Assert
-            tokens.Count.Should().Be(2); // One token for the string and one for EOF
-            tokens[0].Type.Should().Be(TokenType.NULL);
-            tokens[0].Literal.Should().Be(null);
+            var tokens = Scan("\"abc\"");
+
+            tokens[0].Lexeme.Should().Be("\"abc\"");
+            tokens[0].Literal.Should().Be("abc");
         }
 
         [Theory]
-        [InlineData("// This is a commen", new[] { TokenType.EOF })]
-        [InlineData("// This is a comment \n 5", new[] { TokenType.NUMBER, TokenType.EOF })]
-        [InlineData("/* This is a comment\n5 dwdwada /// // */", new[] { TokenType.EOF })]
-        public void ScanTokens_ShouldIgnoreComments(string comment, TokenType[] expectedTypes)
+        [InlineData("\"zażółć gęślą jaźń\"", "zażółć gęślą jaźń")]
+        [InlineData("\"  spacje  \"", "  spacje  ")]
+        [InlineData("\"// to nie komentarz\"", "// to nie komentarz")]
+        [InlineData("\"/* ani to */\"", "/* ani to */")]
+        [InlineData("\"a + b == c;\"", "a + b == c;")]
+        [InlineData("\"zmienna\"", "zmienna")]
+        public void ScanTokens_ShouldPreserveStringContent(string source, string expected)
         {
-            // Arrange
-            var scanner = new Scanner(comment);
-            // Act
-            var tokens = scanner.ScanTokens();
-            // Assert
-            for (int i = 0; i < expectedTypes.Length; i++)
-            {
-                tokens[i].Type.Should().Be(expectedTypes[i]);
-            }
-        }
+            var tokens = Scan(source);
 
-        [Theory]
-        [InlineData("5\n3\n4", new[] { 1, 2, 3 })]
-        [InlineData("5 1 3\n3\n4 5", new[] { 1, 1, 1, 2, 3, 3 })]
-        [InlineData("zmienna a = 3;\n\n zmienna b;", new[] { 1, 1, 1, 1, 1, 3, 3, 3 })]
-        [InlineData("1 \n \n \n \n \n 2", new[] { 1, 6 })]
-        public void ScanTokens_ShouldReturnCorrectLines(string source, int[] expectedLines)
-        {
-            // Arrange
-            var scanner = new Scanner(source);
-            // Act
-            var tokens = scanner.ScanTokens();
-            // Assert
-            for (int i = 0; i < expectedLines.Length; i++)
-            {
-                tokens[i].Line.Should().Be(expectedLines[i]);
-            }
+            tokens.Should().HaveCount(2);
+            tokens[0].Type.Should().Be(TokenType.STRING);
+            tokens[0].Literal.Should().Be(expected);
         }
 
         [Fact]
-        public void ScanTokens_ShouldHandleUnterminatedString()
+        public void ScanTokens_ShouldScanMultipleStringsSeparately()
         {
-            // Arrange
-            var scanner = new Scanner("\"This is an unterminated string");
-            // Act
-            var tokens = scanner.ScanTokens();
-            // Assert
-            tokens.Count.Should().Be(1); // Only EOF token should be present
-            tokens[0].Type.Should().Be(TokenType.EOF);
+            var tokens = Scan("\"a\" \"b\"");
+
+            tokens.Select(t => t.Type).Should().Equal(TokenType.STRING, TokenType.STRING, TokenType.EOF);
+            tokens[0].Literal.Should().Be("a");
+            tokens[1].Literal.Should().Be("b");
+        }
+
+        [Fact]
+        public void ScanTokens_ShouldSupportMultilineStringsAndCountLines()
+        {
+            var tokens = Scan("\"a\nb\" 5");
+
+            tokens.Select(t => t.Type).Should().Equal(TokenType.STRING, TokenType.NUMBER, TokenType.EOF);
+            tokens[0].Literal.Should().Be("a\nb");
+            tokens[1].Line.Should().Be(2);
+        }
+
+        // ---------------------------------------------------------------
+        // Comments
+        // ---------------------------------------------------------------
+
+        [Theory]
+        [InlineData("// komentarz", new[] { TokenType.EOF })]
+        [InlineData("//", new[] { TokenType.EOF })]
+        [InlineData("5 // komentarz", new[] { TokenType.NUMBER, TokenType.EOF })]
+        [InlineData("5 // komentarz\n6", new[] { TokenType.NUMBER, TokenType.NUMBER, TokenType.EOF })]
+        [InlineData("// a\n// b\n7", new[] { TokenType.NUMBER, TokenType.EOF })]
+        [InlineData("// zmienna x = 5;\n", new[] { TokenType.EOF })]
+        public void ScanTokens_ShouldIgnoreLineComments(string source, TokenType[] expected)
+        {
+            Types(source).Should().Equal(expected);
+        }
+
+        [Theory]
+        [InlineData("/* komentarz */ 5", new[] { TokenType.NUMBER, TokenType.EOF })]
+        [InlineData("5 /* x */ 6", new[] { TokenType.NUMBER, TokenType.NUMBER, TokenType.EOF })]
+        [InlineData("/**/ 5", new[] { TokenType.NUMBER, TokenType.EOF })]
+        [InlineData("/* a * b */ 5", new[] { TokenType.NUMBER, TokenType.EOF })]
+        [InlineData("/* a / b */ 5", new[] { TokenType.NUMBER, TokenType.EOF })]
+        [InlineData("/* // */ 5", new[] { TokenType.NUMBER, TokenType.EOF })]
+        [InlineData("/* a */ /* b */ 5", new[] { TokenType.NUMBER, TokenType.EOF })]
+        [InlineData("1 /* a\nb\nc */ 2", new[] { TokenType.NUMBER, TokenType.NUMBER, TokenType.EOF })]
+        [InlineData("/* a */", new[] { TokenType.EOF })]
+        public void ScanTokens_ShouldEndBlockCommentAtClosingDelimiter(string source, TokenType[] expected)
+        {
+            Types(source).Should().Equal(expected);
+        }
+
+        [Fact]
+        public void ScanTokens_ShouldCountLinesInsideBlockComment()
+        {
+            var tokens = Scan("/* a\nb\nc */ 5");
+
+            tokens.Select(t => t.Type).Should().Equal(TokenType.NUMBER, TokenType.EOF);
+            tokens[0].Line.Should().Be(3);
+        }
+
+        [Fact]
+        public void ScanTokens_ShouldNotThrowOnUnterminatedBlockComment()
+        {
+            Action act = () => Scan("5 /* nie zamknięty");
+
+            act.Should().NotThrow();
+            Types("5 /* nie zamknięty").Should().Equal(TokenType.NUMBER, TokenType.EOF);
+        }
+
+        [Fact]
+        public void ScanTokens_ShouldCountLinesAfterLineComment()
+        {
+            var tokens = Scan("// a\n5");
+
+            tokens[0].Type.Should().Be(TokenType.NUMBER);
+            tokens[0].Line.Should().Be(2);
+        }
+
+        [Fact]
+        public void ScanTokens_ShouldTreatSingleSlashAsDivision()
+        {
+            Types("a / b").Should().Equal(
+                TokenType.IDENTIFIER, TokenType.SLASH, TokenType.IDENTIFIER, TokenType.EOF);
+        }
+
+        [Fact]
+        public void ScanTokens_ShouldScanCompoundDivisionAssignment()
+        {
+            Types("a /= 2").Should().Equal(
+                TokenType.IDENTIFIER, TokenType.SLASH_EQUAL, TokenType.NUMBER, TokenType.EOF);
+        }
+
+        // ---------------------------------------------------------------
+        // Whitespace and line numbers
+        // ---------------------------------------------------------------
+
+        [Theory]
+        [InlineData("5\r\n3\r\n4", new[] { 1, 2, 3 })]
+        [InlineData("5\n\n\n3", new[] { 1, 4 })]
+        [InlineData("\n\n5", new[] { 3 })]
+        [InlineData("\t5\t\t6", new[] { 1, 1 })]
+        [InlineData("a\n// komentarz\nb", new[] { 1, 3 })]
+        [InlineData("a /* x\ny */ b", new[] { 1, 2 })]
+        public void ScanTokens_ShouldTrackLineNumbers(string source, int[] expectedLines)
+        {
+            Scan(source)
+                .Where(t => t.Type != TokenType.EOF)
+                .Select(t => t.Line)
+                .Should().Equal(expectedLines);
+        }
+
+        [Fact]
+        public void ScanTokens_ShouldAssignLineOfClosingQuoteToMultilineString()
+        {
+            // Documents current behavior: AddToken uses _line after the string has been scanned.
+            var tokens = Scan("\"a\nb\nc\"");
+
+            tokens[0].Type.Should().Be(TokenType.STRING);
+            tokens[0].Line.Should().Be(3);
+        }
+
+        [Theory]
+        [InlineData("5 6", 2)]
+        [InlineData("5      6", 2)]
+        [InlineData("5\t6", 2)]
+        [InlineData("5\r6", 2)]
+        public void ScanTokens_ShouldSeparateTokensByWhitespace(string source, int expectedTokenCount)
+        {
+            Scan(source).Where(t => t.Type == TokenType.NUMBER).Should().HaveCount(expectedTokenCount);
+        }
+
+        // ---------------------------------------------------------------
+        // General behavior
+        // ---------------------------------------------------------------
+
+        [Fact]
+        public void ScanTokens_ShouldAlwaysEndWithSingleEofToken()
+        {
+            var tokens = Scan("zmienna x = 1;");
+
+            tokens.Last().Type.Should().Be(TokenType.EOF);
+            tokens.Count(t => t.Type == TokenType.EOF).Should().Be(1);
+            tokens.Last().Lexeme.Should().BeEmpty();
+            tokens.Last().Literal.Should().BeNull();
+        }
+
+        [Fact]
+        public void ScanTokens_ShouldReturnLexemesMatchingSourceText()
+        {
+            var lexemes = Scan("zmienna wynik = 3.14 * (a + b);")
+                .Where(t => t.Type != TokenType.EOF)
+                .Select(t => t.Lexeme);
+
+            lexemes.Should().Equal("zmienna", "wynik", "=", "3.14", "*", "(", "a", "+", "b", ")", ";");
+        }
+
+        [Fact]
+        public void ScanTokens_ShouldReturnNullLiteralForNonLiteralTokens()
+        {
+            var tokens = Scan("zmienna x = (1 + 2);");
+
+            tokens.Where(t => t.Type != TokenType.NUMBER && t.Type != TokenType.STRING)
+                  .Should().OnlyContain(t => t.Literal == null);
+        }
+
+        [Fact]
+        public void ScanTokens_ShouldScanClassDefinition()
+        {
+            const string source = @"
+klasa Pies {
+    statyczna metoda stworz() { zwróć wartość_pusta; }
+    metoda szczekaj() { wypisz(""Hau""); }
+}";
+            Types(source).Should().Equal(
+                TokenType.CLASS, TokenType.IDENTIFIER, TokenType.LEFT_BRACE,
+                TokenType.STATIC, TokenType.METHOD, TokenType.IDENTIFIER, TokenType.LEFT_PAREN, TokenType.RIGHT_PAREN,
+                TokenType.LEFT_BRACE, TokenType.RETURN, TokenType.NULL, TokenType.SEMICOLON, TokenType.RIGHT_BRACE,
+                TokenType.METHOD, TokenType.IDENTIFIER, TokenType.LEFT_PAREN, TokenType.RIGHT_PAREN,
+                TokenType.LEFT_BRACE, TokenType.IDENTIFIER, TokenType.LEFT_PAREN, TokenType.STRING,
+                TokenType.RIGHT_PAREN, TokenType.SEMICOLON, TokenType.RIGHT_BRACE,
+                TokenType.RIGHT_BRACE, TokenType.EOF);
+        }
+
+        [Fact]
+        public void ScanTokens_ShouldScanIfElseWithBooleansAndBreak()
+        {
+            Types("jeżeli (prawda) { przerwij; } w_przeciwnym_wypadku { zwróć fałsz; }").Should().Equal(
+                TokenType.IF, TokenType.LEFT_PAREN, TokenType.TRUE, TokenType.RIGHT_PAREN,
+                TokenType.LEFT_BRACE, TokenType.BREAK, TokenType.SEMICOLON, TokenType.RIGHT_BRACE,
+                TokenType.ELSE, TokenType.LEFT_BRACE, TokenType.RETURN, TokenType.FALSE,
+                TokenType.SEMICOLON, TokenType.RIGHT_BRACE, TokenType.EOF);
+        }
+
+        [Fact]
+        public void ScanTokens_ShouldScanCompoundAssignmentsInStatement()
+        {
+            Types("x += 1; y -= 2; z *= 3; w /= 4; p %= 5; q &= 6;").Should().Equal(
+                TokenType.IDENTIFIER, TokenType.PLUS_EQUAL, TokenType.NUMBER, TokenType.SEMICOLON,
+                TokenType.IDENTIFIER, TokenType.MINUS_EQUAL, TokenType.NUMBER, TokenType.SEMICOLON,
+                TokenType.IDENTIFIER, TokenType.STAR_EQUAL, TokenType.NUMBER, TokenType.SEMICOLON,
+                TokenType.IDENTIFIER, TokenType.SLASH_EQUAL, TokenType.NUMBER, TokenType.SEMICOLON,
+                TokenType.IDENTIFIER, TokenType.PERCENT_EQUAL, TokenType.NUMBER, TokenType.SEMICOLON,
+                TokenType.IDENTIFIER, TokenType.AMPERSAND_EQUAL, TokenType.NUMBER, TokenType.SEMICOLON,
+                TokenType.EOF);
+        }
+
+        [Fact]
+        public void ScanTokens_ShouldBeRepeatableAcrossSeparateScannerInstances()
+        {
+            const string source = "zmienna x = 1;";
+
+            Types(source).Should().Equal(Types(source));
         }
     }
 }
