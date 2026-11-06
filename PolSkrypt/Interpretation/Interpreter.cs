@@ -2,6 +2,7 @@
 using PolSkrypt.Contracts;
 using PolSkrypt.Errors;
 using PolSkrypt.Errors.Exceptions;
+using PolSkrypt.Helpers;
 using PolSkrypt.Interpretation.Callables;
 using PolSkrypt.Interpretation.Callables.NativeCallables;
 using PolSkrypt.Lexing;
@@ -85,7 +86,7 @@ namespace PolSkrypt.Interpretation
                     CheckNumberOperands(expression.Operator, left, right);
                     return (double?)left + (double?)right;
                 case TokenType.AMPERSAND:
-                    return Stringify(left) + Stringify(right);
+                    return StringHelper.Stringify(left) + StringHelper.Stringify(right);
                 case TokenType.STAR_STAR:
                     CheckNumberOperands(expression.Operator, left, right);
                     return Math.Pow((double?)left ?? 0, (double?)right ?? 0);
@@ -194,28 +195,6 @@ namespace PolSkrypt.Interpretation
             throw new RuntimeException(op, "Operandy muszą być liczbami.");
         }
 
-        private string Stringify(object? value)
-        {
-            if (value == null)
-            {
-                return Keywords.NULL;
-            }
-
-            if (value is double)
-            {
-                string text = value.ToString()!;
-
-                return text;
-            }
-
-            if (value is bool)
-            {
-                return (bool)value ? Keywords.TRUE : Keywords.FALSE;
-            }
-
-            return value.ToString() ?? string.Empty;
-        }
-
         object? IStmtVisitor<object?>.VisitExpressionStmt(StmtExpression statement)
         {
             Evaluate(statement.Expression);
@@ -225,7 +204,7 @@ namespace PolSkrypt.Interpretation
         object? IStmtVisitor<object?>.VisitPrintStmt(Print statement)
         {
             object? value = Evaluate(statement.Expression);
-            Console.WriteLine(Stringify(value));
+            Console.WriteLine(StringHelper.Stringify(value));
             return null;
         }
 
@@ -426,7 +405,7 @@ namespace PolSkrypt.Interpretation
                     newValue = (double?)currentValue % (double?)value;
                     break;
                 case TokenType.AMPERSAND_EQUAL:
-                    newValue = Stringify(currentValue) + Stringify(value);
+                    newValue = StringHelper.Stringify(currentValue) + StringHelper.Stringify(value);
                     break;
             }
 
