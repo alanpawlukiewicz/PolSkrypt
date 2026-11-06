@@ -1,4 +1,5 @@
-﻿using PolSkrypt.Errors;
+﻿using PolSkrypt.Constants;
+using PolSkrypt.Errors;
 using PolSkrypt.Interpretation;
 using PolSkrypt.Lexing;
 using PolSkrypt.Parsing;
@@ -46,6 +47,7 @@ public class Program
 
     private static void RunPrompt()
     {
+        Console.WriteLine($"PolSkrypt v{InterpreterVersion.CurrentVersion} REPL");
         for (; ; )
         {
             Console.Write("> ");
