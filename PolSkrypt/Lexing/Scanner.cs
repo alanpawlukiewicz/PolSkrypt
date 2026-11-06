@@ -47,7 +47,7 @@ namespace PolSkrypt.Lexing
                 ScanToken();
             }
 
-            _tokens.Add(new Token(TokenType.EOF, string.Empty, null, 0)); // Add an EOF token at the end
+            _tokens.Add(new Token(TokenType.EOF, string.Empty, null, _line)); // Add an EOF token at the end
             return _tokens;
         }
 
