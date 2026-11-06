@@ -133,10 +133,15 @@ namespace PolSkrypt.Lexing
                     }
                     else if (CheckNext('*'))
                     {
-                        while (!(Peek() == '*' && CheckNext('/')) && !IsAtEnd())
+                        while (!(Peek() == '*' && PeekNext()== '/') && !IsAtEnd())
                         {
                             if (Peek() == '\n') _line++;
                             Advance();
+                        }
+                        if (!IsAtEnd()) 
+                        {
+                            Advance(); 
+                            Advance(); // Remove the closing '*/'
                         }
                     }
                     else if (CheckNext('='))
