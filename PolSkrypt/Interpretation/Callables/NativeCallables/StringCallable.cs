@@ -4,15 +4,15 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace PolSkrypt.Interpretation.Callables
+namespace PolSkrypt.Interpretation.Callables.NativeCallables
 {
-    public class InputCallable : ICallable
+    public class StringCallable : ICallable
     {
-        public int? Arity => 0;
+        public int? Arity => 1;
 
         public object? Call(Interpreter interpreter, List<object?> arguments)
         {
-            return Console.ReadLine();
+            return arguments[0]?.ToString();
         }
 
         public override string ToString()

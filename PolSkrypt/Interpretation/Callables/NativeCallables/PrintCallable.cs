@@ -1,7 +1,7 @@
 ﻿using PolSkrypt.Constants;
 using PolSkrypt.Contracts;
 
-namespace PolSkrypt.Interpretation.Callables
+namespace PolSkrypt.Interpretation.Callables.NativeCallables
 {
     public class PrintCallable : ICallable
     {

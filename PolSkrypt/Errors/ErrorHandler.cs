@@ -45,7 +45,13 @@ namespace PolSkrypt.Errors
 
         public static void RuntimeError(RuntimeException ex)
         {
-            Console.Error.WriteLine($"[Linia ${ex.Token.Line}] Błąd: {ex.Message}");
+            if (ex.Token == null)
+            {
+                Console.Error.WriteLine($"Błąd: {ex.Message}");
+                _hadRuntimeError = true;
+                return;
+            }
+            Console.Error.WriteLine($"[Linia {ex.Token.Line}] Błąd: {ex.Message}");
             _hadRuntimeError = true;
         }
 

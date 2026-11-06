@@ -3,6 +3,7 @@ using PolSkrypt.Contracts;
 using PolSkrypt.Errors;
 using PolSkrypt.Errors.Exceptions;
 using PolSkrypt.Interpretation.Callables;
+using PolSkrypt.Interpretation.Callables.NativeCallables;
 using PolSkrypt.Lexing;
 using PolSkrypt.Parsing.Expressions;
 using PolSkrypt.Parsing.Statements;
@@ -22,6 +23,9 @@ namespace PolSkrypt.Interpretation
             _globals.Define("zegar", new ClockCallable());
             _globals.Define("wypisz", new PrintCallable());
             _globals.Define("wprowadź", new InputCallable());
+            _globals.Define("liczba", new NumberCallable());
+            _globals.Define("napis", new StringCallable());
+            _globals.Define("typ", new TypeCallable());
         }
 
         public void Interpret(List<Stmt> statements)
