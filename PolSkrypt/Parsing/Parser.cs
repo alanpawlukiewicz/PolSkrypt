@@ -322,7 +322,7 @@ namespace PolSkrypt.Parsing
                 }
                 else if (expr is PListIndex index)
                 {
-                    return new PListIndexAssign(value, index.Identifier, index.Value);
+                    return new PListIndexAssign(value, index.Identifier, index.Index);
                 }
 
                 ErrorHandler.Error(equals, "Nieprawidłowy cel przypisania.");
