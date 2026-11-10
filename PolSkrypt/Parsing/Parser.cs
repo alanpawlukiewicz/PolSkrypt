@@ -552,6 +552,21 @@ namespace PolSkrypt.Parsing
             if (Match(TokenType.NUMBER, TokenType.STRING)) return new Literal(Previous().Literal);
             if (Match(TokenType.SELF)) return new Self(Previous());
             if (Match(TokenType.IDENTIFIER)) return new Variable(Previous());
+            if (Match(TokenType.LEFT_SQUARE_BRACKET))
+            {
+                var keyword = Previous();
+                List<Expr> items = new() { };
+                while(!Match(TokenType.RIGHT_SQUARE_BRACKET) && !IsAtEnd())
+                {
+                    items.Add(Primary());
+                    if (Peek().Type == TokenType.COMMA)
+                    {
+                        Consume(TokenType.COMMA, "Oczekiwano ','.");
+                    }
+                }
+
+                return new List(keyword, items);
+            }
             if (Match(TokenType.SUPER))
             {
                 Token keyword = Previous();

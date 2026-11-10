@@ -517,5 +517,10 @@ namespace PolSkrypt.Interpretation
             }
             return method.Bind(obj);
         }
+
+        public object? VisitListExpression(List expression)
+        {
+            return $"[{string.Join(", ", expression.Items.Select(Evaluate))}]";
+        }
     }
 }

@@ -67,6 +67,8 @@ namespace PolSkrypt.Lexing
                 case ')': AddToken(TokenType.RIGHT_PAREN); break;
                 case '{': AddToken(TokenType.LEFT_BRACE); break;
                 case '}': AddToken(TokenType.RIGHT_BRACE); break;
+                case '[': AddToken(TokenType.LEFT_SQUARE_BRACKET); break;
+                case ']': AddToken(TokenType.RIGHT_SQUARE_BRACKET); break;
                 case ',': AddToken(TokenType.COMMA); break;
                 case '.': AddToken(TokenType.DOT); break;
                 case '&':

@@ -19,5 +19,6 @@ namespace PolSkrypt.Contracts
         T VisitSetExpression(Set expression);
         T VisitSelfExpression(Self expression);
         T VisitSuperExpression(Super expression);
+        T VisitListExpression(List expression);
     }
 }

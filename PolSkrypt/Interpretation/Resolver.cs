@@ -389,5 +389,10 @@ namespace PolSkrypt.Interpretation
             ResolveLocal(expression, expression.Keyword);
             return null;
         }
+
+        public object? VisitListExpression(List expression)
+        {
+            return null;
+        }
     }
 }
