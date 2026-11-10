@@ -551,7 +551,18 @@ namespace PolSkrypt.Parsing
             if (Match(TokenType.NULL)) return new Literal(null);
             if (Match(TokenType.NUMBER, TokenType.STRING)) return new Literal(Previous().Literal);
             if (Match(TokenType.SELF)) return new Self(Previous());
-            if (Match(TokenType.IDENTIFIER)) return new Variable(Previous());
+            if (Match(TokenType.IDENTIFIER))
+            {
+                var identifier = Previous();
+                if (Match(TokenType.LEFT_SQUARE_BRACKET))
+                {
+                    var bracket = Previous();
+                    var value = Primary();
+                    Consume(TokenType.RIGHT_SQUARE_BRACKET, "Oczekiwano znaku ']'.");
+                    return new PListIndex(bracket, value, identifier);
+                }
+                return new Variable(identifier);
+            }
             if (Match(TokenType.LEFT_SQUARE_BRACKET))
             {
                 var keyword = Previous();
@@ -565,7 +576,7 @@ namespace PolSkrypt.Parsing
                     }
                 }
 
-                return new List(keyword, items);
+                return new PList(keyword, items);
             }
             if (Match(TokenType.SUPER))
             {

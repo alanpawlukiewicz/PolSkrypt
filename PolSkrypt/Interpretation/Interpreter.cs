@@ -518,9 +518,32 @@ namespace PolSkrypt.Interpretation
             return method.Bind(obj);
         }
 
-        public object? VisitListExpression(List expression)
+        public object? VisitListExpression(PList expression)
         {
-            return $"[{string.Join(", ", expression.Items.Select(Evaluate))}]";
+            return expression.Items.Select(Evaluate).ToList();
+        }
+
+        public object? VisitListIndexExpression(PListIndex expression)
+        {
+            var matchingVariable = LookUpVariable(expression.Identifier, expression);
+            if (matchingVariable is not List<object?> list)
+            {
+                throw new RuntimeException(expression.Identifier, "Zmienna musi być listą aby odnosić się do jej indeksów.");
+            }
+            var index = Evaluate(expression.Value);
+            if (index is not double idx || idx < 0 || idx % 1 != 0)
+            {
+                throw new RuntimeException(expression.Keyword, "Indeks musi być dodatnią liczbą całkowitą.");
+            }
+            try
+            {
+                return list[(int)idx];
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                throw new RuntimeException(expression.Keyword, "Indeks znajduje się poza zakresem listy.");
+            }
+            
         }
     }
 }

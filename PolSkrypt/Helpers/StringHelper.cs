@@ -23,6 +23,11 @@ namespace PolSkrypt.Helpers
                 return (bool)value ? Keywords.TRUE : Keywords.FALSE;
             }
 
+            if (value is List<object?> list)
+            {
+                return $"[{string.Join(", ", list)}]";
+            }
+
             return value.ToString() ?? string.Empty;
         }
     }

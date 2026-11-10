@@ -390,7 +390,12 @@ namespace PolSkrypt.Interpretation
             return null;
         }
 
-        public object? VisitListExpression(List expression)
+        public object? VisitListExpression(PList expression)
+        {
+            return null;
+        }
+
+        public object? VisitListIndexExpression(PListIndex expression)
         {
             return null;
         }
