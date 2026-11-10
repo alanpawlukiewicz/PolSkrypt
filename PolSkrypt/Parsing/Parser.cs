@@ -557,7 +557,7 @@ namespace PolSkrypt.Parsing
                 if (Match(TokenType.LEFT_SQUARE_BRACKET))
                 {
                     var bracket = Previous();
-                    var value = Primary();
+                    var value = Expression();
                     Consume(TokenType.RIGHT_SQUARE_BRACKET, "Oczekiwano znaku ']'.");
                     return new PListIndex(bracket, value, identifier);
                 }
@@ -569,7 +569,7 @@ namespace PolSkrypt.Parsing
                 List<Expr> items = new() { };
                 while(!Match(TokenType.RIGHT_SQUARE_BRACKET) && !IsAtEnd())
                 {
-                    items.Add(Primary());
+                    items.Add(Expression());
                     if (Peek().Type == TokenType.COMMA)
                     {
                         Consume(TokenType.COMMA, "Oczekiwano ','.");
