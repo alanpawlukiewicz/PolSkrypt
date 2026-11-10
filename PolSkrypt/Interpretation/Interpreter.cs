@@ -545,5 +545,29 @@ namespace PolSkrypt.Interpretation
             }
             
         }
+
+        public object? VisitPListIndexAssignExpression(PListIndexAssign expression)
+        {
+            var matchingVariable = LookUpVariable(expression.Identifier, expression);
+            if (matchingVariable is not List<object?> list)
+            {
+                throw new RuntimeException(expression.Identifier, "Zmienna musi być listą aby odnosić się do jej indeksów.");
+            }
+            var index = Evaluate(expression.Index);
+            if (index is not double idx || idx < 0 || idx % 1 != 0)
+            {
+                throw new RuntimeException(expression.Identifier, "Indeks musi być dodatnią liczbą całkowitą.");
+            }
+            try
+            {
+                int parsedIndex = (int)idx;
+                list[parsedIndex] = Evaluate(expression.Value);
+                return list[parsedIndex];
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                throw new RuntimeException(expression.Identifier, "Indeks znajduje się poza zakresem listy.");
+            }
+        }
     }
 }

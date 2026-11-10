@@ -21,5 +21,6 @@ namespace PolSkrypt.Contracts
         T VisitSuperExpression(Super expression);
         T VisitListExpression(PList expression);
         T VisitListIndexExpression(PListIndex expression);
+        T VisitPListIndexAssignExpression(PListIndexAssign expression);
     }
 }

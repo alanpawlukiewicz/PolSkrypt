@@ -320,6 +320,10 @@ namespace PolSkrypt.Parsing
                 {
                     return new Set(get.Object, get.Name, value);
                 }
+                else if (expr is PListIndex index)
+                {
+                    return new PListIndexAssign(value, index.Identifier, index.Value);
+                }
 
                 ErrorHandler.Error(equals, "Nieprawidłowy cel przypisania.");
             }

@@ -399,5 +399,13 @@ namespace PolSkrypt.Interpretation
         {
             return null;
         }
+
+        public object? VisitPListIndexAssignExpression(PListIndexAssign expression)
+        {
+            Resolve(expression.Value);
+            ResolveLocal(expression, expression.Identifier);
+
+            return null;
+        }
     }
 }
