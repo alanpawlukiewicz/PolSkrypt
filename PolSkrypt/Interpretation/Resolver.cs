@@ -302,6 +302,15 @@ namespace PolSkrypt.Interpretation
             Declare(statement.Name);
             Define(statement.Name);
 
+            if (statement.Superclass != null)
+            {
+                if (statement.Name.Lexeme == statement.Superclass.Name.Lexeme)
+                {
+                    ErrorHandler.Error(statement.Superclass.Name, "Klasa nie może dziedziczyć po samej sobie.");
+                }
+                Resolve(statement.Superclass);
+            }
+
             BeginScope();
             _scopes.Peek()[Keywords.SELF] = true;
 

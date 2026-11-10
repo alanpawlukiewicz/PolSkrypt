@@ -8,20 +8,35 @@ namespace PolSkrypt.Interpretation.Callables
         private readonly string _name;
         private readonly Dictionary<string, FunctionCallable> _methods;
         private readonly Dictionary<string, FunctionCallable> _staticMethods;
+        private readonly ClassCallable? _superclass;
 
 
-        public ClassCallable(string name, Dictionary<string, FunctionCallable> methods, Dictionary<string, FunctionCallable> staticMethods)
+        public ClassCallable(string name, Dictionary<string, FunctionCallable> methods, Dictionary<string, FunctionCallable> staticMethods, ClassCallable? superclass)
         {
             _name = name;
             _methods = methods;
             _staticMethods = staticMethods;
+            _superclass = superclass;
         }
 
         public string Name => _name;
 
         public int? Arity => FindMethod(Keywords.CONSTRUCTOR)?.Arity ?? 0;
 
-        public FunctionCallable? FindStaticMethod(string name) => _staticMethods.TryGetValue(name, out var m) ? m : null;
+        public FunctionCallable? FindStaticMethod(string name)
+        {
+            if (_staticMethods.ContainsKey(name))
+            {
+                return _staticMethods[name];
+            }
+
+            if (_superclass != null)
+            {
+                return _superclass.FindStaticMethod(name);
+            }
+
+            return null;
+        }
 
         public object? Call(Interpreter interpreter, List<object?> arguments)
         {
@@ -41,7 +56,17 @@ namespace PolSkrypt.Interpretation.Callables
 
         public FunctionCallable? FindMethod(string name)
         {
-            return _methods.ContainsKey(name) ? _methods[name] : null;
+            if (_methods.ContainsKey(name))
+            {
+                return _methods[name];
+            }
+
+            if (_superclass != null)
+            {
+                return _superclass.FindMethod(name);
+            }
+
+            return null;
         }
     }
 }

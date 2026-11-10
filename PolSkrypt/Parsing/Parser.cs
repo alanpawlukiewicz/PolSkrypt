@@ -59,6 +59,12 @@ namespace PolSkrypt.Parsing
         private Stmt ClassDeclaration()
         {
             Token name = Consume(TokenType.IDENTIFIER, "Oczekiwano nazwy klasy.");
+            Variable? superclass = null;
+            if (Match(TokenType.EXTENDS))
+            {
+                Consume(TokenType.IDENTIFIER, "Oczekiwano nazwy klasy nadrzędnej po 'rozszerza'.");
+                superclass = new Variable(Previous());
+            }
             Consume(TokenType.LEFT_BRACE, "Oczekiwano '{' po nazwie klasy.");
             List<Function> methods = new() { };
             List<Function> staticMethods = new() { };
@@ -90,7 +96,7 @@ namespace PolSkrypt.Parsing
 
             Consume(TokenType.RIGHT_BRACE, "Oczekiwano '}' po ciele klasy.");
 
-            return new Class(name, methods, staticMethods);
+            return new Class(name, methods, staticMethods, superclass);
         }
 
         private Function Function(string kind)

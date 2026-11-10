@@ -423,6 +423,15 @@ namespace PolSkrypt.Interpretation
 
         public object? VisitClassStmt(Class statement)
         {
+            object? superclass = null;
+            if (statement.Superclass != null)
+            {
+                superclass = Evaluate(statement.Superclass);
+                if (superclass is not ClassCallable)
+                {
+                    throw new RuntimeException(statement.Superclass.Name, "Nadrzędna klasa musi być klasą.");
+                }
+            }
             _environment.Define(statement.Name.Lexeme, null);
 
             var methods = new Dictionary<string, FunctionCallable>();
@@ -433,7 +442,7 @@ namespace PolSkrypt.Interpretation
             foreach (var method in statement.StaticMethods)
                 staticMethods[method.Name.Lexeme] = new FunctionCallable(method, _environment, false);
 
-            var classCallable = new ClassCallable(statement.Name.Lexeme, methods, staticMethods);
+            var classCallable = new ClassCallable(statement.Name.Lexeme, methods, staticMethods, (ClassCallable?)superclass);
             _environment.Assign(statement.Name, classCallable);
             return null;
         }

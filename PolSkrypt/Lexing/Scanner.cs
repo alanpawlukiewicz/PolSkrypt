@@ -31,7 +31,8 @@ namespace PolSkrypt.Lexing
             {"podczas_gdy", TokenType.WHILE},
             {"przerwij", TokenType.BREAK },
             {"metoda",  TokenType.METHOD},
-            {"statyczna", TokenType.STATIC }
+            {"statyczna", TokenType.STATIC },
+            {"dziedziczy_po", TokenType.EXTENDS }
         };
 
         public Scanner(string source)

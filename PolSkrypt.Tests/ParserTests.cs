@@ -61,7 +61,7 @@ namespace PolSkrypt.Tests
             => new Function(Id(name), Params(parameters), body.ToList());
 
         private static Class Cls(string name, List<Function>? methods = null, List<Function>? staticMethods = null)
-            => new Class(Id(name), methods ?? new List<Function>(), staticMethods ?? new List<Function>());
+            => new Class(Id(name), methods ?? new List<Function>(), staticMethods ?? new List<Function>(), null);
 
         // ---------------------------------------------------------------
         // Basics and primary expressions
