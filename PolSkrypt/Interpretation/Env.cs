@@ -9,6 +9,8 @@ namespace PolSkrypt.Interpretation
         private readonly Env? _enclosing;
         private readonly Dictionary<string, object?> _values = new();
 
+        public Env? Enclosing => _enclosing;
+
         public Env()
         {
             _enclosing = null;
@@ -36,9 +38,9 @@ namespace PolSkrypt.Interpretation
                 return match;
             }
 
-            if (_enclosing != null)
+            if (Enclosing != null)
             {
-                return _enclosing.Get(name);
+                return Enclosing.Get(name);
             }
 
             throw new RuntimeException(name, $"Niezidentyfikowana zmienna '{name.Lexeme}'.");
@@ -52,9 +54,9 @@ namespace PolSkrypt.Interpretation
                 return;
             }
 
-            if (_enclosing != null)
+            if (Enclosing != null)
             {
-                _enclosing.Assign(name, value);
+                Enclosing.Assign(name, value);
                 return;
             }
 
@@ -71,7 +73,7 @@ namespace PolSkrypt.Interpretation
             Env environment = this;
             for (int i = 0; i < distance; i++)
             {
-                environment = environment._enclosing
+                environment = environment.Enclosing
                     ?? throw new RuntimeException(name, $"Niezidentyfikowana zmienna '{name.Lexeme}'.");
             }
 

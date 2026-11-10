@@ -1,4 +1,5 @@
-﻿using PolSkrypt.Errors;
+﻿using PolSkrypt.Constants;
+using PolSkrypt.Errors;
 using System.Globalization;
 
 namespace PolSkrypt.Lexing
@@ -24,8 +25,8 @@ namespace PolSkrypt.Lexing
             {"wartość_pusta", TokenType.NULL},
             {"lub", TokenType.OR},
             {"zwróć", TokenType.RETURN},
-            {"super", TokenType.SUPER},
-            {"ja", TokenType.SELF},
+            {Keywords.SUPER, TokenType.SUPER},
+            {Keywords.SELF, TokenType.SELF},
             {"prawda", TokenType.TRUE},
             {"zmienna", TokenType.VAR},
             {"podczas_gdy", TokenType.WHILE},

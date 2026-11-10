@@ -552,6 +552,13 @@ namespace PolSkrypt.Parsing
             if (Match(TokenType.NUMBER, TokenType.STRING)) return new Literal(Previous().Literal);
             if (Match(TokenType.SELF)) return new Self(Previous());
             if (Match(TokenType.IDENTIFIER)) return new Variable(Previous());
+            if (Match(TokenType.SUPER))
+            {
+                Token keyword = Previous();
+                Consume(TokenType.DOT, "Oczekiwano '.' po 'super'.");
+                Token method = Consume(TokenType.IDENTIFIER, "Oczekiwano nazwy metody po 'super'.");
+                return new Super(keyword, method);
+            }
             if (Match(TokenType.LEFT_PAREN))
             {
                 Expr expr = Expression();

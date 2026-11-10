@@ -21,7 +21,8 @@ namespace PolSkrypt.Interpretation
         private enum ClassType
         {
             NONE,
-            CLASS
+            CLASS,
+            SUBCLASS
         }
 
         private readonly Interpreter _interpreter;
@@ -302,13 +303,17 @@ namespace PolSkrypt.Interpretation
             Declare(statement.Name);
             Define(statement.Name);
 
+            if (statement.Superclass != null && statement.Name.Lexeme == statement.Superclass.Name.Lexeme)
+            {
+                ErrorHandler.Error(statement.Superclass.Name, "Klasa nie może dziedziczyć po samej sobie.");
+            }
+
             if (statement.Superclass != null)
             {
-                if (statement.Name.Lexeme == statement.Superclass.Name.Lexeme)
-                {
-                    ErrorHandler.Error(statement.Superclass.Name, "Klasa nie może dziedziczyć po samej sobie.");
-                }
+                _currentClass = ClassType.SUBCLASS;
                 Resolve(statement.Superclass);
+                BeginScope();
+                _scopes.Peek()[Keywords.SUPER] = true;
             }
 
             BeginScope();
@@ -330,7 +335,14 @@ namespace PolSkrypt.Interpretation
             }
 
             EndScope();
-            _currentClass = previousClass;
+
+
+            if (statement.Superclass != null)
+            {
+                EndScope();
+            }
+
+                _currentClass = previousClass;
 
             return null;
         }
@@ -361,6 +373,20 @@ namespace PolSkrypt.Interpretation
             }
             ResolveLocal(expression, expression.Keyword);
 
+            return null;
+        }
+
+        public object? VisitSuperExpression(Super expression)
+        {
+            if (_currentClass == ClassType.NONE)
+            {
+                ErrorHandler.Error(expression.Keyword, "Nie można użyć słowa kluczowego 'super' poza blokiem klasy.");
+            }
+            else if (_currentClass != ClassType.NONE)
+            {
+                ErrorHandler.Error(expression.Keyword, "Nie można użyć słowa kluczowego 'super' w klasie bez superklasy.");
+            }
+            ResolveLocal(expression, expression.Keyword);
             return null;
         }
     }

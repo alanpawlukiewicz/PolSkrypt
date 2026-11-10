@@ -434,6 +434,12 @@ namespace PolSkrypt.Interpretation
             }
             _environment.Define(statement.Name.Lexeme, null);
 
+            if (statement.Superclass != null)
+            {
+                _environment = new Env(_environment);
+                _environment.Define(Keywords.SUPER, superclass);
+            }
+
             var methods = new Dictionary<string, FunctionCallable>();
             foreach (var method in statement.Methods)
                 methods[method.Name.Lexeme] = new FunctionCallable(method, _environment, method.Name.Lexeme == Keywords.CONSTRUCTOR);
@@ -443,6 +449,12 @@ namespace PolSkrypt.Interpretation
                 staticMethods[method.Name.Lexeme] = new FunctionCallable(method, _environment, false);
 
             var classCallable = new ClassCallable(statement.Name.Lexeme, methods, staticMethods, (ClassCallable?)superclass);
+
+            if (statement.Superclass != null)
+            {
+                _environment = _environment.Enclosing!;
+            }
+
             _environment.Assign(statement.Name, classCallable);
             return null;
         }
@@ -483,6 +495,27 @@ namespace PolSkrypt.Interpretation
         public object? VisitSelfExpression(Self expression)
         {
             return LookUpVariable(expression.Keyword, expression);
+        }
+
+        public object? VisitSuperExpression(Super expression)
+        {
+            int distance = _locals[expression];
+            ClassCallable? superclass = (ClassCallable?)_environment.GetAt(distance, expression.Keyword);
+            if (superclass == null)
+            {
+                throw new RuntimeException(expression.Method, $"Nie można było znaleźć klasy nadrzędnej.");
+            }
+            Instance? obj = (Instance?)_environment.GetAt(distance - 1, new Token(TokenType.SELF, Keywords.SELF, null, expression.Keyword.Line));
+            if (obj == null)
+            {
+                throw new RuntimeException(expression.Method, $"Nie można było znaleźć instancji klasy.");
+            }
+            FunctionCallable? method = superclass.FindMethod(expression.Method.Lexeme);
+            if (method == null)
+            {
+                throw new RuntimeException(expression.Method, $"Nadrzędna klasa '{superclass.Name}' nie posiada metody '{expression.Method.Lexeme}'.");
+            }
+            return method.Bind(obj);
         }
     }
 }
