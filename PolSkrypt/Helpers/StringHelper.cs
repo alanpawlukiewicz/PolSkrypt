@@ -25,7 +25,7 @@ namespace PolSkrypt.Helpers
 
             if (value is List<object?> list)
             {
-                return $"[{string.Join(", ", list)}]";
+                return $"[{string.Join(", ", list.Select(Stringify))}]";
             }
 
             return value.ToString() ?? string.Empty;
