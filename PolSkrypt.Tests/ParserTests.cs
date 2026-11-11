@@ -3,6 +3,7 @@ using PolSkrypt.Constants;
 using PolSkrypt.Lexing;
 using PolSkrypt.Parsing;
 using PolSkrypt.Parsing.Expressions;
+using PolSkrypt.Parsing.Expressions.ListExpressions;
 using PolSkrypt.Parsing.Statements;
 
 namespace PolSkrypt.Tests
@@ -60,8 +61,17 @@ namespace PolSkrypt.Tests
         private static Function Fn(string name, string[] parameters, params Stmt[] body)
             => new Function(Id(name), Params(parameters), body.ToList());
 
-        private static Class Cls(string name, List<Function>? methods = null, List<Function>? staticMethods = null)
-            => new Class(Id(name), methods ?? new List<Function>(), staticMethods ?? new List<Function>(), null);
+        private static Class Cls(string name, List<Function>? methods = null, List<Function>? staticMethods = null,
+            string? superclass = null)
+            => new Class(Id(name), methods ?? new List<Function>(), staticMethods ?? new List<Function>(),
+                superclass == null ? null : V(superclass));
+
+        private static Token LSq() => Op(TokenType.LEFT_SQUARE_BRACKET, "[");
+        private static PList Lst(params Expr[] items) => new PList(LSq(), items.ToList());
+        private static PListIndex Idx(string name, Expr index) => new PListIndex(LSq(), index, Id(name));
+        private static PListIndexAssign IdxSet(string name, Expr index, Expr value)
+            => new PListIndexAssign(value, Id(name), index);
+        private static Super Sup(string method) => new Super(Op(TokenType.SUPER, "super"), Id(method));
 
         // ---------------------------------------------------------------
         // Basics and primary expressions
@@ -828,16 +838,355 @@ namespace PolSkrypt.Tests
         }
 
         // ---------------------------------------------------------------
-        // Known issues (these tests fail until the parser is fixed)
+        // List literals
         // ---------------------------------------------------------------
 
         [Fact]
-        public void Parse_ShouldAllowUnaryMinusInExponent_KnownIssue()
+        public void Parse_ShouldParseEmptyListLiteral()
         {
-            // Exponentiation() recurses into itself, which skips Unary(),
-            // so the right operand of '**' cannot start with '-' or '!'.
+            AssertExpression("[]", Lst());
+        }
+
+        [Fact]
+        public void Parse_ShouldParseListLiteralWithItems()
+        {
+            AssertExpression("[1, 2, 3]", Lst(Num(1), Num(2), Num(3)));
+        }
+
+        [Fact]
+        public void Parse_ShouldParseListLiteralWithMixedExpressions()
+        {
+            AssertExpression("[1 + 2, \"a\", x, f(1)]",
+                Lst(Bin(Num(1), TokenType.PLUS, "+", Num(2)), Str("a"), V("x"), Invoke(V("f"), Num(1))));
+        }
+
+        [Fact]
+        public void Parse_ShouldParseNestedListLiterals()
+        {
+            AssertExpression("[[1], [2, 3], []]",
+                Lst(Lst(Num(1)), Lst(Num(2), Num(3)), Lst()));
+        }
+
+        [Fact]
+        public void Parse_ShouldParseTernaryAsListItem()
+        {
+            AssertExpression("[a ? 1 : 2, 3]",
+                Lst(new Conditional(V("a"), Num(1), Num(2)), Num(3)));
+        }
+
+        [Fact]
+        public void Parse_ShouldAllowTrailingCommaInListLiteral()
+        {
+            AssertExpression("[1, 2,]", Lst(Num(1), Num(2)));
+        }
+
+        [Fact]
+        public void Parse_ShouldParseListLiteralAsInitializer()
+        {
+            AssertParsesTo("zmienna a = [1, 2];", new Var(Id("a"), Lst(Num(1), Num(2))));
+        }
+
+        [Fact]
+        public void Parse_ShouldParseListLiteralAsCallArgument()
+        {
+            AssertExpression("f([1, 2], 3)", Invoke(V("f"), Lst(Num(1), Num(2)), Num(3)));
+        }
+
+        // ---------------------------------------------------------------
+        // List indexing
+        // ---------------------------------------------------------------
+
+        [Fact]
+        public void Parse_ShouldParseListIndexing()
+        {
+            AssertExpression("a[0]", Idx("a", Num(0)));
+        }
+
+        [Fact]
+        public void Parse_ShouldParseListIndexingWithWhitespaceBeforeBracket()
+        {
+            AssertExpression("a [0]", Idx("a", Num(0)));
+        }
+
+        [Fact]
+        public void Parse_ShouldParseListIndexingWithExpressionIndex()
+        {
+            AssertExpression("a[i + 1]", Idx("a", Bin(V("i"), TokenType.PLUS, "+", Num(1))));
+        }
+
+        [Fact]
+        public void Parse_ShouldParseNestedListIndexingInsideIndex()
+        {
+            AssertExpression("a[b[1]]", Idx("a", Idx("b", Num(1))));
+        }
+
+        [Fact]
+        public void Parse_ShouldParseCallInsideIndex()
+        {
+            AssertExpression("a[f(1)]", Idx("a", Invoke(V("f"), Num(1))));
+        }
+
+        [Fact]
+        public void Parse_ShouldParseIndexingInsideBinaryExpression()
+        {
+            AssertExpression("a[0] + a[1]",
+                Bin(Idx("a", Num(0)), TokenType.PLUS, "+", Idx("a", Num(1))));
+        }
+
+        [Fact]
+        public void Parse_ShouldBindIndexingTighterThanUnaryMinus()
+        {
+            AssertExpression("-a[0]", Un(TokenType.MINUS, "-", Idx("a", Num(0))));
+        }
+
+        [Fact]
+        public void Parse_ShouldAllowIndexingAsExponentiationBase()
+        {
+            AssertExpression("a[0] ** 2", Bin(Idx("a", Num(0)), TokenType.STAR_STAR, "**", Num(2)));
+        }
+
+        [Fact]
+        public void Parse_ShouldAllowPropertyAccessOnIndexedElement()
+        {
+            AssertExpression("a[0].x", new Get(Idx("a", Num(0)), Id("x")));
+        }
+
+        [Fact]
+        public void Parse_ShouldAllowCallOnIndexedElement()
+        {
+            AssertExpression("a[0](1)", Invoke(Idx("a", Num(0)), Num(1)));
+        }
+
+        [Fact]
+        public void Parse_ShouldAllowIndexingAsCallArgument()
+        {
+            AssertExpression("f(a[0], b[1])", Invoke(V("f"), Idx("a", Num(0)), Idx("b", Num(1))));
+        }
+
+        [Fact]
+        public void Parse_ShouldAllowIndexingAsTernaryCondition()
+        {
+            AssertExpression("a[0] ? 1 : 2", new Conditional(Idx("a", Num(0)), Num(1), Num(2)));
+        }
+
+        [Fact]
+        public void Parse_ShouldParseIndexingAsVariableInitializer()
+        {
+            AssertParsesTo("zmienna x = a[0];", new Var(Id("x"), Idx("a", Num(0))));
+        }
+
+        // ---------------------------------------------------------------
+        // List index assignment
+        // ---------------------------------------------------------------
+
+        [Fact]
+        public void Parse_ShouldParseListIndexAssignment()
+        {
+            AssertExpression("a[0] = 5", IdxSet("a", Num(0), Num(5)));
+        }
+
+        [Fact]
+        public void Parse_ShouldParseListIndexAssignmentWithExpressionIndexAndValue()
+        {
+            AssertExpression("a[i + 1] = x * 2",
+                IdxSet("a",
+                    Bin(V("i"), TokenType.PLUS, "+", Num(1)),
+                    Bin(V("x"), TokenType.STAR, "*", Num(2))));
+        }
+
+        [Fact]
+        public void Parse_ShouldTreatListIndexAssignmentAsRightAssociative()
+        {
+            AssertExpression("a[0] = b[1] = 2", IdxSet("a", Num(0), IdxSet("b", Num(1), Num(2))));
+        }
+
+        [Fact]
+        public void Parse_ShouldAllowListLiteralAsIndexAssignmentValue()
+        {
+            AssertExpression("a[0] = [1, 2]", IdxSet("a", Num(0), Lst(Num(1), Num(2))));
+        }
+
+        [Fact]
+        public void Parse_ShouldAllowIndexingAsAssignmentValue()
+        {
+            AssertExpression("x = a[0]", new Assign(Id("x"), Idx("a", Num(0))));
+            AssertExpression("a[0] = a[1]", IdxSet("a", Num(0), Idx("a", Num(1))));
+        }
+
+        [Fact]
+        public void Parse_ShouldAllowIndexAssignmentInsideForLoopBody()
+        {
+            AssertParsesTo("dla (zmienna i = 0; i < 3; i += 1) a[i] = i;",
+                Blk(
+                    new Var(Id("i"), Num(0)),
+                    new While(
+                        Bin(V("i"), TokenType.LESS, "<", Num(3)),
+                        Blk(
+                            ExprStmt(IdxSet("a", V("i"), V("i"))),
+                            ExprStmt(new CompoundAssignment(Id("i"), Op(TokenType.PLUS_EQUAL, "+="), Num(1)))))));
+        }
+
+        // ---------------------------------------------------------------
+        // Lists in prompt (REPL) mode
+        // ---------------------------------------------------------------
+
+        [Fact]
+        public void Parse_InPromptMode_ShouldPrintListLiteral()
+        {
+            var statements = Parse("[1, 2]", promptMode: true);
+
+            statements.Should().HaveCount(1);
+            statements[0].Should().BeEquivalentTo(new Print(Lst(Num(1), Num(2))), o => o.PreferringRuntimeMemberTypes());
+        }
+
+        [Fact]
+        public void Parse_InPromptMode_ShouldPrintIndexedElement()
+        {
+            var statements = Parse("a[0]", promptMode: true);
+
+            statements.Should().HaveCount(1);
+            statements[0].Should().BeEquivalentTo(new Print(Idx("a", Num(0))), o => o.PreferringRuntimeMemberTypes());
+        }
+
+        [Fact]
+        public void Parse_InPromptMode_ShouldKeepIndexAssignmentWithSemicolonAsExpressionStatement()
+        {
+            var statements = Parse("a[0] = 1;", promptMode: true);
+
+            statements.Should().HaveCount(1);
+            statements[0].Should().BeEquivalentTo(
+                ExprStmt(IdxSet("a", Num(0), Num(1))), o => o.PreferringRuntimeMemberTypes());
+        }
+
+        // ---------------------------------------------------------------
+        // Inheritance
+        // ---------------------------------------------------------------
+
+        [Fact]
+        public void Parse_ShouldParseEmptyClassWithSuperclass()
+        {
+            AssertParsesTo("klasa B dziedziczy_po A {}", Cls("B", superclass: "A"));
+        }
+
+        [Fact]
+        public void Parse_ShouldParseClassWithSuperclassAndMethods()
+        {
+            AssertParsesTo("klasa B dziedziczy_po A { metoda f() {} statyczna metoda g() {} }",
+                Cls("B",
+                    new List<Function> { Fn("f", new string[0]) },
+                    new List<Function> { Fn("g", new string[0]) },
+                    superclass: "A"));
+        }
+
+        [Fact]
+        public void Parse_ShouldParseClassWithSuperclassFollowedByOtherStatements()
+        {
+            AssertParsesTo("klasa B dziedziczy_po A {} zmienna b = B();",
+                Cls("B", superclass: "A"),
+                new Var(Id("b"), Invoke(V("B"))));
+        }
+
+        // ---------------------------------------------------------------
+        // super
+        // ---------------------------------------------------------------
+
+        [Fact]
+        public void Parse_ShouldParseSuperMethodReference()
+        {
+            AssertExpression("super.f", Sup("f"));
+        }
+
+        [Fact]
+        public void Parse_ShouldParseSuperMethodCall()
+        {
+            AssertExpression("super.f(1)", Invoke(Sup("f"), Num(1)));
+        }
+
+        [Fact]
+        public void Parse_ShouldParsePropertyAccessOnSuperMethodCallResult()
+        {
+            AssertExpression("super.f().g", new Get(Invoke(Sup("f")), Id("g")));
+        }
+
+        [Fact]
+        public void Parse_ShouldParseSuperCallInsideExpression()
+        {
+            AssertExpression("super.f() + 1", Bin(Invoke(Sup("f")), TokenType.PLUS, "+", Num(1)));
+        }
+
+        [Fact]
+        public void Parse_ShouldParseSuperCallInsideMethodOfDerivedClass()
+        {
+            AssertParsesTo("klasa B dziedziczy_po A { metoda f() { zwróć super.f(); } }",
+                Cls("B",
+                    new List<Function> { Fn("f", new string[0], Ret(Invoke(Sup("f")))) },
+                    superclass: "A"));
+        }
+
+        [Fact]
+        public void Parse_ShouldParseSuperConstructorCall()
+        {
+            AssertParsesTo(
+                $"klasa B dziedziczy_po A {{ {FunctionConstants.CONSTRUCTOR}(x) {{ super.{FunctionConstants.CONSTRUCTOR}(x); }} }}",
+                Cls("B",
+                    new List<Function>
+                    {
+                        Fn(FunctionConstants.CONSTRUCTOR, new[] { "x" },
+                            ExprStmt(Invoke(Sup(FunctionConstants.CONSTRUCTOR), V("x"))))
+                    },
+                    superclass: "A"));
+        }
+
+        // ---------------------------------------------------------------
+        // Unary operators in the exponent
+        // ---------------------------------------------------------------
+
+        [Fact]
+        public void Parse_ShouldAllowUnaryMinusInExponent()
+        {
+            // Regression test: the right operand of '**' is parsed with Unary(),
+            // so it may start with '-' or '!'.
             AssertExpression("2 ** -1",
                 Bin(Num(2), TokenType.STAR_STAR, "**", Un(TokenType.MINUS, "-", Num(1))));
+        }
+
+        [Fact]
+        public void Parse_ShouldAllowRepeatedUnaryMinusInExponent()
+        {
+            AssertExpression("2 ** --1",
+                Bin(Num(2), TokenType.STAR_STAR, "**", Un(TokenType.MINUS, "-", Un(TokenType.MINUS, "-", Num(1)))));
+        }
+
+        [Fact]
+        public void Parse_ShouldAllowBangInExponent()
+        {
+            AssertExpression("2 ** !a",
+                Bin(Num(2), TokenType.STAR_STAR, "**", Un(TokenType.BANG, "!", V("a"))));
+        }
+
+        [Fact]
+        public void Parse_ShouldKeepExponentiationRightAssociativeAfterUnaryInExponent()
+        {
+            AssertExpression("2 ** -3 ** 2",
+                Bin(Num(2), TokenType.STAR_STAR, "**",
+                    Un(TokenType.MINUS, "-", Bin(Num(3), TokenType.STAR_STAR, "**", Num(2)))));
+        }
+
+        [Fact]
+        public void Parse_ShouldContinueWithFactorAfterExponentWithUnaryOperand()
+        {
+            AssertExpression("a ** -b * c",
+                Bin(
+                    Bin(V("a"), TokenType.STAR_STAR, "**", Un(TokenType.MINUS, "-", V("b"))),
+                    TokenType.STAR, "*",
+                    V("c")));
+        }
+
+        [Fact]
+        public void Parse_ShouldAllowIndexingAndUnaryMinusInExponent()
+        {
+            AssertExpression("2 ** -a[0]",
+                Bin(Num(2), TokenType.STAR_STAR, "**", Un(TokenType.MINUS, "-", Idx("a", Num(0)))));
         }
     }
 }

@@ -293,18 +293,232 @@ namespace PolSkrypt.Tests
         }
 
         // ---------------------------------------------------------------
-        // Known issues (these tests fail until the lexer / parser is fixed)
+        // Errors at the end of the file
         // ---------------------------------------------------------------
 
         [Fact]
-        public void Parse_ShouldReportLastLineForErrorAtEndOfFile_KnownIssue()
+        public void Parse_ShouldReportLastLineForErrorAtEndOfFile()
         {
-            // Scanner creates the EOF token with Line = 0, so errors reported at the end of the file
-            // say "[Linia 0]". Fix: new Token(TokenType.EOF, string.Empty, null, _line) in Scanner.ScanTokens.
+            // Regression test: Scanner used to create the EOF token with Line = 0,
+            // so errors at the end of the file said "[Linia 0]".
             Parse("zmienna x = 1");
 
             ErrorHandler.HadError.Should().BeTrue();
             _errorOutput.ToString().Should().Contain("[Linia 1]");
+        }
+
+        [Fact]
+        public void Parse_ShouldReportLastLineForErrorAtEndOfMultilineFile()
+        {
+            Parse("zmienna x = 1;\nzmienna y = 2");
+
+            ErrorHandler.HadError.Should().BeTrue();
+            _errorOutput.ToString().Should().Contain("[Linia 2]");
+        }
+
+        // ---------------------------------------------------------------
+        // Lists, indexing, inheritance and super: error messages
+        // ---------------------------------------------------------------
+
+        [Theory]
+        // super
+        [InlineData("super;", "Oczekiwano '.' po 'super'.")]
+        [InlineData("super.;", "Oczekiwano nazwy metody po 'super'.")]
+        [InlineData("super.f = 1;", "Nieprawidłowy cel przypisania.")]
+        // inheritance
+        [InlineData("klasa A dziedziczy_po {}", "Oczekiwano nazwy klasy nadrzędnej")]
+        [InlineData("klasa A dziedziczy_po B C {}", "Oczekiwano '{' po nazwie klasy.")]
+        [InlineData("klasa A dziedziczy_po B.C {}", "Oczekiwano '{' po nazwie klasy.")]
+        [InlineData("klasa A dziedziczy_po B", "Oczekiwano '{' po nazwie klasy.")]
+        // list literals
+        [InlineData("[1, ;", "Oczekiwano wyrażenia.")]
+        [InlineData("[,];", "Oczekiwano wyrażenia.")]
+        [InlineData("[1,,2];", "Oczekiwano wyrażenia.")]
+        // indexing
+        [InlineData("a[0;", "Oczekiwano znaku ']'.")]
+        [InlineData("a[;", "Oczekiwano wyrażenia.")]
+        [InlineData("a[];", "Oczekiwano wyrażenia.")]
+        [InlineData("a[b[1];", "Oczekiwano znaku ']'.")]
+        // invalid assignment targets
+        [InlineData("a[0] += 1;", "Nieprawidłowy cel przypisania.")]
+        [InlineData("a[0] *= 2;", "Nieprawidłowy cel przypisania.")]
+        [InlineData("[1] = 2;", "Nieprawidłowy cel przypisania.")]
+        // function / method declarations
+        [InlineData("funkcja () {}", "Oczekiwano nazwy dla 'funkcja'.")]
+        [InlineData("funkcja f( {}", "Oczekiwano nazwy parametru.")]
+        [InlineData("funkcja f(a b) {}", "Oczekiwano ')' po parametrach.")]
+        [InlineData("funkcja f() ;", "Oczekiwano '{' przed ciałem 'funkcja'")]
+        [InlineData("klasa A { metoda f() ; }", "Oczekiwano '{' przed ciałem 'metoda'")]
+        [InlineData("klasa A { statyczna metoda f() ; }", "Oczekiwano '{' przed ciałem 'statyczna metoda'")]
+        public void Parse_ShouldReportExpectedErrorForListsIndexingInheritanceAndSuper(string source, string expectedMessage)
+        {
+            Parse(source);
+
+            ErrorHandler.HadError.Should().BeTrue();
+            _errorOutput.ToString().Should().Contain(expectedMessage);
+        }
+
+        [Theory]
+        [InlineData("[];")]
+        [InlineData("[1, 2, 3];")]
+        [InlineData("[1, 2,];")]
+        [InlineData("[[1], [2]];")]
+        [InlineData("a[0];")]
+        [InlineData("a[b[0]];")]
+        [InlineData("a[0] = 1;")]
+        [InlineData("a[b[0]] = c[1];")]
+        [InlineData("a[0].x = 1;")]
+        [InlineData("zmienna a = [1, 2]; a[0] = a[1];")]
+        [InlineData("klasa B dziedziczy_po A {}")]
+        [InlineData("klasa B dziedziczy_po A { metoda f() { zwróć super.f(); } }")]
+        [InlineData("2 ** -1;")]
+        [InlineData("2 ** !a;")]
+        public void Parse_ShouldNotReportErrorForValidListsIndexingInheritanceAndSuper(string source)
+        {
+            Parse(source);
+
+            ErrorHandler.HadError.Should().BeFalse();
+            _errorOutput.ToString().Should().BeEmpty();
+        }
+
+        [Theory]
+        [InlineData("a[0][1];")]
+        [InlineData("a.b[0];")]
+        [InlineData("f()[0];")]
+        [InlineData("[1, 2][0];")]
+        [InlineData("ja[0];")]
+        public void Parse_ShouldReportErrorWhenIndexingSomethingOtherThanPlainIdentifier_CurrentLimitation(string source)
+        {
+            // Documents current behavior: indexing is only parsed directly after an identifier
+            // (Primary), not as a postfix operator in Call(). If chained indexing gets supported,
+            // move these cases to ParserTests.
+            Parse(source);
+
+            ErrorHandler.HadError.Should().BeTrue();
+            _errorOutput.ToString().Should().Contain("Oczekiwano ';' po wartości.");
+        }
+
+        [Fact]
+        public void Parse_ShouldReportUnterminatedIndexAtEndOfFile()
+        {
+            Parse("a[0");
+
+            ErrorHandler.HadError.Should().BeTrue();
+            _errorOutput.ToString().Should().Contain("Oczekiwano znaku ']'.");
+        }
+
+        [Fact]
+        public void Parse_ShouldReportMissingSemicolonAfterIndexExpressionInNonPromptMode()
+        {
+            Parse("a[0]");
+
+            ErrorHandler.HadError.Should().BeTrue();
+            _errorOutput.ToString().Should().Contain("Oczekiwano ';' po wartości.");
+        }
+
+        [Fact]
+        public void Parse_ShouldNotReportMissingSemicolonAfterIndexExpressionInPromptMode()
+        {
+            Parse("a[0]", promptMode: true);
+
+            ErrorHandler.HadError.Should().BeFalse();
+        }
+
+        // ---------------------------------------------------------------
+        // Error recovery - lists, indexing, inheritance and super
+        // ---------------------------------------------------------------
+
+        [Fact]
+        public void Parse_ShouldRecoverFromInvalidSuperAndParseNextStatement()
+        {
+            var statements = Parse("super; zmienna y = 1;");
+
+            ErrorHandler.HadError.Should().BeTrue();
+            statements.Should().HaveCount(1);
+            statements[0].Should().BeEquivalentTo(
+                new Var(Id("y"), new Literal(1.0)), o => o.PreferringRuntimeMemberTypes());
+        }
+
+        [Fact]
+        public void Parse_ShouldRecoverFromErrorInClassBodyAndParseNextDeclaration()
+        {
+            var statements = Parse("klasa A { x } zmienna y;");
+
+            ErrorHandler.HadError.Should().BeTrue();
+            statements.Should().HaveCount(1);
+            statements[0].Should().BeEquivalentTo(new Var(Id("y"), null), o => o.PreferringRuntimeMemberTypes());
+        }
+
+        [Fact]
+        public void Parse_ShouldRecoverFromMissingSuperclassNameAndParseNextDeclaration()
+        {
+            var statements = Parse("klasa A dziedziczy_po { } zmienna y;");
+
+            ErrorHandler.HadError.Should().BeTrue();
+            statements.Should().ContainSingle().Which.Should().BeOfType<Var>();
+        }
+
+        [Fact]
+        public void Parse_ShouldRecoverFromUnterminatedIndexAndParseNextStatement()
+        {
+            var statements = Parse("a[0; zmienna y = 1;");
+
+            ErrorHandler.HadError.Should().BeTrue();
+            statements.Should().HaveCount(1);
+            statements[0].Should().BeEquivalentTo(
+                new Var(Id("y"), new Literal(1.0)), o => o.PreferringRuntimeMemberTypes());
+        }
+
+        [Fact]
+        public void Parse_ShouldContinueAfterInvalidCompoundAssignmentToIndex()
+        {
+            // Like other invalid assignment targets, this is reported but does not throw.
+            var statements = Parse("a[0] += 1; zmienna y = 1;");
+
+            ErrorHandler.HadError.Should().BeTrue();
+            statements.Should().HaveCount(2);
+            statements[1].Should().BeEquivalentTo(
+                new Var(Id("y"), new Literal(1.0)), o => o.PreferringRuntimeMemberTypes());
+        }
+
+        [Fact]
+        public void Parse_ShouldRecoverFromErrorInsideListLiteral()
+        {
+            var statements = Parse("zmienna a = [1, ;\nzmienna b = 2;");
+
+            ErrorHandler.HadError.Should().BeTrue();
+            statements.Should().HaveCount(1);
+            statements[0].Should().BeEquivalentTo(
+                new Var(new Token(TokenType.IDENTIFIER, "b", null, 2), new Literal(2.0)),
+                o => o.PreferringRuntimeMemberTypes());
+        }
+
+        [Fact]
+        public void Parse_ShouldTerminateOnUnterminatedListAndIndex()
+        {
+            Action act = () =>
+            {
+                Parse("[1, 2");
+                Parse("a[");
+                Parse("klasa A dziedziczy_po");
+                Parse("super.");
+            };
+
+            act.Should().NotThrow();
+            ErrorHandler.HadError.Should().BeTrue();
+        }
+
+        // ---------------------------------------------------------------
+        // Known issues (these tests fail until the parser is fixed)
+        // ---------------------------------------------------------------
+
+        [Fact]
+        public void Parse_ShouldReportUnterminatedListLiteralInPromptMode_KnownIssue()
+        {
+            Parse("[1, 2", promptMode: true);
+
+            ErrorHandler.HadError.Should().BeTrue();
+            _errorOutput.ToString().Should().Contain("Oczekiwano znaku ']'.");
         }
     }
 }
