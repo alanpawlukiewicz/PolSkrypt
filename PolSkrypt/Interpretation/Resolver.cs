@@ -383,7 +383,7 @@ namespace PolSkrypt.Interpretation
             {
                 ErrorHandler.Error(expression.Keyword, "Nie można użyć słowa kluczowego 'super' poza blokiem klasy.");
             }
-            else if (_currentClass != ClassType.NONE)
+            else if (_currentClass != ClassType.CLASS)
             {
                 ErrorHandler.Error(expression.Keyword, "Nie można użyć słowa kluczowego 'super' w klasie bez superklasy.");
             }
@@ -393,17 +393,25 @@ namespace PolSkrypt.Interpretation
 
         public object? VisitListExpression(PList expression)
         {
+            foreach (var item in expression.Items)
+            {
+                Resolve(item);
+            }
             return null;
         }
 
         public object? VisitListIndexExpression(PListIndex expression)
         {
+
+            Resolve(expression.Index);
+            ResolveLocal(expression, expression.Identifier);
             return null;
         }
 
         public object? VisitPListIndexAssignExpression(PListIndexAssign expression)
         {
             Resolve(expression.Value);
+            Resolve(expression.Index);
             ResolveLocal(expression, expression.Identifier);
 
             return null;
