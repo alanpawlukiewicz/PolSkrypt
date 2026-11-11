@@ -519,23 +519,29 @@ namespace PolSkrypt.Interpretation
 
         public object? VisitSuperExpression(Super expression)
         {
-            int distance = _locals[expression];
-            ClassCallable? superclass = (ClassCallable?)_environment.GetAt(distance, expression.Keyword);
-            if (superclass == null)
+            if(_locals.TryGetValue(expression, out int distance))
             {
-                throw new RuntimeException(expression.Method, $"Nie można było znaleźć klasy nadrzędnej.");
+                ClassCallable? superclass = (ClassCallable?)_environment.GetAt(distance, expression.Keyword);
+                if (superclass == null)
+                {
+                    throw new RuntimeException(expression.Method, $"Nie można było znaleźć klasy nadrzędnej.");
+                }
+                Instance? obj = (Instance?)_environment.GetAt(distance - 1, new Token(TokenType.SELF, Keywords.SELF, null, expression.Keyword.Line));
+                if (obj == null)
+                {
+                    throw new RuntimeException(expression.Method, $"Nie można było znaleźć instancji klasy.");
+                }
+                FunctionCallable? method = superclass.FindMethod(expression.Method.Lexeme);
+                if (method == null)
+                {
+                    throw new RuntimeException(expression.Method, $"Nadrzędna klasa '{superclass.Name}' nie posiada metody '{expression.Method.Lexeme}'.");
+                }
+                return method.Bind(obj);
             }
-            Instance? obj = (Instance?)_environment.GetAt(distance - 1, new Token(TokenType.SELF, Keywords.SELF, null, expression.Keyword.Line));
-            if (obj == null)
+            else
             {
-                throw new RuntimeException(expression.Method, $"Nie można było znaleźć instancji klasy.");
+                throw new RuntimeException(expression.Method, "Nie można było znaleźć klasy nadrzędnej.");
             }
-            FunctionCallable? method = superclass.FindMethod(expression.Method.Lexeme);
-            if (method == null)
-            {
-                throw new RuntimeException(expression.Method, $"Nadrzędna klasa '{superclass.Name}' nie posiada metody '{expression.Method.Lexeme}'.");
-            }
-            return method.Bind(obj);
         }
 
         public object? VisitListExpression(PList expression)
