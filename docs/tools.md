@@ -1,6 +1,6 @@
 # Narzędzia PolSkrypt
 
-Wersja dokumentu: 0.1.0
+Wersja dokumentu: 0.2.0
 
 ## Spis treści
 
@@ -13,10 +13,10 @@ Wersja dokumentu: 0.1.0
 
 Resolver analizuje drzewo składniowe programu przed jego wykonaniem. Ma dwa zadania:
 
-1. **Wyznaczanie zasięgu zmiennych lokalnych.** Dla każdego użycia zmiennej lokalnej ustala, w którym otaczającym bloku została zadeklarowana. Dzięki temu zasięg jest blokowy, shadowing działa przewidywalnie, a domknięcia widzą zmienne z otaczającego zasięgu.
+1. **Wyznaczanie zasięgu zmiennych lokalnych.** Dla każdego użycia zmiennej lokalnej ustala, w którym otaczającym bloku została zadeklarowana. Dzięki temu zasięg jest blokowy, shadowing działa przewidywalnie, a domknięcia widzą zmienne z otaczającego zasięgu. Dotyczy to także zmiennych używanych przez operatory złożone (`+=` itd.) oraz przez indeksowanie list (`lista[i]`, `lista[i] = x`), a także `ja` i `super` w metodach.
 2. **Wykrywanie błędów.** Część błędów jest zgłaszana od razu, a nie dopiero w chwili, gdy wykonanie dojdzie do wadliwego miejsca.
 
-Resolver działą automatycznie przed każdym uruchomieniem.
+Resolver działa automatycznie przed każdym uruchomieniem.
 
 ### Wykrywane błędy
 
@@ -26,6 +26,15 @@ Resolver działą automatycznie przed każdym uruchomieniem.
 | `zwróć` użyte poza funkcją | `Nie można zwrócić wartości spoza funkcji.` |
 | Odczyt zmiennej lokalnej w jej własnym inicjatorze | `Nie można odczytać lokalnej zmiennej w jej własnym inicjatorze.` |
 | Ponowna deklaracja zmiennej w tym samym zasięgu lokalnym | `Zmienna o tej nazwie już istnieje w tym zakresie.` |
+| `ja` użyte poza klasą | `Nie można użyć 'ja' poza klasą.` |
+| `ja` użyte w metodzie statycznej | `Nie można użyć 'ja' w metodzie statycznej.` |
+| `super` użyte poza klasą | `Nie można użyć słowa kluczowego 'super' poza blokiem klasy.` |
+| `super` użyte w klasie bez klasy bazowej | `Nie można użyć słowa kluczowego 'super' w klasie bez superklasy.` |
+| `super` użyte w metodzie statycznej | `Nie można użyć słowa kluczowego 'super' w metodzie statycznej.` |
+| Klasa dziedziczy po samej sobie | `Klasa nie może dziedziczyć po samej sobie.` |
+| Zwrócenie wartości z konstruktora | `Nie można zwrócić wartości z konstruktora.` |
+| Dwie metody o tej samej nazwie w jednej klasie | `Metoda 'nazwa' została już zdefiniowana w tej klasie.` |
+| Dwie metody statyczne o tej samej nazwie w jednej klasie | `Metoda statyczna 'nazwa' została już zdefiniowana w tej klasie.` |
 
 #### `przerwij` poza pętlą
 
@@ -55,14 +64,28 @@ funkcja f() {
 }
 ```
 
+W konstruktorze klasy dozwolone jest samo `zwróć;`, ale `zwróć wartość;` jest błędem.
+
 #### Odczyt zmiennej w jej własnym inicjatorze
 
-Reguła dotyczy zmiennych **lokalnych** (zadeklarowanych w bloku lub funkcji). Chroni przed przypadkowym odwołaniem się do zmiennej, która jeszcze nie ma wartości, szczególnie gdy przesłania ona zmienną zewnętrzną:
+Reguła dotyczy zmiennych **lokalnych** (zadeklarowanych w bloku lub funkcji). Chroni przed przypadkowym odwołaniem się do zmiennej, która jeszcze nie ma wartości, szczególnie gdy przesłania ona zmienną zewnętrzną. Obejmuje każdy odczyt takiej zmiennej: zwykły, przez indeks listy i przez operator złożony:
 
 ```text
 zmienna a = 1;
+zmienna b = [1, 2];
+zmienna c = 1;
 {
     zmienna a = a + 1;          // błąd: 'a' po prawej stronie to jeszcze nie zainicjowane lokalne 'a'
+    zmienna b = b[0];           // błąd: odczyt przez indeks
+    zmienna c = c += 1;         // błąd: odczyt przez operator złożony
+}
+```
+
+Funkcja anonimowa może odwoływać się do zmiennej, której jest inicjatorem (np. do rekurencji), bo odczyt następuje dopiero przy wywołaniu:
+
+```text
+{
+    zmienna f = funkcja () { zwróć f; };   // poprawnie
 }
 ```
 
@@ -94,21 +117,51 @@ zmienna x = 1;
 }
 ```
 
+#### `ja` i `super`
+
+`ja` jest dostępne tylko w konstruktorze i metodach instancji. `super` jest dostępne tylko w klasie, która dziedziczy po innej klasie, także tylko w jej konstruktorze i metodach instancji. Użycie w funkcji zagnieżdżonej lub anonimowej wewnątrz metody jest dozwolone, o ile ta metoda nie jest statyczna:
+
+```text
+ja;                                            // błąd: poza klasą
+
+klasa A {
+    metoda f() {
+        zwróć funkcja () { zwróć ja; };        // poprawnie
+    }
+    statyczna metoda g() {
+        zwróć ja;                              // błąd: metoda statyczna
+    }
+    metoda h() {
+        zwróć super.h();                       // błąd: klasa A nie ma klasy bazowej
+    }
+}
+```
+
+Szczegóły dotyczące klas opisuje [classes.md](classes.md).
+
+#### Duplikaty metod w klasie
+
+Dwie metody o tej samej nazwie w jednej klasie są błędem. Metody zwykłe i statyczne sprawdzane są osobno, więc metoda zwykła i statyczna mogą mieć tę samą nazwę:
+
+```text
+klasa A {
+    metoda f() { }
+    metoda f() { }                 // błąd
+}
+
+klasa B {
+    metoda f() { }
+    statyczna metoda f() { }       // poprawnie
+}
+```
+
 ### Zasięg globalny
 
-Resolver nie śledzi zmiennych globalnych. W konsekwencji reguły dotyczące deklaracji (ponowna deklaracja, odczyt w inicjatorze) obowiązują wyłącznie w zasięgach lokalnych, a na poziomie globalnym nie są sprawdzane przed uruchomieniem.
-
-### Czego resolver nie sprawdza
-
-- **Użycia niezadeklarowanej zmiennej.** Nazwa, której nie znaleziono w żadnym zasięgu lokalnym, jest traktowana jako globalna i nie jest tu weryfikowana. Ewentualny błąd zostanie więc zgłoszony dopiero podczas wykonania *(do potwierdzenia)*.
-- **Liczby argumentów wywołania funkcji.** Zgodność liczby argumentów jest sprawdzana w czasie działania programu *(do potwierdzenia)*.
-- **Typów i wartości.** Typowanie jest dynamiczne, więc np. dzielenie przez 0 (`1 / 0`) czy dodawanie napisu do liczby (`"a" + 1`) są zgłaszane dopiero podczas wykonania.
-
----
+Resolver nie śledzi zmiennych globalnych. Reguły dotyczące deklaracji są sprawdzane w trakcie czasu wykonania.
 
 ## 2. Tryb promptu (REPL)
 
-Tryb promptu pozwala wpisywać kod linia po linii i od razu widzieć wyniki.
+Tryb promptu pozwala wpisywać kod linia po linii i od razu widzieć wyniki. Zmienne, funkcje i klasy zdefiniowane w jednej linii są dostępne w kolejnych.
 
 ### Wyświetlanie wartości wyrażeń
 
@@ -127,13 +180,16 @@ WARTOŚĆ PUSTA
 
 ### Przypisania
 
-Przypisanie jest wyrażeniem, więc również zwraca wartość. Przypisanie złożone najpierw zmienia zmienną, a następnie zwraca jej nową wartość.
+Przypisanie jest wyrażeniem, więc również zwraca wartość. Przypisanie złożone najpierw zmienia zmienną, a następnie zwraca jej nową wartość. To samo dotyczy przypisania do elementu listy.
 
 ```text
 > a += 1
 6
 > a
 6
+> zmienna l = [1, 2, 3];
+> l[0] = 5
+5
 ```
 
 Wyrażenie nie wyświetli się jeżeli zostanie one zakończone znakiem `;`.

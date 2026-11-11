@@ -1,6 +1,16 @@
 # Referencja języka PolSkrypt
 
-Wersja dokumentu: 0.3.0
+Wersja dokumentu: 0.4.0
+
+Dokumentacja jest podzielona na kilka plików:
+
+| Plik | Zawartość |
+|------|-----------|
+| `language-reference.md` (ten plik) | podstawy języka: składnia, typy, zmienne, operatory, instrukcje sterujące, funkcje |
+| [`classes.md`](classes.md) | klasy, metody, dziedziczenie, `super` |
+| [`lists.md`](lists.md) | listy i metody natywne list |
+| [`builtin-functions.md`](builtin-functions.md) | funkcje wbudowane (`wypisz`, `liczba`, `typ` itd.) |
+| [`tools.md`](tools.md) | narzędzia: analiza statyczna (resolver) i tryb promptu (REPL) |
 
 ## Spis treści
 
@@ -11,8 +21,9 @@ Wersja dokumentu: 0.3.0
 5. [Instrukcje sterujące](#5-instrukcje-sterujące)
 6. [Funkcje](#6-funkcje)
 7. [Funkcje anonimowe](#7-funkcje-anonimowe)
-8. [Klasy](#8-klasy)
-9. [Funkcje wbudowane](#9-funkcje-wbudowane)
+8. [Klasy i dziedziczenie](classes.md)
+9. [Listy](lists.md)
+10. [Funkcje wbudowane](builtin-functions.md)
 
 ---
 
@@ -35,9 +46,33 @@ Wielkość liter ma znaczenie (`x` i `X` to różne zmienne).
 
 Nie mogą być używane jako identyfikatory:
 
-`zmienna` `funkcja` `jeżeli` `w_przeciwnym_wypadku` `podczas_gdy` `dla` `prawda` `fałsz` `wartość_pusta` `lub` `oraz` `zwróć` `przerwij` `klasa` `metoda` `statyczna` `ja`
+`zmienna` `zm` `funkcja` `jeżeli` `w_przeciwnym_wypadku` `wpw` `podczas_gdy` `pgdy` `dla` `prawda` `fałsz` `wartość_pusta` `lub` `oraz` `zwróć` `przerwij` `klasa` `metoda` `statyczna` `dziedziczy_po` `ja` `super`
 
-Dodatkowo wewnątrz ciała klasy specjalne znaczenie ma nazwa `konstruktor` (zob. [Klasy](#8-klasy)).
+Dodatkowo wewnątrz ciała klasy specjalne znaczenie ma nazwa `konstruktor` (zob. [Klasy](classes.md)).
+
+### Aliasy słów kluczowych
+
+Dla najczęściej używanych słów kluczowych istnieją krótsze aliasy. Alias zachowuje się dokładnie tak samo jak pełne słowo kluczowe.
+
+| Słowo kluczowe | Alias |
+|----------------|-------|
+| `zmienna` | `zm` |
+| `w_przeciwnym_wypadku` | `wpw` |
+| `podczas_gdy` | `pgdy` |
+
+```text
+zm i = 0;
+pgdy (i < 3) {
+    jeżeli (i == 1) {
+        wypisz("jeden");
+    } wpw {
+        wypisz("inna");
+    }
+    i += 1;
+}
+```
+
+> **Uwaga:** aliasy są również słowami kluczowymi, więc nie można używać ich jako nazw zmiennych ani funkcji. Dotyczy to także istniejących programów, które mają zmienną o nazwie `zm`, `wpw` lub `pgdy`. Identyfikatory tylko *zaczynające się* od aliasu (np. `zm1`, `wpwx`) są poprawne.
 
 ### Instrukcje i średniki
 
@@ -85,13 +120,14 @@ x = "pięć";          // teraz napis
 | Napis | `"tekst"` | ciąg znaków bez ograniczenia długości |
 | Logiczny | `prawda`, `fałsz` | dwie wartości logiczne |
 | Pusty | `wartość_pusta` | oznacza brak wartości |
+| Lista | `[]`, `[1, "a", prawda]` | uporządkowany, modyfikowalny ciąg wartości dowolnych typów (zob. [Listy](lists.md)) |
 | Funkcja | `funkcja (a, b) { ... }` | funkcje są wartościami pierwszej klasy: można je przypisywać do zmiennych i przekazywać dalej |
 | Klasa | `klasa K { ... }` | klasy są wartościami; wywołanie klasy tworzy instancję |
 | Instancja | `K(1, 2)` | obiekt utworzony z klasy; przechowuje pola i udostępnia metody |
 
 ### Liczba
 
-Wszystkie liczby są typu double, więc `1` i `1.0` to ta sama wartość. Dzielenie przez 0 jest błędem (nie daje nieskończoności).
+Wszystkie liczby są typu double, więc `1` i `1.0` to ta sama wartość. Dzielenie przez 0 jest błędem (nie daje nieskończoności). Dotyczy to wszystkich operatorów z dzielnikiem: `/`, `%`, `/=` i `%=`.
 
 W literałach liczbowych dozwolone są wyłącznie cyfry `0-9`; inne znaki Unicode będące cyframi (np. cyfry arabsko-indyjskie) nie są traktowane jako liczby.
 
@@ -105,11 +141,21 @@ wypisz("a" & 1);      // wypisze: a1
 wypisz("a" + 1);      // błąd
 ```
 
-> **Uwaga:** operator `.` nie służy już do konkatenacji (zdezaprobowany w 0.3.0 razem z `.=`). Kropka oznacza teraz dostęp do pól i metod (zob. [Klasy](#8-klasy)).
+> **Uwaga:** operator `.` nie służy już do konkatenacji (zdezaprobowany w 0.3.0 razem z `.=`). Kropka oznacza teraz dostęp do pól i metod (zob. [Klasy](classes.md)).
 
 ### Pusty
 
 `wartość_pusta` jest jedyną wartością swojego typu. Zwraca ją funkcja (lub metoda), w której nie wykonano `zwróć`. Porównanie `wartość_pusta == wartość_pusta` daje `prawda`. Użycie jej w operacji arytmetycznej jest błędem (np. `wartość_pusta + 1`).
+
+### Lista
+
+Lista to modyfikowalny ciąg wartości, tworzony literałem w nawiasach kwadratowych i indeksowany od zera. Listy są przekazywane przez referencję: dwie zmienne mogą wskazywać tę samą listę. Pełny opis, w tym metody natywne, znajduje się w [lists.md](lists.md).
+
+```text
+zmienna l = [10, 20, 30];
+wypisz(l[1]);         // wypisze: 20
+l[1] = 99;
+```
 
 ### Porównywanie wartości różnych typów
 
@@ -118,6 +164,16 @@ Operator `==` porównuje zarówno wartości, jak i typy, więc wartości różny
 ```text
 wypisz(1 == "1");     // wypisze: fałsz
 wypisz(0 == fałsz);   // wypisze: fałsz
+```
+
+Listy (podobnie jak instancje) są porównywane przez referencję, a nie przez zawartość. Równe są tylko dwa odwołania do tej samej listy:
+
+```text
+zmienna a = [1];
+zmienna b = a;
+zmienna c = a.kopiuj(); // kopia zmiennej a
+wypisz(a == b);       // wypisze: prawda (ta sama lista)
+wypisz(a == c);     // wypisze: fałsz (inna lista o takiej samej zawartości)
 ```
 
 ### Prawdziwość wartości
@@ -139,8 +195,12 @@ Zasady są następujące:
 | `-1`, `3.14` | prawda |
 | `""` (pusty napis) | prawda |
 | `"tekst"` | prawda |
+| `[]` (pusta lista) | prawda |
+| `[1, 2]` | prawda |
 | funkcja | prawda |
 | klasa, instancja | prawda |
+
+Do sprawdzenia, czy lista jest pusta, służy metoda `pusta()` (zob. [lists.md](lists.md)).
 
 #### Wpływ na operatory `oraz` i `lub`
 
@@ -164,15 +224,17 @@ wypisz(fałsz oraz 3);          // wypisze: fałsz
 
 ```text
 zmienna nazwa = wyrażenie;
+zm nazwa = wyrażenie;        // alias
 ```
 
 ### Zasady
 
-- Zmienna musi być zadeklarowana (`zmienna`) przed użyciem.
+- Zmienna musi być zadeklarowana (`zmienna` lub `zm`) przed użyciem.
 - Ponowna deklaracja zmiennej o tej samej nazwie w tym samym zasięgu jest **błędem**. Dotyczy to zarówno zmiennych w blokach, jak i zmiennych globalnych (do wersji 0.2.0 zmienne globalne były w takim przypadku nadpisywane). Żeby zmienić wartość istniejącej zmiennej, użyj przypisania: `x = 2;`.
-- Błędy tego typu są wykrywane już na etapie statycznej analizy kodu (Resolver), przed uruchomieniem programu.
+- Błędy tego typu w zasięgach lokalnych są wykrywane już na etapie statycznej analizy kodu (Resolver), przed uruchomieniem programu. Resolver nie śledzi zmiennych globalnych (zob. [tools.md](tools.md)).
 - Zasięg jest blokowy: zmienna istnieje do końca bloku `{ }`.
 - Zmienna wewnętrzna może przesłonić zewnętrzną (shadowing).
+- Zmiennej lokalnej nie można odczytać w jej własnym inicjatorze, także przez indeks (`zmienna l = l[0];`) ani przypisanie złożone (`zmienna x = x += 1;`).
 
 ### Przykład
 
@@ -196,7 +258,7 @@ x = 3;           // poprawnie: przypisanie
 
 | Typ | Operatory | Łączność |
 |------|-----------|----------|
-| Wyrażenie, wywołanie, dostęp do pola | `()` `.` | lewostronna |
+| Wyrażenie, wywołanie, dostęp do pola, indeksowanie listy | `()` `.` `[]` | lewostronna |
 | Potęgowy | `**` | prawostronna |
 | Jednoargumentowy | `-` `!` | prawostronna |
 | Multiplikatywny | `*` `/` `%` | lewostronna |
@@ -224,12 +286,12 @@ x = 3;           // poprawnie: przypisanie
 | `/` | liczba, liczba | liczba | dzielenie przez 0 powoduje błąd |
 | `*` | liczba, liczba | liczba | |
 | `-` | liczba, liczba | liczba | |
-| `%` | liczba, liczba | liczba | reszta z dzielenia |
+| `%` | liczba, liczba | liczba | reszta z dzielenia (ma znak dzielnej: `-7 % 3` daje `-1`); dzielenie przez 0 powoduje błąd |
 | `**` | liczba, liczba | liczba | potęgowanie; wykładnik może mieć operator jednoargumentowy, np. `2 ** -1` daje `0.5` |
 
 ### Operatory przypisania
 
-Oprócz zwykłego przypisania `=` dostępne są operatory złożone: `+=`, `-=`, `*=`, `/=`, `%=` oraz `&=` (konkatenacja z przypisaniem). Każdy z nich działa jak odpowiadający mu operator binarny, którego wynik jest zapisywany z powrotem do zmiennej (lub pola).
+Oprócz zwykłego przypisania `=` dostępne są operatory złożone: `+=`, `-=`, `*=`, `/=`, `%=` oraz `&=` (konkatenacja z przypisaniem). Każdy z nich działa jak odpowiadający mu operator binarny, którego wynik jest zapisywany z powrotem do zmiennej. Operatory `/=` i `%=` również zgłaszają błąd przy dzielniku równym 0.
 
 ```text
 zmienna x = 5;
@@ -239,6 +301,16 @@ x %= 3;          // x == 2
 zmienna s = "a";
 s &= "b";        // s == "ab"
 ```
+
+Operatory złożone można stosować **tylko do zmiennych**. Nie działają na polach obiektów ani na elementach list; takie przypisanie jest błędem (`Nieprawidłowy cel przypisania.`):
+
+```text
+a.pole += 1;          // błąd
+lista[0] += 1;        // błąd
+lista[0] = lista[0] + 1;   // poprawnie
+```
+
+Zwykłe przypisanie działa także na polach (`a.pole = 1;`) oraz elementach list (`lista[0] = 1;`).
 
 ### Operatory logiczne
 
@@ -252,7 +324,7 @@ wypisz(5 oraz 7);  // wypisze: 7
 
 ### Porównania
 
-- `==` porównuje wartości oraz typy danych.
+- `==` porównuje wartości oraz typy danych (listy i instancje przez referencję).
 - `<`, `>`, `>=`, `<=` działają tylko na liczbach.
 
 ### Tabela zachowań brzegowych
@@ -260,11 +332,14 @@ wypisz(5 oraz 7);  // wypisze: 7
 | Wyrażenie | Wynik |
 |-----------|-------|
 | `1 / 0` | *błąd* |
+| `5 % 0` | *błąd* |
 | `wartość_pusta == wartość_pusta` | `prawda` |
 | `wartość_pusta + 1` | *błąd* |
 | `"a" + 1` | *błąd* |
 | `"a" & 1` | `"a1"` |
 | `2 ** -1` | `0.5` |
+| `-7 % 3` | `-1` |
+| `[1] == [1]` | `fałsz` |
 
 ---
 
@@ -278,10 +353,17 @@ wypisz(5 oraz 7);  // wypisze: 7
 jeżeli (warunek) { ... } w_przeciwnym_wypadku jeżeli (warunek) { ... } w_przeciwnym_wypadku { ... }
 ```
 
+Zamiast `w_przeciwnym_wypadku` można użyć aliasu `wpw`:
+
+```text
+jeżeli (warunek) { ... } wpw jeżeli (warunek) { ... } wpw { ... }
+```
+
 ### podczas_gdy
 
 ```text
 podczas_gdy (warunek) { ... }
+pgdy (warunek) { ... }        // alias
 ```
 
 ### dla
@@ -289,6 +371,8 @@ podczas_gdy (warunek) { ... }
 ```text
 dla (inicjalizacja; warunek; zmiana) { ... }
 ```
+
+Zmienna zadeklarowana w części inicjalizacji istnieje tylko wewnątrz pętli. Każda z trzech części może być pominięta, np. `dla (;;) { ... }` to pętla nieskończona (przerywana przez `przerwij`).
 
 ### przerwij
 
@@ -312,6 +396,7 @@ wypisz(dodaj(2, 3));   // wypisze: 5
 
 - `zwróć` jest dozwolone wyłącznie wewnątrz funkcji (lub metody); użycie poza nią jest błędem wykrywanym na etapie statycznej analizy kodu.
 - Funkcja, w której nie wykonano `zwróć`, zwraca `wartość_pusta`.
+- Liczba argumentów wywołania musi zgadzać się z liczbą parametrów (w przeciwnym razie błąd w czasie działania programu).
 
 ## 7. Funkcje anonimowe
 
@@ -330,116 +415,14 @@ wypisz(x(1, 2));   // wypisze: 3
 - Liczba argumentów musi się zgadzać.
 - Liczba argumentów musi być mniejsza od 256.
 - Brak `zwróć` zwraca `wartość_pusta`.
-- Funkcje są wartościami pierwszej klasy (można je przypisywać do zmiennych).
+- Funkcje są wartościami pierwszej klasy (można je przypisywać do zmiennych, przechowywać w listach i przekazywać jako argumenty).
 - Domknięcia: funkcja zagnieżdżona widzi zmienne z otaczającego zasięgu.
 
----
-
-## 8. Klasy
-
-### Składnia
-
 ```text
-klasa Nazwa {
-    konstruktor(parametry) { ciało }
-
-    metoda nazwa(parametry) { ciało }
-
-    statyczna metoda nazwa(parametry) { ciało }
-}
-```
-
-W ciele klasy mogą występować wyłącznie: konstruktor, metody i metody statyczne. Po definicji klasy ani jej elementów nie stawia się średnika.
-
-### Elementy klasy
-
-| Element | Składnia | Opis |
-|---------|----------|------|
-| Konstruktor | `konstruktor(a, b) { ... }` | wywoływany przy tworzeniu instancji; **nie** poprzedza go słowo `metoda` |
-| Metoda | `metoda nazwa(a) { ... }` | metoda instancji; każda zwykła metoda **musi** zaczynać się od słowa `metoda` |
-| Metoda statyczna | `statyczna metoda nazwa(a) { ... }` | metoda wywoływana na samej klasie, a nie na instancji; poprzedzona połączonymi słowami `statyczna metoda` |
-
-### Tworzenie instancji
-
-Klasę wywołuje się jak funkcję. Wywołanie tworzy nową instancję i wykonuje jej konstruktor z podanymi argumentami. Liczba argumentów musi zgadzać się z liczbą parametrów konstruktora.
-
-```text
-zmienna a = K(1, 2);
-```
-
-### Pola i słowo `ja`
-
-Wewnątrz konstruktora i metod słowo kluczowe `ja` oznacza bieżącą instancję. Pola tworzy się przez przypisanie i odczytuje przez operator `.`:
-
-```text
-ja.a = a;               // zapis pola (wewnątrz konstruktora lub metody)
-zmienna x = obiekt.a;   // odczyt pola
-```
-
-PolSkrypt wspiera dynamiczne dodawanie atrybutów:
-
-```
-klasa K {}
-zmienna a = K();
-a.b = 3;
-wypisz(a.b); // wypisze: 3
-```
-
-Próba odwołania się do nieistniejącego atrybutu lub metody skończy się błędem:
-
-```
-klasa K {}
-zmienna a = K();
-wypisz(a.b);     // błąd
-wypisz(a.c());   // błąd
-```
-
-### Wywoływanie metod
-
-- metody instancji wywołuje się na instancji: `a.metoda1();`
-- metody statyczne wywołuje się na klasie: `K.st_metoda1();`
-
-### Przykład
-
-```text
-klasa K {
-    metoda metoda1() {
-        wypisz("zwykła metoda");
-    }
-
-    statyczna metoda st_metoda1() {
-        wypisz("statyczna metoda");
-    }
-
-    konstruktor(a, b) {
-        ja.a = a;
-        ja.b = b;
-    }
+funkcja dodajacy(n) {
+    zwróć funkcja (x) { zwróć x + n; };
 }
 
-zmienna a = K(1, 2);
-wypisz(a.a);          // wypisze: 1
-wypisz(a.b);          // wypisze: 2
-a.metoda1();          // wypisze: zwykła metoda
-K.st_metoda1();       // wypisze: statyczna metoda
+zmienna dodaj3 = dodajacy(3);
+wypisz(dodaj3(4));   // wypisze: 7
 ```
-
-### Zasady
-
-- Metoda bez `zwróć` zwraca `wartość_pusta`.
-- Konstruktor **zawsze** zwraca instancję obiektu którego tworzy.
-- `ja` jest dostępne wyłącznie wewnątrz klasy.
-- Klasa i instancja są wartościami prawdziwymi (zob. [Prawdziwość wartości](#prawdziwość-wartości)).
-
----
-
-## 9. Funkcje wbudowane
-
-| Funkcja | Opis | Przykład | Wynik |
-|---------|------|----------|-------|
-| `wypisz(x, ...)` | wypisuje wartości oddzielone spacją; **nie** dodaje na końcu znaku nowej linii; obsługuje sekwencje specjalne `\n`, `\b`, `\r` | `wypisz(1, "a");` | `1 a` |
-| `wprowadź()` | pozwala na wprowadzenie wartości zmiennej z klawiatury w postaci napisu | `zmienna a = wprowadź();` | |
-| `zegar()` | zwraca obecną godzinę UTC w sekundach w postaci liczby | `wypisz(zegar());` | `1793629096` |
-| `liczba(x)` | zamienia wartość `x` na liczbę; zwraca błąd w przypadku niepoprawnego argumentu | `liczba("42");` | `42` |
-| `napis(x)` | zamienia wartość `x` na napis | `napis(42);` | `"42"` |
-| `typ(x)` | zwraca typ wartości `x` | `wypisz(typ(5));` | `LICZBA` |
