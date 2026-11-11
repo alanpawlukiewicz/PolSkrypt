@@ -539,13 +539,9 @@ namespace PolSkrypt.Interpretation
                 throw new RuntimeException(expression.Identifier, "Zmienna musi być listą aby odnosić się do jej indeksów.");
             }
             var index = Evaluate(expression.Index);
-            if (index is not double idx || idx < 0 || idx % 1 != 0)
-            {
-                throw new RuntimeException(expression.Keyword, "Indeks musi być dodatnią liczbą całkowitą.");
-            }
             try
             {
-                return list[(int)idx];
+                return list[ListHelper.HandleIndex(index, expression.Keyword)];
             }
             catch (ArgumentOutOfRangeException)
             {
@@ -562,13 +558,9 @@ namespace PolSkrypt.Interpretation
                 throw new RuntimeException(expression.Identifier, "Zmienna musi być listą aby odnosić się do jej indeksów.");
             }
             var index = Evaluate(expression.Index);
-            if (index is not double idx || idx < 0 || idx % 1 != 0)
-            {
-                throw new RuntimeException(expression.Identifier, "Indeks musi być dodatnią liczbą całkowitą.");
-            }
             try
             {
-                int parsedIndex = (int)idx;
+                int parsedIndex = ListHelper.HandleIndex(index, expression.Identifier);
                 list[parsedIndex] = Evaluate(expression.Value);
                 return list[parsedIndex];
             }
