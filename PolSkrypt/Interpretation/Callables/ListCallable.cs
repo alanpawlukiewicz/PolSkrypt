@@ -18,7 +18,8 @@ namespace PolSkrypt.Interpretation.Callables
         private enum ListCallType
         {
             APPEND, REMOVE, LENGTH, CONTAINS,
-            INSERT, EMPTY, COPY, LOOKUP
+            INSERT, EMPTY, COPY, LOOKUP,
+            COUNT
         }
 
         private ListCallType ToListCallType(string type)
@@ -56,7 +57,7 @@ namespace PolSkrypt.Interpretation.Callables
                 {
                     return null;
                 }
-                else if (_callType == ListCallType.REMOVE || _callType == ListCallType.CONTAINS)
+                else if (_callType == ListCallType.REMOVE || _callType == ListCallType.CONTAINS || _callType == ListCallType.COUNT)
                 {
                     return 1;
                 }
@@ -112,6 +113,19 @@ namespace PolSkrypt.Interpretation.Callables
                     }
                 }
                 return null;
+            }
+            else if (_callType == ListCallType.COUNT)
+            {
+                int counter = 0;
+                for (int i = 0; i < _list.Count; i++)
+                {
+                    if (_list[i]!.Equals(arguments[0]))
+                    {
+                        counter++;
+                    }
+                }
+                return (double)counter;
+
             }
             return _list;
         }

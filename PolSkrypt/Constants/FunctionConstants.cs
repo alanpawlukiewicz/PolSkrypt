@@ -12,7 +12,8 @@
             { "wstaw", "insert" },
             { "pusta", "empty" },
             { "kopiuj", "copy" },
-            { "szukaj", "lookup" }
+            { "szukaj", "lookup" },
+            { "policz", "count" }
         };
     }
 }
