@@ -582,6 +582,11 @@ namespace PolSkrypt.Parsing
                         Consume(TokenType.COMMA, "Oczekiwano ','.");
                     }
                 }
+                var closingBracket = Previous();
+                if (closingBracket.Type != TokenType.RIGHT_SQUARE_BRACKET)
+                {
+                    ErrorHandler.Error(closingBracket, "Oczekiwano znaku ']'.");
+                }
 
                 return new PList(keyword, items);
             }
