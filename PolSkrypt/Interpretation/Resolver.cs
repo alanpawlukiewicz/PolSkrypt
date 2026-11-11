@@ -31,6 +31,7 @@ namespace PolSkrypt.Interpretation
         private FunctionType _currentFunction = FunctionType.NONE;
         private bool _inLoop = false;
         private ClassType _currentClass = ClassType.NONE;
+        private bool _inStaticMethod = false;
 
         public Resolver(Interpreter interpreter)
         {
@@ -116,6 +117,7 @@ namespace PolSkrypt.Interpretation
 
         public object? VisitCompoundAssignmentExpression(CompoundAssignment expression)
         {
+            CheckNotReadInOwnInitializer(expression.Name);
             Resolve(expression.Value);
             ResolveLocal(expression, expression.Name);
             return null;
@@ -225,14 +227,19 @@ namespace PolSkrypt.Interpretation
 
         public object? VisitVariableExpression(Variable expression)
         {
-            if (_scopes.Count > 0
-                && _scopes.Peek().TryGetValue(expression.Name.Lexeme, out bool defined) && defined == false)
-            {
-                ErrorHandler.Error(expression.Name, "Nie można odczytać lokalnej zmiennej w jej własnym inicjatorze.");
-            }
+            CheckNotReadInOwnInitializer(expression.Name);
 
             ResolveLocal(expression, expression.Name);
             return null;
+        }
+
+        private void CheckNotReadInOwnInitializer(Token name)
+        {
+            if (_scopes.Count > 0
+                && _scopes.Peek().TryGetValue(name.Lexeme, out bool defined) && defined == false)
+            {
+                ErrorHandler.Error(name, "Nie można odczytać lokalnej zmiennej w jej własnym inicjatorze.");
+            }
         }
 
         private void ResolveLocal(Expr expression, Token name)
@@ -320,8 +327,20 @@ namespace PolSkrypt.Interpretation
             BeginScope();
             _scopes.Peek()[Keywords.SELF] = true;
 
+            // Instance methods of a class nested within a static method can use 'ja',
+            // so the flag is cleared while they are being analyzed and restored afterwards.
+            bool previousInStaticMethod = _inStaticMethod;
+            _inStaticMethod = false;
+
+            var methodNames = new HashSet<string>();
             foreach (var method in statement.Methods)
             {
+                if (!methodNames.Add(method.Name.Lexeme))
+                {
+                    ErrorHandler.Error(method.Name,
+                        $"Metoda '{method.Name.Lexeme}' została już zdefiniowana w tej klasie.");
+                }
+
                 FunctionType declaration = FunctionType.METHOD;
                 if (method.Name.Lexeme == FunctionConstants.CONSTRUCTOR)
                 {
@@ -329,21 +348,29 @@ namespace PolSkrypt.Interpretation
                 }
                 ResolveFunction(method, declaration);
             }
+            EndScope();
 
+            _inStaticMethod = true;
+            var staticMethodNames = new HashSet<string>();
             foreach (var staticMethod in statement.StaticMethods)
             {
+                if (!staticMethodNames.Add(staticMethod.Name.Lexeme))
+                {
+                    ErrorHandler.Error(staticMethod.Name,
+                        $"Metoda statyczna '{staticMethod.Name.Lexeme}' została już zdefiniowana w tej klasie.");
+                }
+
                 ResolveFunction(staticMethod, FunctionType.STATIC_METHOD);
             }
 
-            EndScope();
-
+            _inStaticMethod = previousInStaticMethod;
 
             if (statement.Superclass != null)
             {
                 EndScope();
             }
 
-                _currentClass = previousClass;
+            _currentClass = previousClass;
 
             return null;
         }
@@ -364,7 +391,7 @@ namespace PolSkrypt.Interpretation
 
         public object? VisitSelfExpression(Self expression)
         {
-            if (_currentFunction == FunctionType.STATIC_METHOD)
+            if (_inStaticMethod)
             {
                 ErrorHandler.Error(expression.Keyword, "Nie można użyć 'ja' w metodzie statycznej.");
             }
@@ -383,9 +410,13 @@ namespace PolSkrypt.Interpretation
             {
                 ErrorHandler.Error(expression.Keyword, "Nie można użyć słowa kluczowego 'super' poza blokiem klasy.");
             }
-            else if (_currentClass != ClassType.CLASS)
+            else if (_currentClass == ClassType.CLASS)
             {
                 ErrorHandler.Error(expression.Keyword, "Nie można użyć słowa kluczowego 'super' w klasie bez superklasy.");
+            }
+            else if (_inStaticMethod)
+            {
+                ErrorHandler.Error(expression.Keyword, "Nie można użyć słowa kluczowego 'super' w metodzie statycznej.");
             }
             ResolveLocal(expression, expression.Keyword);
             return null;
@@ -402,7 +433,7 @@ namespace PolSkrypt.Interpretation
 
         public object? VisitListIndexExpression(PListIndex expression)
         {
-
+            CheckNotReadInOwnInitializer(expression.Identifier);
             Resolve(expression.Index);
             ResolveLocal(expression, expression.Identifier);
             return null;
@@ -410,6 +441,7 @@ namespace PolSkrypt.Interpretation
 
         public object? VisitPListIndexAssignExpression(PListIndexAssign expression)
         {
+            CheckNotReadInOwnInitializer(expression.Identifier);
             Resolve(expression.Value);
             Resolve(expression.Index);
             ResolveLocal(expression, expression.Identifier);
