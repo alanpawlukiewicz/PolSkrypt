@@ -7,6 +7,23 @@ a numeracja wersji zgodna z [Semantic Versioning](https://semver.org/lang/pl/).
 
 ## [Niewydane]
 
+## [0.4.0] 2026-11-11
+
+### Dodano
+- Dziedziczenie.
+- słowa kluczowe `super`, `dziedziczy_po`.
+- Listy tworzone poprzez `[]`.
+- Funkcje natywne operujące na listach: `dodaj`, `usuń`, `długość`, `zawiera`, `wstaw`, `pusta`, `kopiuj`, `szukaj`, `policz`, `wyczyść`.
+- Aliasy dla niektórych słów kluczowych: `zmienna` -> `zm`, `w_przeciwnym_wypadku` -> `wpw`, `podczas_gdy` -> `pgdy`.
+
+### Zmienono
+- Funkcja natywna `wypisz` nie wypisuje teraz dodatkowego znaku " " w przypadku podania jednego argumentu.
+
+### Naprawiono
+- Operatory złożonego przypisania niepoprawnie identyfikujące zmienne.
+- Operatory `/=`, `%=` i `%` nie sprawdzające czy dzielnik to 0.
+- Klasy pozwalające na wielokrotną deklarację metod (zwykłych i statycznych) o tej samej nazwie.
+
 ## [0.3.0] 2026-11-06
 
 ### Dodano
@@ -51,6 +68,7 @@ a numeracja wersji zgodna z [Semantic Versioning](https://semver.org/lang/pl/).
 - Funkcje natywne: `zegar`, `wypisz`, `wprowadź`
 
 [Niewydane]: https://github.com/alanpawlukiewicz/PolSkrypt/tree/master
+[0.4.0]: https://github.com/alanpawlukiewicz/PolSkrypt/releases/tag/v0.4.0
 [0.3.0]: https://github.com/alanpawlukiewicz/PolSkrypt/releases/tag/v0.3.0
 [0.2.0]: https://github.com/alanpawlukiewicz/PolSkrypt/releases/tag/v0.2.0
 [0.1.0]: https://github.com/alanpawlukiewicz/PolSkrypt/releases/tag/v0.1.0
