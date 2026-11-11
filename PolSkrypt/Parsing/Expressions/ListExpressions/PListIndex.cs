@@ -1,7 +1,7 @@
 ﻿using PolSkrypt.Contracts;
 using PolSkrypt.Lexing;
 
-namespace PolSkrypt.Parsing.Expressions
+namespace PolSkrypt.Parsing.Expressions.ListExpressions
 {
     public class PListIndex : Expr
     {

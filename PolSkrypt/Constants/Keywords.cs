@@ -11,5 +11,7 @@
         public const string CONSTRUCTOR = "konstruktor";
         public const string SELF = "ja";
         public const string SUPER = "super";
+        public const string APPEND = "dodaj";
+        public const string REMOVE = "usuń";
     }
 }

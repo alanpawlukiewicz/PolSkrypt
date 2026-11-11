@@ -3,6 +3,7 @@ using PolSkrypt.Errors;
 using PolSkrypt.Errors.Exceptions;
 using PolSkrypt.Lexing;
 using PolSkrypt.Parsing.Expressions;
+using PolSkrypt.Parsing.Expressions.ListExpressions;
 using PolSkrypt.Parsing.Statements;
 
 namespace PolSkrypt.Parsing
@@ -517,7 +518,9 @@ namespace PolSkrypt.Parsing
                 else if (Match(TokenType.DOT))
                 {
                     Token name = Consume(TokenType.IDENTIFIER, "Oczekiwano nazwy po '.'");
+
                     expr = new Get(expr, name);
+
                 }
                 else
                 {
@@ -571,7 +574,7 @@ namespace PolSkrypt.Parsing
             {
                 var keyword = Previous();
                 List<Expr> items = new() { };
-                while(!Match(TokenType.RIGHT_SQUARE_BRACKET) && !IsAtEnd())
+                while (!Match(TokenType.RIGHT_SQUARE_BRACKET) && !IsAtEnd())
                 {
                     items.Add(Expression());
                     if (Peek().Type == TokenType.COMMA)

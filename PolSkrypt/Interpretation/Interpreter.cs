@@ -7,7 +7,9 @@ using PolSkrypt.Interpretation.Callables;
 using PolSkrypt.Interpretation.Callables.NativeCallables;
 using PolSkrypt.Lexing;
 using PolSkrypt.Parsing.Expressions;
+using PolSkrypt.Parsing.Expressions.ListExpressions;
 using PolSkrypt.Parsing.Statements;
+using static PolSkrypt.Interpretation.Callables.ListCallable;
 
 namespace PolSkrypt.Interpretation
 {
@@ -461,7 +463,7 @@ namespace PolSkrypt.Interpretation
 
         public object? VisitGetExpression(Get expression)
         {
-            object? obj = Evaluate(expression.Object);
+            var obj = Evaluate(expression.Object);
 
             if (obj is Instance instance)
                 return instance.Get(expression.Name);
@@ -472,6 +474,13 @@ namespace PolSkrypt.Interpretation
                 if (m != null) return m;
                 throw new RuntimeException(expression.Name,
                     $"Klasa '{klass.Name}' nie posiada metody statycznej '{expression.Name.Lexeme}'.");
+            }
+
+            // Handle append and remove for lists
+            if (obj is List<object?> list && (expression.Name.Lexeme == Keywords.APPEND || expression.Name.Lexeme == Keywords.REMOVE))
+            {
+                var type = expression.Name.Lexeme == Keywords.APPEND ? ListCallType.APPEND : ListCallType.REMOVE;
+                return new ListCallable(type, list, expression.Name);
             }
 
             throw new RuntimeException(expression.Name, "Tylko instancje i klasy mają właściwości.");
@@ -543,7 +552,7 @@ namespace PolSkrypt.Interpretation
             {
                 throw new RuntimeException(expression.Keyword, "Indeks znajduje się poza zakresem listy.");
             }
-            
+
         }
 
         public object? VisitPListIndexAssignExpression(PListIndexAssign expression)

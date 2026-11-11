@@ -3,6 +3,7 @@ using PolSkrypt.Contracts;
 using PolSkrypt.Errors;
 using PolSkrypt.Lexing;
 using PolSkrypt.Parsing.Expressions;
+using PolSkrypt.Parsing.Expressions.ListExpressions;
 using PolSkrypt.Parsing.Statements;
 
 namespace PolSkrypt.Interpretation
