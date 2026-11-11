@@ -10,7 +10,8 @@
             { "długość" , "length" },
             { "zawiera", "contains" },
             { "wstaw", "insert" },
-            { "pusta", "empty" }
+            { "pusta", "empty" },
+            { "kopiuj", "copy" }
         };
     }
 }

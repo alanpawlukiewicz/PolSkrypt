@@ -22,7 +22,8 @@ namespace PolSkrypt.Interpretation.Callables
             LENGTH,
             CONTAINS,
             INSERT,
-            EMPTY
+            EMPTY,
+            COPY
         }
 
         private ListCallType ToListCallType(string type)
@@ -64,7 +65,7 @@ namespace PolSkrypt.Interpretation.Callables
                 {
                     return 1;
                 }
-                else if (_callType == ListCallType.LENGTH || _callType == ListCallType.EMPTY)
+                else if (_callType == ListCallType.LENGTH || _callType == ListCallType.EMPTY || _callType == ListCallType.COPY)
                 {
                     return 0;
                 }
@@ -101,6 +102,10 @@ namespace PolSkrypt.Interpretation.Callables
             else if (_callType == ListCallType.EMPTY)
             {
                 return _list.Count == 0;
+            }
+            else if (_callType == ListCallType.COPY)
+            {
+                return new List<object?>(_list);
             }
             return _list;
         }
