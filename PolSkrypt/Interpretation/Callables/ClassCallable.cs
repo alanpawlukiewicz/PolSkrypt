@@ -21,7 +21,7 @@ namespace PolSkrypt.Interpretation.Callables
 
         public string Name => _name;
 
-        public int? Arity => FindMethod(Keywords.CONSTRUCTOR)?.Arity ?? 0;
+        public int? Arity => FindMethod(FunctionConstants.CONSTRUCTOR)?.Arity ?? 0;
 
         public FunctionCallable? FindStaticMethod(string name)
         {
@@ -41,7 +41,7 @@ namespace PolSkrypt.Interpretation.Callables
         public object? Call(Interpreter interpreter, List<object?> arguments)
         {
             Instance instance = new Instance(this);
-            FunctionCallable? ctor = FindMethod(Keywords.CONSTRUCTOR);
+            FunctionCallable? ctor = FindMethod(FunctionConstants.CONSTRUCTOR);
             if (ctor != null)
             {
                 ctor.Bind(instance).Call(interpreter, arguments);

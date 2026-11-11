@@ -83,9 +83,9 @@ namespace PolSkrypt.Parsing
                 else
                 {
                     Token nextToken = Peek();
-                    if (nextToken.Type == TokenType.IDENTIFIER && nextToken.Lexeme == Keywords.CONSTRUCTOR)
+                    if (nextToken.Type == TokenType.IDENTIFIER && nextToken.Lexeme == FunctionConstants.CONSTRUCTOR)
                     {
-                        methods.Add(Function(Keywords.CONSTRUCTOR)); // Allow constructor declaration without method keyword
+                        methods.Add(Function(FunctionConstants.CONSTRUCTOR)); // Allow constructor declaration without method keyword
                     }
                     else
                     {

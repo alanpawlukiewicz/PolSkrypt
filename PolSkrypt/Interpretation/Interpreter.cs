@@ -444,7 +444,7 @@ namespace PolSkrypt.Interpretation
 
             var methods = new Dictionary<string, FunctionCallable>();
             foreach (var method in statement.Methods)
-                methods[method.Name.Lexeme] = new FunctionCallable(method, _environment, method.Name.Lexeme == Keywords.CONSTRUCTOR);
+                methods[method.Name.Lexeme] = new FunctionCallable(method, _environment, method.Name.Lexeme == FunctionConstants.CONSTRUCTOR);
 
             var staticMethods = new Dictionary<string, FunctionCallable>();
             foreach (var method in statement.StaticMethods)

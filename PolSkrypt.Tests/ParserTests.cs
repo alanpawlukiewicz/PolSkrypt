@@ -748,10 +748,10 @@ namespace PolSkrypt.Tests
         [Fact]
         public void Parse_ShouldParseConstructorWithoutMethodKeyword()
         {
-            AssertParsesTo($"klasa A {{ {Keywords.CONSTRUCTOR}(x) {{ ja.x = x; }} }}",
+            AssertParsesTo($"klasa A {{ {FunctionConstants.CONSTRUCTOR}(x) {{ ja.x = x; }} }}",
                 Cls("A", new List<Function>
                 {
-                    Fn(Keywords.CONSTRUCTOR, new[] { "x" },
+                    Fn(FunctionConstants.CONSTRUCTOR, new[] { "x" },
                         ExprStmt(new Set(new Self(Op(TokenType.SELF, "ja")), Id("x"), V("x"))))
                 }));
         }

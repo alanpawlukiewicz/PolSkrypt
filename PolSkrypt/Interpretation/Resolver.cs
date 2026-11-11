@@ -323,7 +323,7 @@ namespace PolSkrypt.Interpretation
             foreach (var method in statement.Methods)
             {
                 FunctionType declaration = FunctionType.METHOD;
-                if (method.Name.Lexeme == Keywords.CONSTRUCTOR)
+                if (method.Name.Lexeme == FunctionConstants.CONSTRUCTOR)
                 {
                     declaration = FunctionType.INITIALIZER;
                 }
