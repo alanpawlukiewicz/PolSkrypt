@@ -19,7 +19,7 @@ namespace PolSkrypt.Interpretation.Callables
         {
             APPEND, REMOVE, LENGTH, CONTAINS,
             INSERT, EMPTY, COPY, LOOKUP,
-            COUNT
+            COUNT, CLEAR
         }
 
         private ListCallType ToListCallType(string type)
@@ -61,7 +61,8 @@ namespace PolSkrypt.Interpretation.Callables
                 {
                     return 1;
                 }
-                else if (_callType == ListCallType.LENGTH || _callType == ListCallType.EMPTY || _callType == ListCallType.COPY)
+                else if (_callType == ListCallType.LENGTH || _callType == ListCallType.EMPTY 
+                    || _callType == ListCallType.COPY || _callType == ListCallType.CLEAR)
                 {
                     return 0;
                 }
@@ -126,6 +127,10 @@ namespace PolSkrypt.Interpretation.Callables
                 }
                 return (double)counter;
 
+            }
+            else if (_callType == ListCallType.CLEAR)
+            {
+                _list.Clear();
             }
             return _list;
         }

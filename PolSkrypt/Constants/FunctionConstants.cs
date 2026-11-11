@@ -13,7 +13,8 @@
             { "pusta", "empty" },
             { "kopiuj", "copy" },
             { "szukaj", "lookup" },
-            { "policz", "count" }
+            { "policz", "count" },
+            { "wyczyść", "clear" }
         };
     }
 }
