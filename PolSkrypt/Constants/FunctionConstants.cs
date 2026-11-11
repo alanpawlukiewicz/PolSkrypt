@@ -11,7 +11,8 @@
             { "zawiera", "contains" },
             { "wstaw", "insert" },
             { "pusta", "empty" },
-            { "kopiuj", "copy" }
+            { "kopiuj", "copy" },
+            { "szukaj", "lookup" }
         };
     }
 }
