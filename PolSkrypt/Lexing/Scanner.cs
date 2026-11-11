@@ -32,6 +32,7 @@ namespace PolSkrypt.Lexing
             {"zmienna", TokenType.VAR},
             {"zm", TokenType.VAR},
             {"podczas_gdy", TokenType.WHILE},
+            {"pgdy", TokenType.WHILE},
             {"przerwij", TokenType.BREAK },
             {"metoda",  TokenType.METHOD},
             {"statyczna", TokenType.STATIC },
