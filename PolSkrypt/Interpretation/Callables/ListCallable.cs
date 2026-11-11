@@ -1,15 +1,8 @@
-﻿using Microsoft.VisualBasic;
-using PolSkrypt.Constants;
+﻿using PolSkrypt.Constants;
 using PolSkrypt.Contracts;
-using PolSkrypt.Errors;
 using PolSkrypt.Errors.Exceptions;
 using PolSkrypt.Helpers;
 using PolSkrypt.Lexing;
-using System;
-using System.Collections.Generic;
-using System.Linq.Expressions;
-using System.Text;
-using System.Xml.Linq;
 
 namespace PolSkrypt.Interpretation.Callables
 {
@@ -46,12 +39,14 @@ namespace PolSkrypt.Interpretation.Callables
             {
                 throw new RuntimeException(name, "Podano niepoprawną funkcję listy.");
             }
-            
+
             _list = list;
             _name = name;
         }
 
-        public int? Arity { get
+        public int? Arity
+        {
+            get
             {
                 if (_callType == ListCallType.APPEND)
                 {
@@ -61,7 +56,7 @@ namespace PolSkrypt.Interpretation.Callables
                 {
                     return 1;
                 }
-                else if (_callType == ListCallType.LENGTH || _callType == ListCallType.EMPTY 
+                else if (_callType == ListCallType.LENGTH || _callType == ListCallType.EMPTY
                     || _callType == ListCallType.COPY || _callType == ListCallType.CLEAR)
                 {
                     return 0;

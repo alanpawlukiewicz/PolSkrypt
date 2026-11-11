@@ -1,8 +1,5 @@
 ﻿using PolSkrypt.Errors.Exceptions;
 using PolSkrypt.Lexing;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace PolSkrypt.Helpers
 {

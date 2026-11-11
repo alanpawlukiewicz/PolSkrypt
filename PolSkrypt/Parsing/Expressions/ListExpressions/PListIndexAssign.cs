@@ -1,8 +1,5 @@
 ﻿using PolSkrypt.Contracts;
 using PolSkrypt.Lexing;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace PolSkrypt.Parsing.Expressions.ListExpressions
 {

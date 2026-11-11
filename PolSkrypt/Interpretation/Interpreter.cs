@@ -9,7 +9,6 @@ using PolSkrypt.Lexing;
 using PolSkrypt.Parsing.Expressions;
 using PolSkrypt.Parsing.Expressions.ListExpressions;
 using PolSkrypt.Parsing.Statements;
-using static PolSkrypt.Interpretation.Callables.ListCallable;
 
 namespace PolSkrypt.Interpretation
 {
@@ -519,7 +518,7 @@ namespace PolSkrypt.Interpretation
 
         public object? VisitSuperExpression(Super expression)
         {
-            if(_locals.TryGetValue(expression, out int distance))
+            if (_locals.TryGetValue(expression, out int distance))
             {
                 ClassCallable? superclass = (ClassCallable?)_environment.GetAt(distance, expression.Keyword);
                 if (superclass == null)
