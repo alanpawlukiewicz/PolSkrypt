@@ -50,7 +50,23 @@ namespace PolSkrypt.Interpretation.Callables
             _name = name;
         }
 
-        public int? Arity => _callType == ListCallType.REMOVE ? 1 : null;
+        public int? Arity { get
+            {
+                if (_callType == ListCallType.APPEND)
+                {
+                    return null;
+                }
+                if (_callType == ListCallType.REMOVE)
+                {
+                    return 1;
+                }
+                if (_callType == ListCallType.LENGTH)
+                {
+                    return 0;
+                }
+                return null;
+            }
+        }
 
         public object? Call(Interpreter interpreter, List<object?> arguments)
         {
@@ -62,8 +78,7 @@ namespace PolSkrypt.Interpretation.Callables
             {
                 if (arguments[0] is not double index)
                 {
-                    ErrorHandler.Error(_name, "Podano niepoprawny indeks.");
-                    return _list;
+                    throw new RuntimeException(_name, "Podano niepoprawny indeks.");
                 }
                 try
                 {
@@ -72,9 +87,12 @@ namespace PolSkrypt.Interpretation.Callables
                 }
                 catch (ArgumentOutOfRangeException)
                 {
-                    ErrorHandler.Error(_name, "Indeks znajduje się poza zakresem listy.");
-                    return _list;
+                    throw new RuntimeException(_name, "Indeks znajduje się poza zakresem listy.");
                 }
+            }
+            else if (_callType == ListCallType.LENGTH)
+            {
+                return _list.Count;
             }
             return _list;
         }
