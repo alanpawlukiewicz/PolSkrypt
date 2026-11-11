@@ -7,7 +7,8 @@
         public static readonly Dictionary<string, string> LIST_FUNCTIONS = new Dictionary<string, string>{
             { "dodaj", "append" }, 
             { "usuń", "remove" }, 
-            { "długość" , "length" } 
+            { "długość" , "length" },
+            { "zawiera", "contains" }
         };
     }
 }

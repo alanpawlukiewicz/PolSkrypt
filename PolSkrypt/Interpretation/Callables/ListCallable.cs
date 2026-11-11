@@ -18,7 +18,8 @@ namespace PolSkrypt.Interpretation.Callables
         {
             APPEND,
             REMOVE,
-            LENGTH
+            LENGTH,
+            CONTAINS
         }
 
         private ListCallType ToListCallType(string type)
@@ -56,13 +57,17 @@ namespace PolSkrypt.Interpretation.Callables
                 {
                     return null;
                 }
-                if (_callType == ListCallType.REMOVE)
+                else if (_callType == ListCallType.REMOVE)
                 {
                     return 1;
                 }
-                if (_callType == ListCallType.LENGTH)
+                else if (_callType == ListCallType.LENGTH)
                 {
                     return 0;
+                }
+                else if (_callType == ListCallType.CONTAINS)
+                {
+                    return 1;
                 }
                 return null;
             }
@@ -93,6 +98,10 @@ namespace PolSkrypt.Interpretation.Callables
             else if (_callType == ListCallType.LENGTH)
             {
                 return _list.Count;
+            }
+            else if (_callType == ListCallType.CONTAINS)
+            {
+                return _list.Contains(arguments[0]);
             }
             return _list;
         }
