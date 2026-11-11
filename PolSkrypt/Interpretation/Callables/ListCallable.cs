@@ -1,4 +1,6 @@
-﻿using PolSkrypt.Contracts;
+﻿using Microsoft.VisualBasic;
+using PolSkrypt.Constants;
+using PolSkrypt.Contracts;
 using PolSkrypt.Errors;
 using PolSkrypt.Errors.Exceptions;
 using PolSkrypt.Lexing;
@@ -6,23 +8,44 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text;
+using System.Xml.Linq;
 
 namespace PolSkrypt.Interpretation.Callables
 {
     public class ListCallable : ICallable
     {
-        public enum ListCallType
+        private enum ListCallType
         {
             APPEND,
-            REMOVE
+            REMOVE,
+            LENGTH
         }
+
+        private ListCallType ToListCallType(string type)
+        {
+            var x = FunctionConstants.LIST_FUNCTIONS[type].ToUpper();
+            if (Enum.TryParse(FunctionConstants.LIST_FUNCTIONS[type].ToUpper(), out ListCallType parsedType))
+            {
+                return parsedType;
+            }
+            throw new RuntimeException(_name, "Podano niepoprawną funkcję listy.");
+        }
+
         private readonly ListCallType _callType;
         private readonly List<object?> _list;
         private readonly Token _name;
 
-        public ListCallable(ListCallType callType, List<object?> list, Token name)
+        public ListCallable(List<object?> list, Token name)
         {
-            _callType = callType;
+            if (FunctionConstants.LIST_FUNCTIONS.ContainsKey(name.Lexeme))
+            {
+                _callType = ToListCallType(name.Lexeme);
+            }
+            else
+            {
+                throw new RuntimeException(name, "Podano niepoprawną funkcję listy.");
+            }
+            
             _list = list;
             _name = name;
         }

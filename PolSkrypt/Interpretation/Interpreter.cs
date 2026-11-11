@@ -477,10 +477,9 @@ namespace PolSkrypt.Interpretation
             }
 
             // Handle append and remove for lists
-            if (obj is List<object?> list && (expression.Name.Lexeme == Keywords.APPEND || expression.Name.Lexeme == Keywords.REMOVE))
+            if (obj is List<object?> list)
             {
-                var type = expression.Name.Lexeme == Keywords.APPEND ? ListCallType.APPEND : ListCallType.REMOVE;
-                return new ListCallable(type, list, expression.Name);
+                return new ListCallable(list, expression.Name);
             }
 
             throw new RuntimeException(expression.Name, "Tylko instancje i klasy mają właściwości.");
