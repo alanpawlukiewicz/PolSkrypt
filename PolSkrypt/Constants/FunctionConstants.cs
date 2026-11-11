@@ -9,7 +9,8 @@
             { "usuń", "remove" }, 
             { "długość" , "length" },
             { "zawiera", "contains" },
-            { "wstaw", "insert" }
+            { "wstaw", "insert" },
+            { "pusta", "empty" }
         };
     }
 }

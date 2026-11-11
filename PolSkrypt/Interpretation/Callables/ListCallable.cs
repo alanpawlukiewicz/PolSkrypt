@@ -21,7 +21,8 @@ namespace PolSkrypt.Interpretation.Callables
             REMOVE,
             LENGTH,
             CONTAINS,
-            INSERT
+            INSERT,
+            EMPTY
         }
 
         private ListCallType ToListCallType(string type)
@@ -59,17 +60,13 @@ namespace PolSkrypt.Interpretation.Callables
                 {
                     return null;
                 }
-                else if (_callType == ListCallType.REMOVE)
+                else if (_callType == ListCallType.REMOVE || _callType == ListCallType.CONTAINS)
                 {
                     return 1;
                 }
-                else if (_callType == ListCallType.LENGTH)
+                else if (_callType == ListCallType.LENGTH || _callType == ListCallType.EMPTY)
                 {
                     return 0;
-                }
-                else if (_callType == ListCallType.CONTAINS)
-                {
-                    return 1;
                 }
                 else if (_callType == ListCallType.INSERT)
                 {
@@ -100,6 +97,10 @@ namespace PolSkrypt.Interpretation.Callables
             else if (_callType == ListCallType.INSERT)
             {
                 HandleInsert(ListHelper.HandleIndex(arguments[0], _name), arguments[1]);
+            }
+            else if (_callType == ListCallType.EMPTY)
+            {
+                return _list.Count == 0;
             }
             return _list;
         }
