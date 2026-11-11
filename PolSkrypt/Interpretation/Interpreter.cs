@@ -381,7 +381,7 @@ namespace PolSkrypt.Interpretation
 
         public object? VisitCompoundAssignmentExpression(CompoundAssignment expression)
         {
-            var currentValue = _environment.Get(expression.Name);
+            var currentValue = LookUpVariable(expression.Name, expression);
             var value = Evaluate(expression.Value);
             object? newValue = null;
             switch (expression.Operator.Type)
