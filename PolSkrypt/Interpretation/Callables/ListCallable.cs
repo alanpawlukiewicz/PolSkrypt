@@ -3,6 +3,7 @@ using PolSkrypt.Constants;
 using PolSkrypt.Contracts;
 using PolSkrypt.Errors;
 using PolSkrypt.Errors.Exceptions;
+using PolSkrypt.Helpers;
 using PolSkrypt.Lexing;
 using System;
 using System.Collections.Generic;
@@ -19,7 +20,8 @@ namespace PolSkrypt.Interpretation.Callables
             APPEND,
             REMOVE,
             LENGTH,
-            CONTAINS
+            CONTAINS,
+            INSERT
         }
 
         private ListCallType ToListCallType(string type)
@@ -69,6 +71,10 @@ namespace PolSkrypt.Interpretation.Callables
                 {
                     return 1;
                 }
+                else if (_callType == ListCallType.INSERT)
+                {
+                    return 2;
+                }
                 return null;
             }
         }
@@ -81,19 +87,7 @@ namespace PolSkrypt.Interpretation.Callables
             }
             else if (_callType == ListCallType.REMOVE)
             {
-                if (arguments[0] is not double index)
-                {
-                    throw new RuntimeException(_name, "Podano niepoprawny indeks.");
-                }
-                try
-                {
-                    int parsedIndex = (int)index;
-                    _list.RemoveAt(parsedIndex);
-                }
-                catch (ArgumentOutOfRangeException)
-                {
-                    throw new RuntimeException(_name, "Indeks znajduje się poza zakresem listy.");
-                }
+                HandleRemove(arguments[0]);
             }
             else if (_callType == ListCallType.LENGTH)
             {
@@ -103,7 +97,35 @@ namespace PolSkrypt.Interpretation.Callables
             {
                 return _list.Contains(arguments[0]);
             }
+            else if (_callType == ListCallType.INSERT)
+            {
+                HandleInsert(ListHelper.HandleIndex(arguments[0], _name), arguments[1]);
+            }
             return _list;
+        }
+
+        private void HandleRemove(object? argument)
+        {
+            try
+            {
+                _list.RemoveAt(ListHelper.HandleIndex(argument, _name));
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                throw new RuntimeException(_name, "Indeks znajduje się poza zakresem listy.");
+            }
+        }
+
+        private void HandleInsert(int index, object? argument)
+        {
+            try
+            {
+                _list.Insert(index, argument);
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                throw new RuntimeException(_name, "Indeks znajduje się poza zakresem listy.");
+            }
         }
     }
 }

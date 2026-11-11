@@ -8,7 +8,8 @@
             { "dodaj", "append" }, 
             { "usuń", "remove" }, 
             { "długość" , "length" },
-            { "zawiera", "contains" }
+            { "zawiera", "contains" },
+            { "wstaw", "insert" }
         };
     }
 }
