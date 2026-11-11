@@ -4,7 +4,10 @@ Język skryptowy bazowany na książce [Crafting Interpreters](https://craftingi
 
 ## Dokumentacja
 
-- [Referencja języka](docs/language-reference.md) – składnia, typy, operatory, funkcje i klasy
+- [Referencja języka](docs/language-reference.md) – składnia, typy, zmienne, operatory, instrukcje sterujące i funkcje
+- [Klasy i dziedziczenie](docs/classes.md) – klasy, metody, konstruktory, dziedziczenie (`dziedziczy_po`) i `super`
+- [Listy](docs/lists.md) – tworzenie list, indeksowanie i metody natywne list
+- [Funkcje wbudowane](docs/builtin-functions.md) – `wypisz`, `wprowadź`, `zegar`, `liczba`, `napis`, `typ`
 - [Narzędzia](docs/tools.md) – analiza statyczna (resolver) i tryb promptu (REPL)
 - [Changelog](CHANGELOG.md) – historia zmian między wersjami
 
