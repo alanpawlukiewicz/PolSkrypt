@@ -83,6 +83,10 @@ namespace PolSkrypt.Interpretation
                     return (double?)left * (double?)right;
                 case TokenType.PERCENT:
                     CheckNumberOperands(expression.Operator, left, right);
+                    if ((double?)right == 0)
+                    {
+                        throw new RuntimeException(expression.Operator, "Pamiętaj cholero, nigdy nie dziel przez 0!");
+                    }
                     return (double?)left % (double?)right;
                 case TokenType.PLUS:
                     CheckNumberOperands(expression.Operator, left, right);
@@ -400,10 +404,18 @@ namespace PolSkrypt.Interpretation
                     break;
                 case TokenType.SLASH_EQUAL:
                     CheckNumberOperands(expression.Operator, currentValue, value);
+                    if ((double?)value == 0)
+                    {
+                        throw new RuntimeException(expression.Operator, "Pamiętaj cholero, nigdy nie dziel przez 0!");
+                    }
                     newValue = (double?)currentValue / (double?)value;
                     break;
                 case TokenType.PERCENT_EQUAL:
                     CheckNumberOperands(expression.Operator, currentValue, value);
+                    if ((double?)value == 0)
+                    {
+                        throw new RuntimeException(expression.Operator, "Pamiętaj cholero, nigdy nie dziel przez 0!");
+                    }
                     newValue = (double?)currentValue % (double?)value;
                     break;
                 case TokenType.AMPERSAND_EQUAL:
