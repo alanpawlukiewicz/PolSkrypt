@@ -266,15 +266,8 @@ namespace PolSkrypt.Tests
             tokens[1].Literal.Should().Be(5.0);
         }
 
-        [Fact]
-        public void ScanTokens_ShouldNotThrowOnNonAsciiDigits()
-        {
-            // char.IsDigit also returns true for e.g. Arabic-Indic digits,
-            // and double.Parse then throws a FormatException.
-            Action act = () => Scan("٣");
-
-            act.Should().NotThrow();
-        }
+        // The test for non-ASCII digits as a standalone character lives in ScannerErrorTests,
+        // because such a character is now reported through ErrorHandler (static state).
 
         // ---------------------------------------------------------------
         // Strings
@@ -520,6 +513,264 @@ klasa Pies {
                 TokenType.IDENTIFIER, TokenType.PERCENT_EQUAL, TokenType.NUMBER, TokenType.SEMICOLON,
                 TokenType.IDENTIFIER, TokenType.AMPERSAND_EQUAL, TokenType.NUMBER, TokenType.SEMICOLON,
                 TokenType.EOF);
+        }
+
+        // ---------------------------------------------------------------
+        // Keyword aliases and inheritance
+        // ---------------------------------------------------------------
+
+        [Theory]
+        [InlineData("wpw", TokenType.ELSE)]
+        [InlineData("zm", TokenType.VAR)]
+        [InlineData("pgdy", TokenType.WHILE)]
+        [InlineData("dziedziczy_po", TokenType.EXTENDS)]
+        public void ScanTokens_ShouldRecognizeShortKeywordAliasesAndExtends(string keyword, TokenType expected)
+        {
+            var tokens = Scan(keyword);
+
+            tokens.Should().HaveCount(2);
+            tokens[0].Type.Should().Be(expected);
+            tokens[0].Lexeme.Should().Be(keyword);
+            tokens[0].Literal.Should().BeNull();
+        }
+
+        [Theory]
+        [InlineData("wpw", "w_przeciwnym_wypadku")]
+        [InlineData("zm", "zmienna")]
+        [InlineData("pgdy", "podczas_gdy")]
+        public void ScanTokens_ShouldGiveAliasTheSameTokenTypeAsFullKeyword(string alias, string full)
+        {
+            Types(alias).Should().Equal(Types(full));
+        }
+
+        [Theory]
+        [InlineData("wpw1")]
+        [InlineData("wpwx")]
+        [InlineData("zm1")]
+        [InlineData("zm_")]
+        [InlineData("zmm")]
+        [InlineData("pgdy2")]
+        [InlineData("pgd")]
+        [InlineData("dziedziczy")]
+        [InlineData("dziedziczy_po_")]
+        [InlineData("dziedziczy_pol")]
+        [InlineData("w_przeciwnym")]
+        [InlineData("Wpw")]
+        [InlineData("ZM")]
+        [InlineData("Dziedziczy_po")]
+        public void ScanTokens_ShouldTreatAliasLookalikesAsIdentifiers(string text)
+        {
+            var tokens = Scan(text);
+
+            tokens.Should().HaveCount(2);
+            tokens[0].Type.Should().Be(TokenType.IDENTIFIER);
+            tokens[0].Lexeme.Should().Be(text);
+        }
+
+        [Fact]
+        public void ScanTokens_ShouldScanClassWithInheritance()
+        {
+            Types("klasa Pies dziedziczy_po Zwierze { }").Should().Equal(
+                TokenType.CLASS, TokenType.IDENTIFIER, TokenType.EXTENDS, TokenType.IDENTIFIER,
+                TokenType.LEFT_BRACE, TokenType.RIGHT_BRACE, TokenType.EOF);
+        }
+
+        [Fact]
+        public void ScanTokens_ShouldScanStatementsWrittenWithShortAliases()
+        {
+            Types("zm i = 0; pgdy (i < 3) { i += 1; }").Should().Equal(
+                TokenType.VAR, TokenType.IDENTIFIER, TokenType.EQUAL, TokenType.NUMBER, TokenType.SEMICOLON,
+                TokenType.WHILE, TokenType.LEFT_PAREN, TokenType.IDENTIFIER, TokenType.LESS, TokenType.NUMBER,
+                TokenType.RIGHT_PAREN, TokenType.LEFT_BRACE, TokenType.IDENTIFIER, TokenType.PLUS_EQUAL,
+                TokenType.NUMBER, TokenType.SEMICOLON, TokenType.RIGHT_BRACE, TokenType.EOF);
+        }
+
+        [Fact]
+        public void ScanTokens_ShouldScanIfWithShortElseAlias()
+        {
+            Types("jeżeli (a) { } wpw { }").Should().Equal(
+                TokenType.IF, TokenType.LEFT_PAREN, TokenType.IDENTIFIER, TokenType.RIGHT_PAREN,
+                TokenType.LEFT_BRACE, TokenType.RIGHT_BRACE,
+                TokenType.ELSE, TokenType.LEFT_BRACE, TokenType.RIGHT_BRACE, TokenType.EOF);
+        }
+
+        // ---------------------------------------------------------------
+        // Square brackets
+        // ---------------------------------------------------------------
+
+        [Theory]
+        [InlineData("[", TokenType.LEFT_SQUARE_BRACKET)]
+        [InlineData("]", TokenType.RIGHT_SQUARE_BRACKET)]
+        public void ScanTokens_ShouldScanSquareBrackets(string source, TokenType expected)
+        {
+            var tokens = Scan(source);
+
+            tokens.Should().HaveCount(2);
+            tokens[0].Type.Should().Be(expected);
+            tokens[0].Lexeme.Should().Be(source);
+            tokens[0].Literal.Should().BeNull();
+        }
+
+        [Fact]
+        public void ScanTokens_ShouldScanEmptyArrayLiteral()
+        {
+            Types("[]").Should().Equal(
+                TokenType.LEFT_SQUARE_BRACKET, TokenType.RIGHT_SQUARE_BRACKET, TokenType.EOF);
+        }
+
+        [Fact]
+        public void ScanTokens_ShouldScanArrayLiteralAndIndexing()
+        {
+            Types("a[0] = [1, 2.5];").Should().Equal(
+                TokenType.IDENTIFIER, TokenType.LEFT_SQUARE_BRACKET, TokenType.NUMBER, TokenType.RIGHT_SQUARE_BRACKET,
+                TokenType.EQUAL,
+                TokenType.LEFT_SQUARE_BRACKET, TokenType.NUMBER, TokenType.COMMA, TokenType.NUMBER,
+                TokenType.RIGHT_SQUARE_BRACKET, TokenType.SEMICOLON, TokenType.EOF);
+        }
+
+        [Fact]
+        public void ScanTokens_ShouldScanNestedIndexing()
+        {
+            Types("a[b[1]]").Should().Equal(
+                TokenType.IDENTIFIER, TokenType.LEFT_SQUARE_BRACKET,
+                TokenType.IDENTIFIER, TokenType.LEFT_SQUARE_BRACKET, TokenType.NUMBER, TokenType.RIGHT_SQUARE_BRACKET,
+                TokenType.RIGHT_SQUARE_BRACKET, TokenType.EOF);
+        }
+
+        [Fact]
+        public void ScanTokens_ShouldScanIndexedCompoundAssignment()
+        {
+            Types("t[i] += 1").Should().Equal(
+                TokenType.IDENTIFIER, TokenType.LEFT_SQUARE_BRACKET, TokenType.IDENTIFIER,
+                TokenType.RIGHT_SQUARE_BRACKET, TokenType.PLUS_EQUAL, TokenType.NUMBER, TokenType.EOF);
+        }
+
+        [Fact]
+        public void ScanTokens_ShouldNotTreatBracketsInsideStringsAsTokens()
+        {
+            var tokens = Scan("\"[1, 2]\"");
+
+            tokens.Select(t => t.Type).Should().Equal(TokenType.STRING, TokenType.EOF);
+            tokens[0].Literal.Should().Be("[1, 2]");
+        }
+
+        // ---------------------------------------------------------------
+        // Identifiers vs. non-ASCII digits
+        // ---------------------------------------------------------------
+
+        [Fact]
+        public void ScanTokens_ShouldAllowNonAsciiDigitInsideIdentifier()
+        {
+            // Documents current behavior: only the START of a number is restricted to '0'-'9',
+            // while identifiers use char.IsLetterOrDigit, which accepts e.g. Arabic-Indic digits.
+            var tokens = Scan("a٣");
+
+            tokens.Should().HaveCount(2);
+            tokens[0].Type.Should().Be(TokenType.IDENTIFIER);
+            tokens[0].Lexeme.Should().Be("a٣");
+        }
+
+        // ---------------------------------------------------------------
+        // Additional comment edge cases
+        // ---------------------------------------------------------------
+
+        [Theory]
+        [InlineData("/*/ 5", new[] { TokenType.EOF })]                                   // "/*/" does not close itself
+        [InlineData("/***/ 5", new[] { TokenType.NUMBER, TokenType.EOF })]
+        [InlineData("/* a **/ 5", new[] { TokenType.NUMBER, TokenType.EOF })]
+        [InlineData("/* a */5", new[] { TokenType.NUMBER, TokenType.EOF })]
+        [InlineData("/*", new[] { TokenType.EOF })]
+        [InlineData("/* a *", new[] { TokenType.EOF })]
+        [InlineData("/* a /", new[] { TokenType.EOF })]
+        [InlineData("a //= 5", new[] { TokenType.IDENTIFIER, TokenType.EOF })]            // comment wins over "/="
+        [InlineData("a /*= 5 */ b", new[] { TokenType.IDENTIFIER, TokenType.IDENTIFIER, TokenType.EOF })]
+        [InlineData("a /// b", new[] { TokenType.IDENTIFIER, TokenType.EOF })]
+        [InlineData("a / /* x */ b", new[] { TokenType.IDENTIFIER, TokenType.SLASH, TokenType.IDENTIFIER, TokenType.EOF })]
+        [InlineData("5//komentarz\r\n6", new[] { TokenType.NUMBER, TokenType.NUMBER, TokenType.EOF })]
+        [InlineData("*/", new[] { TokenType.STAR, TokenType.SLASH, TokenType.EOF })]     // closing delimiter outside a comment
+        [InlineData("/* a */ */ 5", new[] { TokenType.STAR, TokenType.SLASH, TokenType.NUMBER, TokenType.EOF })]
+        public void ScanTokens_ShouldHandleCommentEdgeCases(string source, TokenType[] expected)
+        {
+            Types(source).Should().Equal(expected);
+        }
+
+        [Theory]
+        [InlineData("/*")]
+        [InlineData("/* a *")]
+        [InlineData("/*/")]
+        [InlineData("5 /* a\nb\nc")]
+        public void ScanTokens_ShouldNotThrowOnUnterminatedBlockCommentVariants(string source)
+        {
+            Action act = () => Scan(source);
+
+            act.Should().NotThrow();
+        }
+
+        [Fact]
+        public void ScanTokens_ShouldAssignCorrectLineToTokenAfterCommentsOfBothKinds()
+        {
+            var tokens = Scan("a // x\n/* y\nz */ b\n// w\nc");
+
+            tokens.Where(t => t.Type != TokenType.EOF)
+                  .Select(t => (t.Lexeme, t.Line))
+                  .Should().Equal(("a", 1), ("b", 3), ("c", 5));
+        }
+
+        // ---------------------------------------------------------------
+        // Line of the EOF token
+        // ---------------------------------------------------------------
+
+        [Theory]
+        [InlineData("", 1)]
+        [InlineData("5", 1)]
+        [InlineData("5\n", 2)]
+        [InlineData("\n\n\n", 4)]
+        [InlineData("5\r\n6\r\n", 3)]
+        [InlineData("// a\n", 2)]
+        [InlineData("/* a\nb */", 2)]
+        [InlineData("a\n/* x\ny", 3)]          // unterminated block comment still counts lines
+        [InlineData("\"a\nb\"", 2)]
+        public void ScanTokens_ShouldAssignLastLineNumberToEofToken(string source, int expectedLine)
+        {
+            var tokens = Scan(source);
+
+            tokens.Last().Type.Should().Be(TokenType.EOF);
+            tokens.Last().Line.Should().Be(expectedLine);
+        }
+
+        // ---------------------------------------------------------------
+        // Numbers - additional cases
+        // ---------------------------------------------------------------
+
+        [Theory]
+        [InlineData("1.5.", new[] { TokenType.NUMBER, TokenType.DOT, TokenType.EOF })]
+        [InlineData("1..2", new[] { TokenType.NUMBER, TokenType.DOT, TokenType.DOT, TokenType.NUMBER, TokenType.EOF })]
+        [InlineData("a[1.5]", new[] { TokenType.IDENTIFIER, TokenType.LEFT_SQUARE_BRACKET, TokenType.NUMBER,
+                                      TokenType.RIGHT_SQUARE_BRACKET, TokenType.EOF })]
+        [InlineData("1+2", new[] { TokenType.NUMBER, TokenType.PLUS, TokenType.NUMBER, TokenType.EOF })]
+        [InlineData("1.5**2", new[] { TokenType.NUMBER, TokenType.STAR_STAR, TokenType.NUMBER, TokenType.EOF })]
+        public void ScanTokens_ShouldSplitNumbersCorrectlyNextToPunctuation(string source, TokenType[] expected)
+        {
+            Types(source).Should().Equal(expected);
+        }
+
+        [Fact]
+        public void ScanTokens_ShouldParseNumbersIndependentlyOfCurrentCulture()
+        {
+            var original = System.Globalization.CultureInfo.CurrentCulture;
+            try
+            {
+                System.Globalization.CultureInfo.CurrentCulture = new System.Globalization.CultureInfo("pl-PL");
+
+                var tokens = Scan("3.14");
+
+                tokens[0].Type.Should().Be(TokenType.NUMBER);
+                tokens[0].Literal.Should().Be(3.14);
+            }
+            finally
+            {
+                System.Globalization.CultureInfo.CurrentCulture = original;
+            }
         }
 
         [Fact]
