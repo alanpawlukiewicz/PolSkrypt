@@ -375,7 +375,7 @@ namespace PolSkrypt.Tests
         [InlineData("&=", TokenType.AMPERSAND_EQUAL)]
         public void Parse_ShouldParseCompoundAssignment(string op, TokenType type)
         {
-            AssertExpression($"x {op} 1", new CompoundAssignment(Id("x"), Op(type, op), Num(1)));
+            AssertExpression($"x {op} 1", new CompoundAssignment(Op(type, op), V("x"), Num(1)));
         }
 
         [Fact]
@@ -383,8 +383,8 @@ namespace PolSkrypt.Tests
         {
             AssertExpression("x += 1 + 2",
                 new CompoundAssignment(
-                    Id("x"),
                     Op(TokenType.PLUS_EQUAL, "+="),
+                    V("x"),
                     Bin(Num(1), TokenType.PLUS, "+", Num(2))));
         }
 
@@ -392,7 +392,7 @@ namespace PolSkrypt.Tests
         public void Parse_ShouldParseCompoundAssignmentWithAssignmentValue()
         {
             AssertExpression("x += y = 2",
-                new CompoundAssignment(Id("x"), Op(TokenType.PLUS_EQUAL, "+="), new Assign(Id("y"), Num(2))));
+                new CompoundAssignment(Op(TokenType.PLUS_EQUAL, "+="), V("x"), new Assign(Id("y"), Num(2.0))));
         }
 
         // ---------------------------------------------------------------
@@ -654,7 +654,7 @@ namespace PolSkrypt.Tests
                     new Literal(true),
                     Blk(
                         ExprStmt(V("x")),
-                        ExprStmt(new CompoundAssignment(Id("i"), Op(TokenType.PLUS_EQUAL, "+="), Num(1))))));
+                        ExprStmt(new CompoundAssignment(Op(TokenType.PLUS_EQUAL, "+="), V("i"), Num(1))))));
         }
 
         [Fact]
@@ -1027,7 +1027,7 @@ namespace PolSkrypt.Tests
                         Bin(V("i"), TokenType.LESS, "<", Num(3)),
                         Blk(
                             ExprStmt(IdxSet("a", V("i"), V("i"))),
-                            ExprStmt(new CompoundAssignment(Id("i"), Op(TokenType.PLUS_EQUAL, "+="), Num(1)))))));
+                            ExprStmt(new CompoundAssignment(Op(TokenType.PLUS_EQUAL, "+="), V("i"), Num(1)))))));
         }
 
         // ---------------------------------------------------------------

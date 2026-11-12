@@ -2033,5 +2033,120 @@ zmienna wynik = k.daj()[1];").Should().Be(99.0);
         {
             AssertRuntimeError("zmienna m = [1, 2]; zmienna wynik = m[0][0];", "musi być listą");
         }
+
+        [Fact]
+        public void CompoundAssignment_OnListElement_UpdatesElementNotVariable()
+        {
+            var interpreter = ExecuteSource(@"
+zmienna l = [1, 2, 3];
+l[1] += 10;
+l[2] *= 4;");
+
+            AsList(Global(interpreter, "l")).Should().Equal(1.0, 12.0, 12.0);
+        }
+
+        [Fact]
+        public void CompoundAssignment_OnChainedIndex_UpdatesNestedElement()
+        {
+            Eval(@"
+zmienna m = [[1, 2], [3, 4]];
+m[1][0] -= 1;
+zmienna wynik = m[1][0];").Should().Be(2.0);
+        }
+
+        [Fact]
+        public void CompoundAssignment_OnListElement_EvaluatesIndexExpressionOnce()
+        {
+            Eval(@"
+zmienna n = 0;
+funkcja nast() { n += 1; zwróć 0; }
+zmienna l = [5];
+l[nast()] += 1;
+zmienna wynik = n;").Should().Be(1.0);
+        }
+
+        [Fact]
+        public void CompoundAssignment_OnLocalVariableInsideFunction_UpdatesLocal()
+        {
+            Eval(@"
+funkcja f() { zmienna i = 1; i += 4; zwróć i; }
+zmienna wynik = f();").Should().Be(5.0);
+        }
+
+        [Theory]
+        [InlineData("zmienna l = [1]; l[1] += 1;", "poza zakresem")]
+        [InlineData("zmienna x = 5; x[0] += 1;", "musi być listą")]
+        [InlineData("zmienna l = [1]; l[0] /= 0;", "dziel przez 0")]
+        [InlineData("zmienna l = [1]; l[0] += \"a\";", "Operandy muszą być liczbami.")]
+        public void CompoundAssignment_OnListElement_ReportsRuntimeErrors(string source, string fragment)
+        {
+            AssertRuntimeError(source, fragment);
+        }
+
+        [Fact]
+        public void CompoundAssignment_Ampersand_OnListElement_Concatenates()
+        {
+            var interpreter = ExecuteSource("zmienna l = [\"a\"]; l[0] &= 1;");
+
+            AsList(Global(interpreter, "l")).Should().Equal("a1");
+        }
+
+        [Fact]
+        public void CompoundAssignment_OnField_UpdatesFieldAndReturnsNewValue()
+        {
+            var interpreter = ExecuteSource(@"
+klasa K { @init() { ja.n = 1; } metoda zwieksz() { ja.n += 2; zwróć ja.n; } }
+zmienna k = K();
+k.n *= 5;
+zmienna r1 = k.n += 1;
+zmienna r2 = k.zwieksz();");
+
+            Global(interpreter, "r1").Should().Be(6.0);
+            Global(interpreter, "r2").Should().Be(8.0);
+        }
+
+        [Fact]
+        public void CompoundAssignment_OnField_EvaluatesObjectExpressionOnce()
+        {
+            Eval(@"
+klasa K { @init() { ja.n = 0; } }
+zmienna k = K();
+zmienna licznik = 0;
+funkcja daj() { licznik += 1; zwróć k; }
+daj().n += 1;
+zmienna wynik = licznik;").Should().Be(1.0);
+        }
+
+        [Fact]
+        public void CompoundAssignment_OnNestedTargets_Works()
+        {
+            var interpreter = ExecuteSource(@"
+klasa P { @init() { ja.l = [10, 20]; ja.n = 1; } }
+klasa W { @init() { ja.p = P(); } }
+zmienna w = W();
+w.p.n += 4;
+w.p.l[1] -= 5;
+zmienna lista = [P()];
+lista[0].n &= ""x"";
+zmienna a = w.p.n;
+zmienna b = w.p.l[1];
+zmienna c = lista[0].n;");
+
+            Global(interpreter, "a").Should().Be(5.0);
+            Global(interpreter, "b").Should().Be(15.0);
+            Global(interpreter, "c").Should().Be("1x");
+        }
+
+        [Theory]
+        [InlineData("klasa K { } zmienna k = K(); k.n += 1;", null)] 
+        [InlineData("zmienna x = 5; x.y += 1;", "Tylko instancje mają atrybuty.")]
+        [InlineData("zmienna l = [1]; l.y += 1;", "Tylko instancje mają atrybuty.")]
+        [InlineData("klasa K { } K.y += 1;", "Tylko instancje mają atrybuty.")]
+        [InlineData("klasa K { @init() { ja.n = 1; } } zmienna k = K(); k.n /= 0;", "dziel przez 0")]
+        [InlineData("klasa K { @init() { ja.n = 1; } } zmienna k = K(); k.n += \"a\";", "Operandy muszą być liczbami.")]
+        public void CompoundAssignment_OnField_ReportsRuntimeErrors(string source, string? fragment)
+        {
+            AssertRuntimeError(source, fragment);
+        }
     }
 }

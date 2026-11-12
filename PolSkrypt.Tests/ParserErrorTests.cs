@@ -67,7 +67,6 @@ namespace PolSkrypt.Tests
         [InlineData("1 = 2;", "Nieprawidłowy cel przypisania.")]
         [InlineData("(a) = 1;", "Nieprawidłowy cel przypisania.")]
         [InlineData("1 += 2;", "Nieprawidłowy cel przypisania.")]
-        [InlineData("a.b += 1;", "Nieprawidłowy cel przypisania.")]
         // Return / break / blocks
         [InlineData("zwróć 1", "Oczekiwano ';' po wartości zwróconej.")]
         [InlineData("przerwij", "Oczekiwano ';' po 'przerwij'.")]
@@ -340,8 +339,6 @@ namespace PolSkrypt.Tests
         [InlineData("a[];", "Oczekiwano wyrażenia.")]
         [InlineData("a[b[1];", "Oczekiwano znaku ']'.")]
         // invalid assignment targets
-        [InlineData("a[0] += 1;", "Nieprawidłowy cel przypisania.")]
-        [InlineData("a[0] *= 2;", "Nieprawidłowy cel przypisania.")]
         [InlineData("[1] = 2;", "Nieprawidłowy cel przypisania.")]
         // function / method declarations
         [InlineData("funkcja () {}", "Oczekiwano nazwy dla 'funkcja'.")]
@@ -449,18 +446,6 @@ namespace PolSkrypt.Tests
             ErrorHandler.HadError.Should().BeTrue();
             statements.Should().HaveCount(1);
             statements[0].Should().BeEquivalentTo(
-                new Var(Id("y"), new Literal(1.0)), o => o.PreferringRuntimeMemberTypes());
-        }
-
-        [Fact]
-        public void Parse_ShouldContinueAfterInvalidCompoundAssignmentToIndex()
-        {
-            // Like other invalid assignment targets, this is reported but does not throw.
-            var statements = Parse("a[0] += 1; zmienna y = 1;");
-
-            ErrorHandler.HadError.Should().BeTrue();
-            statements.Should().HaveCount(2);
-            statements[1].Should().BeEquivalentTo(
                 new Var(Id("y"), new Literal(1.0)), o => o.PreferringRuntimeMemberTypes());
         }
 
