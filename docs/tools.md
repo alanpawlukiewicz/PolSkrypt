@@ -1,6 +1,6 @@
 # Narzędzia PolSkrypt
 
-Wersja dokumentu: 0.2.0
+Wersja dokumentu: 0.2.1
 
 ## Spis treści
 
@@ -176,6 +176,17 @@ W trybie promptu **nie trzeba używać `wypisz`**, aby zobaczyć wartość wyra�
 > zmienna b;
 > b
 WARTOŚĆ PUSTA
+```
+
+Każdy nowy prompt zaczyna się od nowej linii.
+
+```text
+> zmienna a = 3;
+> a;
+3
+> wypisz(a);
+3
+>   // pomimo wypisania samej wartości (bez '\n') promt zaczyna się w nowej linii
 ```
 
 ### Przypisania

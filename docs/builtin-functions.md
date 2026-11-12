@@ -1,6 +1,6 @@
 # Funkcje wbudowane PolSkrypt
 
-Wersja dokumentu: 0.4.0
+Wersja dokumentu: 0.4.1
 
 Część referencji języka PolSkrypt (zob. [language-reference.md](language-reference.md)).
 
@@ -59,8 +59,31 @@ Zamienia wartość na liczbę. Błędny argument (np. `liczba("abc")`) kończy s
 
 ## `napis`
 
-Zamienia wartość na napis (`napis(42)` daje `"42"`).
+Zamienia wartość na napis.
+
+| Wartość | Wynik |
+|---------|-------|
+| "abc" | "abc" |
+| wartość_pusta | "WARTOŚĆ PUSTA" |
+| 42 | "42" |
+| prawda | "PRAWDA" |
+| fałsz | "FAŁSZ" |
+| [1, 2, 3] | "[1, 2, 3]" |
+| klasa | "\<klasa K\>" |
+| instancja klasy | "\<instancja klasy K\>" |
+| funkcja natywna | "\<funkcja natywna\>" |
 
 ## `typ`
 
-Zwraca napis opisujący typ wartości, np. `LICZBA` dla `typ(5)`.
+Zwraca napis opisujący typ wartości.
+| Typ | Wynik |
+|-----|-------|
+| liczba | LICZBA |
+| napis | NAPIS |
+| prawda | PRAWDA |
+| fałsz | FAŁSZ |
+| wartość_pusta | WARTOŚĆ PUSTA |
+| lista | LISTA |
+| klasa | \<klasa K\> |
+| instancja klasy | \<instancja klasy K\> |
+| funkcja natywna | \<funkcja natywna\> |

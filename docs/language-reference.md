@@ -1,6 +1,6 @@
 # Referencja języka PolSkrypt
 
-Wersja dokumentu: 0.4.0
+Wersja dokumentu: 0.4.1
 
 Dokumentacja jest podzielona na kilka plików:
 
@@ -295,22 +295,19 @@ Oprócz zwykłego przypisania `=` dostępne są operatory złożone: `+=`, `-=`,
 
 ```text
 zmienna x = 5;
-x += 3;          // x == 8
-x %= 3;          // x == 2
+x += 3;           // x == 8
+x %= 3;           // x == 2
 
 zmienna s = "a";
-s &= "b";        // s == "ab"
+s &= "b";         // s == "ab"
+
+zmienna a = K();
+a.pole = 1;
+a.pole += 1;      // a.pole == 2
+
+lista = [1, 2];
+lista[0] += 1;    // lista == [2, 2]
 ```
-
-Operatory złożone można stosować **tylko do zmiennych**. Nie działają na polach obiektów ani na elementach list; takie przypisanie jest błędem (`Nieprawidłowy cel przypisania.`):
-
-```text
-a.pole += 1;          // błąd
-lista[0] += 1;        // błąd
-lista[0] = lista[0] + 1;   // poprawnie
-```
-
-Zwykłe przypisanie działa także na polach (`a.pole = 1;`) oraz elementach list (`lista[0] = 1;`).
 
 ### Operatory logiczne
 

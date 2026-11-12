@@ -1,6 +1,6 @@
 # Listy w PolSkrypt
 
-Wersja dokumentu: 0.4.0
+Wersja dokumentu: 0.4.1
 
 Część referencji języka PolSkrypt (zob. [language-reference.md](language-reference.md)).
 
@@ -63,29 +63,17 @@ l[1] = l[2] = 7;        // l == [10, 7, 7]
 
 ```text
 zmienna m = [[1, 2], [3, 4]];
-zmienna wiersz = m[1];  // wiersz == [3, 4]
-wypisz(wiersz[0]);      // wypisze: 3
+wypisz(m[1][0]);  // wypisze: 3
 ```
 
-### Ograniczenie: indeksowanie tylko po nazwie zmiennej
-
-Indeksowanie działa obecnie wyłącznie bezpośrednio po nazwie zmiennej. Poniższe zapisy zgłaszają błąd składni (`Oczekiwano ';' po wartości.`):
+### Odwoływanie się do elementu
 
 ```text
-m[0][1];                // błąd: indeksowanie wyniku indeksowania
-obiekt.pole[0];         // błąd: indeksowanie pola
-funkcja()[0];           // błąd: indeksowanie wyniku wywołania
-[1, 2, 3][0];           // błąd: indeksowanie literału
+m[0][1]         // poprawnie
+obiekt.pole[0]  // poprawnie
+funkcja()[0][1] // poprawnie
+[1, 2, 3][1]    // poprawnie
 ```
-
-Obejściem jest zapisanie wyniku w zmiennej pomocniczej:
-
-```text
-zmienna wiersz = m[0];
-wypisz(wiersz[1]);
-```
-
-Po zaindeksowaniu można za to użyć dostępu do pola lub wywołania: `lista[0].pole`, `lista[0].metoda()`, `lista[0](argument)` (gdy element jest funkcją).
 
 ---
 
