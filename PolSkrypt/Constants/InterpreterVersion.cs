@@ -2,6 +2,6 @@
 {
     public static class InterpreterVersion
     {
-        public const string CurrentVersion = "0.4.0";
+        public const string CurrentVersion = "0.4.1";
     }
 }
