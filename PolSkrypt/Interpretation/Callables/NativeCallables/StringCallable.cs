@@ -1,5 +1,6 @@
 ﻿using PolSkrypt.Constants;
 using PolSkrypt.Contracts;
+using PolSkrypt.Helpers;
 
 namespace PolSkrypt.Interpretation.Callables.NativeCallables
 {
@@ -9,7 +10,7 @@ namespace PolSkrypt.Interpretation.Callables.NativeCallables
 
         public object? Call(Interpreter interpreter, List<object?> arguments)
         {
-            return arguments[0]?.ToString();
+            return StringHelper.Stringify(arguments[0]);
         }
 
         public override string ToString()
