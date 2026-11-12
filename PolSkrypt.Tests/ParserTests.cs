@@ -68,9 +68,9 @@ namespace PolSkrypt.Tests
 
         private static Token LSq() => Op(TokenType.LEFT_SQUARE_BRACKET, "[");
         private static PList Lst(params Expr[] items) => new PList(LSq(), items.ToList());
-        private static PListIndex Idx(string name, Expr index) => new PListIndex(LSq(), index, Id(name));
+        private static PListIndex Idx(string name, Expr index) => new PListIndex(LSq(), V(name), index);
         private static PListIndexAssign IdxSet(string name, Expr index, Expr value)
-            => new PListIndexAssign(value, Id(name), index);
+            => new PListIndexAssign(LSq(), V(name), index, value);
         private static Super Sup(string method) => new Super(Op(TokenType.SUPER, "super"), Id(method));
 
         // ---------------------------------------------------------------

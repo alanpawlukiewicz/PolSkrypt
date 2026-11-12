@@ -60,7 +60,7 @@ namespace PolSkrypt.Tests
         [InlineData(";", "Oczekiwano wyrażenia.")]
         [InlineData("1 + ;", "Oczekiwano wyrażenia.")]
         [InlineData("(1 + 2;", "Oczekiwano ')' po wyrażeniu.")]
-        [InlineData("f(1, 2;", "Oczekiwano ')' po liscie argumentów.")]
+        [InlineData("f(1, 2;", "Oczekiwano ')' po liście argumentów.")]
         [InlineData("a.;", "Oczekiwano nazwy po '.'")]
         [InlineData("a ? b;", "Oczekiwano ':' po gałęzi.")]
         // Invalid assignment targets (reported without throwing)
@@ -92,7 +92,7 @@ namespace PolSkrypt.Tests
         // Anonymous functions
         [InlineData("zmienna f = funkcja { };", "Oczekiwano '('.")]
         [InlineData("zmienna f = funkcja(1) { };", "Oczekiwano nazwy parametru.")]
-        [InlineData("zmienna f = funkcja(a ;", "Oczekiwano ')' po liscie argumentów.")]
+        [InlineData("zmienna f = funkcja(a ;", "Oczekiwano ')' po liście argumentów.")]
         [InlineData("zmienna f = funkcja() ;", "Oczekiwano '{'.")]
         public void Parse_ShouldReportExpectedError(string source, string expectedMessage)
         {
@@ -379,23 +379,6 @@ namespace PolSkrypt.Tests
 
             ErrorHandler.HadError.Should().BeFalse();
             _errorOutput.ToString().Should().BeEmpty();
-        }
-
-        [Theory]
-        [InlineData("a[0][1];")]
-        [InlineData("a.b[0];")]
-        [InlineData("f()[0];")]
-        [InlineData("[1, 2][0];")]
-        [InlineData("ja[0];")]
-        public void Parse_ShouldReportErrorWhenIndexingSomethingOtherThanPlainIdentifier_CurrentLimitation(string source)
-        {
-            // Documents current behavior: indexing is only parsed directly after an identifier
-            // (Primary), not as a postfix operator in Call(). If chained indexing gets supported,
-            // move these cases to ParserTests.
-            Parse(source);
-
-            ErrorHandler.HadError.Should().BeTrue();
-            _errorOutput.ToString().Should().Contain("Oczekiwano ';' po wartości.");
         }
 
         [Fact]
