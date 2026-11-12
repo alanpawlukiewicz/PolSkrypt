@@ -117,9 +117,9 @@ namespace PolSkrypt.Interpretation
 
         public object? VisitCompoundAssignmentExpression(CompoundAssignment expression)
         {
-            CheckNotReadInOwnInitializer(expression.Name);
+            Resolve(expression.Target);
             Resolve(expression.Value);
-            ResolveLocal(expression, expression.Name);
+
             return null;
         }
 

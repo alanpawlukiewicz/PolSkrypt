@@ -335,10 +335,9 @@ namespace PolSkrypt.Parsing
                 Token op = Previous();
                 Expr value = Assignment();
 
-                if (expr is Variable variable)
+                if (expr is Variable or Get or PListIndex)
                 {
-                    Token name = variable.Name;
-                    return new CompoundAssignment(name, op, value);
+                    return new CompoundAssignment(op, expr, value);
                 }
 
                 ErrorHandler.Error(op, "Nieprawidłowy cel przypisania.");

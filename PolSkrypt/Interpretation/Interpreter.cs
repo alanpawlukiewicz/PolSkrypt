@@ -384,54 +384,107 @@ namespace PolSkrypt.Interpretation
 
         public object? VisitCompoundAssignmentExpression(CompoundAssignment expression)
         {
-            var currentValue = LookUpVariable(expression.Name, expression);
-            var value = Evaluate(expression.Value);
-            object? newValue = null;
-            switch (expression.Operator.Type)
+            switch (expression.Target)
+            {
+                case Variable variable:
+                    {
+                        object? current = Evaluate(variable);
+                        object? newValue = ApplyCompoundOperator(expression.Operator, current, Evaluate(expression.Value));
+
+                        if (_locals.TryGetValue(variable, out int depth))
+                        {
+                            _environment.AssignAt(depth, variable.Name, newValue);
+                        }
+                        else
+                        {
+                            _globals.Assign(variable.Name, newValue);
+                        }
+
+                        return newValue;
+                    }
+
+                case Get get:
+                    {
+                        var obj = Evaluate(get.Object);
+
+                        if (obj is Instance instance)
+                        {
+                            object? current = instance.Get(get.Name);
+                            object? newValue = ApplyCompoundOperator(expression.Operator, current, Evaluate(expression.Value));
+
+                            instance.Set(get.Name, newValue);
+
+                            return newValue;
+                        }
+                        throw new RuntimeException(get.Name, "Tylko instancje mają atrybuty.");
+                    }
+
+                case PListIndex listIndex:
+                    {
+                        if (Evaluate(listIndex.Target) is not List<object?> list)
+                        {
+                            throw new RuntimeException(listIndex.Bracket, "Zmienna musi być listą aby odnosić się do jej indeksów.");
+                        }
+
+                        int index = ListHelper.HandleIndex(Evaluate(listIndex.Index), listIndex.Bracket);
+
+                        try
+                        {
+                            object? current = list[index];
+                            object? newValue = ApplyCompoundOperator(expression.Operator, current, Evaluate(expression.Value));
+
+                            list[index] = newValue;
+                            return newValue;
+                        }
+                        catch (ArgumentOutOfRangeException)
+                        {
+                            throw new RuntimeException(listIndex.Bracket, "Indeks znajduje się poza zakresem listy.");
+                        }
+                    }
+
+                default:
+                    throw new RuntimeException(expression.Operator, "Nieprawidłowy cel przypisania.");
+            }
+        }
+
+        private object? ApplyCompoundOperator(Token op, object? current, object? value)
+        {
+            switch (op.Type)
             {
                 case TokenType.PLUS_EQUAL:
-                    CheckNumberOperands(expression.Operator, currentValue, value);
-                    newValue = (double?)currentValue + (double?)value;
-                    break;
+                    CheckNumberOperands(op, current, value);
+                    return (double)current! + (double)value!;
+
                 case TokenType.MINUS_EQUAL:
-                    CheckNumberOperands(expression.Operator, currentValue, value);
-                    newValue = (double?)currentValue - (double?)value;
-                    break;
+                    CheckNumberOperands(op, current, value);
+                    return (double)current! - (double)value!;
+
                 case TokenType.STAR_EQUAL:
-                    CheckNumberOperands(expression.Operator, currentValue, value);
-                    newValue = (double?)currentValue * (double?)value;
-                    break;
+                    CheckNumberOperands(op, current, value);
+                    return (double)current! * (double)value!;
+
                 case TokenType.SLASH_EQUAL:
-                    CheckNumberOperands(expression.Operator, currentValue, value);
-                    if ((double?)value == 0)
+                    CheckNumberOperands(op, current, value);
+                    if ((double)value! == 0)
                     {
-                        throw new RuntimeException(expression.Operator, "Pamiętaj cholero, nigdy nie dziel przez 0!");
+                        throw new RuntimeException(op, "Pamiętaj cholero, nigdy nie dziel przez 0!");
                     }
-                    newValue = (double?)currentValue / (double?)value;
-                    break;
+                    return (double)current! / (double)value!;
+
                 case TokenType.PERCENT_EQUAL:
-                    CheckNumberOperands(expression.Operator, currentValue, value);
-                    if ((double?)value == 0)
+                    CheckNumberOperands(op, current, value);
+                    if ((double)value! == 0)
                     {
-                        throw new RuntimeException(expression.Operator, "Pamiętaj cholero, nigdy nie dziel przez 0!");
+                        throw new RuntimeException(op, "Pamiętaj cholero, nigdy nie dziel przez 0!");
                     }
-                    newValue = (double?)currentValue % (double?)value;
-                    break;
+                    return (double)current! % (double)value!;
+
                 case TokenType.AMPERSAND_EQUAL:
-                    newValue = StringHelper.Stringify(currentValue) + StringHelper.Stringify(value);
-                    break;
-            }
+                    return StringHelper.Stringify(current) + StringHelper.Stringify(value);
 
-            if (_locals.TryGetValue(expression, out int depth))
-            {
-                _environment.AssignAt(depth, expression.Name, newValue);
+                default:
+                    throw new RuntimeException(op, "Nieznany operator przypisania złożonego.");
             }
-            else
-            {
-                _globals.Assign(expression.Name, newValue);
-            }
-
-            return newValue;
         }
 
         public object? VisitClassStmt(Class statement)
