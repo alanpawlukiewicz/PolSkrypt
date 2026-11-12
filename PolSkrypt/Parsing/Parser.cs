@@ -323,7 +323,7 @@ namespace PolSkrypt.Parsing
                 }
                 else if (expr is PListIndex index)
                 {
-                    return new PListIndexAssign(value, index.Identifier, index.Index);
+                    return new PListIndexAssign(index.Bracket, index.Target, index.Index, value);
                 }
 
                 ErrorHandler.Error(equals, "Nieprawidłowy cel przypisania.");
@@ -522,6 +522,13 @@ namespace PolSkrypt.Parsing
                     expr = new Get(expr, name);
 
                 }
+                else if (Match(TokenType.LEFT_SQUARE_BRACKET))
+                {
+                    var bracket = Previous();
+                    var index = Expression();
+                    Consume(TokenType.RIGHT_SQUARE_BRACKET, "Oczekiwano znaku ']'.");
+                    expr = new PListIndex(bracket, expr, index);
+                }
                 else
                 {
                     break;
@@ -546,7 +553,7 @@ namespace PolSkrypt.Parsing
                 } while (Match(TokenType.COMMA));
             }
 
-            Token paren = Consume(TokenType.RIGHT_PAREN, "Oczekiwano ')' po liscie argumentów.");
+            Token paren = Consume(TokenType.RIGHT_PAREN, "Oczekiwano ')' po liście argumentów.");
 
             return new Call(callee, paren, arguments);
         }
@@ -561,13 +568,6 @@ namespace PolSkrypt.Parsing
             if (Match(TokenType.IDENTIFIER))
             {
                 var identifier = Previous();
-                if (Match(TokenType.LEFT_SQUARE_BRACKET))
-                {
-                    var bracket = Previous();
-                    var value = Expression();
-                    Consume(TokenType.RIGHT_SQUARE_BRACKET, "Oczekiwano znaku ']'.");
-                    return new PListIndex(bracket, value, identifier);
-                }
                 return new Variable(identifier);
             }
             if (Match(TokenType.LEFT_SQUARE_BRACKET))
@@ -619,7 +619,7 @@ namespace PolSkrypt.Parsing
                     } while (Match(TokenType.COMMA));
                 }
 
-                Consume(TokenType.RIGHT_PAREN, "Oczekiwano ')' po liscie argumentów.");
+                Consume(TokenType.RIGHT_PAREN, "Oczekiwano ')' po liście argumentów.");
                 Consume(TokenType.LEFT_BRACE, "Oczekiwano '{'.");
                 var block = Block();
                 return new AnonFunction(parameters, block);

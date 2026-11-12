@@ -5,21 +5,26 @@ namespace PolSkrypt.Parsing.Expressions.ListExpressions
 {
     public class PListIndexAssign : Expr
     {
-        private readonly Expr _value;
+        private readonly Token _bracket;
+        private readonly Expr _target;
         private readonly Expr _index;
-        private readonly Token _identifier;
+        private readonly Expr _value;
 
-        public PListIndexAssign(Expr value, Token identifier, Expr index)
+        public PListIndexAssign(Token bracket, Expr target, Expr index, Expr value)
         {
-            _value = value;
-            _identifier = identifier;
+            _bracket = bracket;
+            _target = target;
             _index = index;
+            _value = value;
         }
 
-        public Expr Value => _value;
-        public Token Identifier => _identifier;
+        public Token Bracket => _bracket;
+
+        public Expr Target => _target;
 
         public Expr Index => _index;
+
+        public Expr Value => _value;
 
         public override T Accept<T>(IExprVisitor<T> visitor)
         {

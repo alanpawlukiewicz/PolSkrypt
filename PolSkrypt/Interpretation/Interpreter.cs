@@ -550,40 +550,40 @@ namespace PolSkrypt.Interpretation
 
         public object? VisitListIndexExpression(PListIndex expression)
         {
-            var matchingVariable = LookUpVariable(expression.Identifier, expression);
-            if (matchingVariable is not List<object?> list)
+            var target = Evaluate(expression.Target);
+            if (target is not List<object?> list)
             {
-                throw new RuntimeException(expression.Identifier, "Zmienna musi być listą aby odnosić się do jej indeksów.");
+                throw new RuntimeException(expression.Bracket, "Zmienna musi być listą aby odnosić się do jej indeksów.");
             }
             var index = Evaluate(expression.Index);
             try
             {
-                return list[ListHelper.HandleIndex(index, expression.Keyword)];
+                return list[ListHelper.HandleIndex(index, expression.Bracket)];
             }
             catch (ArgumentOutOfRangeException)
             {
-                throw new RuntimeException(expression.Keyword, "Indeks znajduje się poza zakresem listy.");
+                throw new RuntimeException(expression.Bracket, "Indeks znajduje się poza zakresem listy.");
             }
 
         }
 
         public object? VisitPListIndexAssignExpression(PListIndexAssign expression)
         {
-            var matchingVariable = LookUpVariable(expression.Identifier, expression);
-            if (matchingVariable is not List<object?> list)
+            var target = Evaluate(expression.Target);
+            if (target is not List<object?> list)
             {
-                throw new RuntimeException(expression.Identifier, "Zmienna musi być listą aby odnosić się do jej indeksów.");
+                throw new RuntimeException(expression.Bracket, "Zmienna musi być listą aby odnosić się do jej indeksów.");
             }
             var index = Evaluate(expression.Index);
             try
             {
-                int parsedIndex = ListHelper.HandleIndex(index, expression.Identifier);
+                int parsedIndex = ListHelper.HandleIndex(index, expression.Bracket);
                 list[parsedIndex] = Evaluate(expression.Value);
                 return list[parsedIndex];
             }
             catch (ArgumentOutOfRangeException)
             {
-                throw new RuntimeException(expression.Identifier, "Indeks znajduje się poza zakresem listy.");
+                throw new RuntimeException(expression.Bracket, "Indeks znajduje się poza zakresem listy.");
             }
         }
     }

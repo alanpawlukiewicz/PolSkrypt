@@ -433,18 +433,17 @@ namespace PolSkrypt.Interpretation
 
         public object? VisitListIndexExpression(PListIndex expression)
         {
-            CheckNotReadInOwnInitializer(expression.Identifier);
+            Resolve(expression.Target);
             Resolve(expression.Index);
-            ResolveLocal(expression, expression.Identifier);
+
             return null;
         }
 
         public object? VisitPListIndexAssignExpression(PListIndexAssign expression)
         {
-            CheckNotReadInOwnInitializer(expression.Identifier);
-            Resolve(expression.Value);
+            Resolve(expression.Target);
             Resolve(expression.Index);
-            ResolveLocal(expression, expression.Identifier);
+            Resolve(expression.Value);
 
             return null;
         }
