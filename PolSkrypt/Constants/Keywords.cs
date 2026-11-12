@@ -8,6 +8,7 @@
         public const string BOOLEAN = "WARTOŚĆ LOGICZNA";
         public const string TRUE = "PRAWDA";
         public const string FALSE = "FAŁSZ";
+        public const string LIST = "LISTA";
         public const string SELF = "ja";
         public const string SUPER = "super";
     }

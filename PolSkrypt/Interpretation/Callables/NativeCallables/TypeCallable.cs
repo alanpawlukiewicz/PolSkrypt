@@ -22,6 +22,10 @@ namespace PolSkrypt.Interpretation.Callables.NativeCallables
             {
                 return Keywords.BOOLEAN;
             }
+            else if (argument is List<object?>)
+            {
+                return Keywords.LIST;
+            }
             else if (argument is null)
             {
                 return Keywords.NULL;
