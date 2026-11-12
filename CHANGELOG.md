@@ -7,6 +7,17 @@ a numeracja wersji zgodna z [Semantic Versioning](https://semver.org/lang/pl/).
 
 ## [Niewydane]
 
+## [0.4.1] 2026-11-12
+
+### Zmieniono
+- Można teraz odwoływać się do elementów literałów, wyniku wywołania, wyniku indeksowania oraz pól obiektów np. `a.b[0]`, `[1, 2, 3][0]`, `fn()[0]`, `l[0][0]`.
+- REPL teraz zawsze zaczyna nowy prompt od nowej linii.
+- Operatory złożonego przypisania mogą operować teraz na elementach listy oraz wyrażeniach instancji np. `l[0] += 2`, `a.b /= 4`.
+
+### Naprawiono
+- Funkcja natywna `typ` zwraca teraz dla listy typ `LISTA`.
+- Funkcja natywna `napis` zwraca teraz listę w postaci `[...]` np. `[1, 2, 3]`.
+
 ## [0.4.0] 2026-11-11
 
 ### Dodano
@@ -68,6 +79,7 @@ a numeracja wersji zgodna z [Semantic Versioning](https://semver.org/lang/pl/).
 - Funkcje natywne: `zegar`, `wypisz`, `wprowadź`
 
 [Niewydane]: https://github.com/alanpawlukiewicz/PolSkrypt/tree/master
+[0.4.1]: https://github.com/alanpawlukiewicz/PolSkrypt/releases/tag/v0.4.1
 [0.4.0]: https://github.com/alanpawlukiewicz/PolSkrypt/releases/tag/v0.4.0
 [0.3.0]: https://github.com/alanpawlukiewicz/PolSkrypt/releases/tag/v0.3.0
 [0.2.0]: https://github.com/alanpawlukiewicz/PolSkrypt/releases/tag/v0.2.0
