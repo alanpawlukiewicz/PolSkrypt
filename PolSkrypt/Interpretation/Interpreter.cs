@@ -4,6 +4,7 @@ using PolSkrypt.Errors;
 using PolSkrypt.Errors.Exceptions;
 using PolSkrypt.Helpers;
 using PolSkrypt.Interpretation.Callables;
+using PolSkrypt.Interpretation.Callables.FileCallables;
 using PolSkrypt.Interpretation.Callables.NativeCallables;
 using PolSkrypt.Lexing;
 using PolSkrypt.Parsing.Expressions;
@@ -28,6 +29,7 @@ namespace PolSkrypt.Interpretation
             _globals.Define("liczba", new NumberCallable());
             _globals.Define("napis", new StringCallable());
             _globals.Define("typ", new TypeCallable());
+            _globals.Define(Keywords.FILE, new FileClassCallable());
         }
 
         public void Interpret(List<Stmt> statements)
@@ -533,7 +535,7 @@ namespace PolSkrypt.Interpretation
             if (obj is Instance instance)
                 return instance.Get(expression.Name);
 
-            if (obj is ClassCallable klass)
+            if (obj is IClassCallable klass)
             {
                 var m = klass.FindStaticMethod(expression.Name.Lexeme);
                 if (m != null) return m;
@@ -545,6 +547,12 @@ namespace PolSkrypt.Interpretation
             if (obj is List<object?> list)
             {
                 return new ListCallable(list, expression.Name);
+            }
+
+            // Handle file operations
+            if (obj is FileStream fileStream)
+            {
+                return new FileStreamCallable(fileStream, expression.Name);
             }
 
             throw new RuntimeException(expression.Name, "Tylko instancje i klasy mają właściwości.");

@@ -3,7 +3,7 @@ using PolSkrypt.Contracts;
 
 namespace PolSkrypt.Interpretation.Callables
 {
-    public class ClassCallable : ICallable
+    public class ClassCallable : IClassCallable
     {
         private readonly string _name;
         private readonly Dictionary<string, FunctionCallable> _methods;
@@ -23,7 +23,7 @@ namespace PolSkrypt.Interpretation.Callables
 
         public int? Arity => FindMethod(FunctionConstants.CONSTRUCTOR)?.Arity ?? 0;
 
-        public FunctionCallable? FindStaticMethod(string name)
+        public ICallable? FindStaticMethod(string name)
         {
             if (_staticMethods.ContainsKey(name))
             {

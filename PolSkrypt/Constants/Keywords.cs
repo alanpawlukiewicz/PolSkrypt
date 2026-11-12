@@ -11,5 +11,6 @@
         public const string LIST = "LISTA";
         public const string SELF = "ja";
         public const string SUPER = "super";
+        public const string FILE = "Plik";
     }
 }
