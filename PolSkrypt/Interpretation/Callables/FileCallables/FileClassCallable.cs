@@ -6,7 +6,10 @@ namespace PolSkrypt.Interpretation.Callables.FileCallables
     public class FileClassCallable : IClassCallable
     {
         private readonly Dictionary<string, ICallable> _methods = new Dictionary<string, ICallable>{ 
-            { "otwórz", new OpenFileCallable() }
+            { "otwórz", new OpenFileCallable() },
+            { "istnieje", new FileExistsCallable() },
+            { "usuń", new DeleteFileCallable() },
+            { "przemianuj", new ChangeFileNameCallable() }
         };
 
         public int? Arity => 0;

@@ -1,5 +1,6 @@
 ﻿using PolSkrypt.Constants;
 using PolSkrypt.Contracts;
+using PolSkrypt.Entities;
 using PolSkrypt.Errors;
 using PolSkrypt.Errors.Exceptions;
 using PolSkrypt.Helpers;
@@ -550,9 +551,9 @@ namespace PolSkrypt.Interpretation
             }
 
             // Handle file operations
-            if (obj is FileStream fileStream)
+            if (obj is PFile file)
             {
-                return new FileStreamCallable(fileStream, expression.Name);
+                return new FileStreamCallable(file, expression.Name);
             }
 
             throw new RuntimeException(expression.Name, "Tylko instancje i klasy mają właściwości.");

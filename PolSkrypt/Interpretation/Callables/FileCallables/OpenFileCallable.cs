@@ -1,4 +1,5 @@
 ﻿using PolSkrypt.Contracts;
+using PolSkrypt.Entities;
 using PolSkrypt.Errors.Exceptions;
 using PolSkrypt.Helpers;
 using System.Text;
@@ -14,43 +15,44 @@ namespace PolSkrypt.Interpretation.Callables.FileCallables
             string path = StringHelper.Stringify(arguments[0]);
             string mode = StringHelper.Stringify(arguments[1]);
 
-            if (!File.Exists(path))
+            (FileMode fileMode, FileAccess fileAccess) = mode switch
             {
-                try
-                {
-                    return File.Create(path);
-                }
-                catch (ArgumentException)
-                {
-                    throw new RuntimeException("Nazwa pliku nie może być pusta.");
-                }
-                catch(UnauthorizedAccessException)
-                {
-                    throw new RuntimeException("Prośba o dostęp do pliku została odrzucona.");
-                }
-            }
+                "r" => (FileMode.Open, FileAccess.Read),
+                "w" => (FileMode.Create, FileAccess.Write),
+                "a" => (FileMode.Append, FileAccess.Write),
+                "rw" => (FileMode.OpenOrCreate, FileAccess.ReadWrite),
+                _ => throw new RuntimeException("Nieprawidłowy tryb pliku.")
+            };
 
-            FileAccess? fileAccess = null;
-            switch (mode)
+            try
             {
-                case "r":
-                    fileAccess = FileAccess.Read;
-                    break;
-                case "w":
-                    fileAccess = FileAccess.Write;
-                    break;
-                case "rw":
-                    fileAccess = FileAccess.ReadWrite;
-                    break;
+                return new PFile(File.Open(path, fileMode, fileAccess, FileShare.ReadWrite));
             }
-
-            if (fileAccess == null)
+            catch (FileNotFoundException)
             {
-                throw new RuntimeException("Nieprawidłowy tryb pliku.");
+                throw new RuntimeException("Plik nie istnieje.");
             }
-
-            return File.Open(path, FileMode.Open, (FileAccess)fileAccess, FileShare.None);
+            catch (DirectoryNotFoundException)
+            {
+                throw new RuntimeException("Nieprawidłowa ścieżka pliku.");
+            }
+            catch (UnauthorizedAccessException)
+            {
+                throw new RuntimeException("Prośba o dostęp do pliku została odrzucona.");
+            }
+            catch (ArgumentException)
+            {
+                throw new RuntimeException("Nazwa pliku nie może być pusta.");
+            }
+            catch (IOException)
+            {
+                throw new RuntimeException("Nie można otworzyć pliku (może być używany przez inny proces).");
+            }
         }
 
+        public override string ToString()
+        {
+            return "<funkcja otwórz>";
+        }
     }
 }
