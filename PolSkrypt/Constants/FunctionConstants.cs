@@ -5,17 +5,5 @@
         public const int MAX_PARAMS_COUNT = 255;
         public const string NATIVE_FN_STRING = "<funkcja natywna>";
         public const string CONSTRUCTOR = "konstruktor";
-        public static readonly Dictionary<string, string> LIST_FUNCTIONS = new Dictionary<string, string>{
-            { "dodaj", "append" },
-            { "usuń", "remove" },
-            { "długość" , "length" },
-            { "zawiera", "contains" },
-            { "wstaw", "insert" },
-            { "pusta", "empty" },
-            { "kopiuj", "copy" },
-            { "szukaj", "lookup" },
-            { "policz", "count" },
-            { "wyczyść", "clear" }
-        };
     }
 }

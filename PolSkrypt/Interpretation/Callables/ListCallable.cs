@@ -15,15 +15,18 @@ namespace PolSkrypt.Interpretation.Callables
             COUNT, CLEAR
         }
 
-        private ListCallType ToListCallType(string type)
-        {
-            var x = FunctionConstants.LIST_FUNCTIONS[type].ToUpper();
-            if (Enum.TryParse(FunctionConstants.LIST_FUNCTIONS[type].ToUpper(), out ListCallType parsedType))
-            {
-                return parsedType;
-            }
-            throw new RuntimeException(_name, "Podano niepoprawną funkcję listy.");
-        }
+        private static readonly Dictionary<string, ListCallType> _listFunctions = new Dictionary<string, ListCallType>{
+            { "dodaj", ListCallType.APPEND },
+            { "usuń", ListCallType.REMOVE },
+            { "długość", ListCallType.LENGTH },
+            { "zawiera", ListCallType.CONTAINS },
+            { "wstaw", ListCallType.INSERT },
+            { "pusta", ListCallType.EMPTY },
+            { "kopiuj", ListCallType.COPY },
+            { "szukaj", ListCallType.LOOKUP },
+            { "policz", ListCallType.COUNT },
+            { "wyczyść", ListCallType.CLEAR }
+        };
 
         private readonly ListCallType _callType;
         private readonly List<object?> _list;
@@ -31,9 +34,9 @@ namespace PolSkrypt.Interpretation.Callables
 
         public ListCallable(List<object?> list, Token name)
         {
-            if (FunctionConstants.LIST_FUNCTIONS.ContainsKey(name.Lexeme))
+            if (_listFunctions.ContainsKey(name.Lexeme))
             {
-                _callType = ToListCallType(name.Lexeme);
+                _callType = _listFunctions[name.Lexeme];
             }
             else
             {
