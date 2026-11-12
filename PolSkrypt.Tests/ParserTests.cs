@@ -68,9 +68,13 @@ namespace PolSkrypt.Tests
 
         private static Token LSq() => Op(TokenType.LEFT_SQUARE_BRACKET, "[");
         private static PList Lst(params Expr[] items) => new PList(LSq(), items.ToList());
-        private static PListIndex Idx(string name, Expr index) => new PListIndex(LSq(), V(name), index);
+
+        private static PListIndex IdxOf(Expr target, Expr index) => new PListIndex(LSq(), target, index);
+        private static PListIndex Idx(string name, Expr index) => IdxOf(V(name), index);
+        private static PListIndexAssign IdxSetOf(Expr target, Expr index, Expr value)
+            => new PListIndexAssign(LSq(), target, index, value);
         private static PListIndexAssign IdxSet(string name, Expr index, Expr value)
-            => new PListIndexAssign(LSq(), V(name), index, value);
+            => IdxSetOf(V(name), index, value);
         private static Super Sup(string method) => new Super(Op(TokenType.SUPER, "super"), Id(method));
 
         // ---------------------------------------------------------------
@@ -1188,5 +1192,70 @@ namespace PolSkrypt.Tests
             AssertExpression("2 ** -a[0]",
                 Bin(Num(2), TokenType.STAR_STAR, "**", Un(TokenType.MINUS, "-", Idx("a", Num(0)))));
         }
+
+        [Fact]
+        public void Parse_ShouldParseChainedIndexing()
+        {
+            AssertExpression("m[0][1]", IdxOf(Idx("m", Num(0)), Num(1)));
+        }
+
+        [Fact]
+        public void Parse_ShouldParseTripleChainedIndexing()
+        {
+            AssertExpression("m[0][1][2]", IdxOf(IdxOf(Idx("m", Num(0)), Num(1)), Num(2)));
+        }
+
+        [Fact]
+        public void Parse_ShouldParseIndexingOfProperty()
+        {
+            AssertExpression("a.b[0]", IdxOf(new Get(V("a"), Id("b")), Num(0)));
+        }
+
+        [Fact]
+        public void Parse_ShouldParseIndexingOfCallResult()
+        {
+            AssertExpression("f()[0]", IdxOf(Invoke(V("f")), Num(0)));
+        }
+
+        [Fact]
+        public void Parse_ShouldParseIndexingOfListLiteral()
+        {
+            AssertExpression("[1, 2][0]", IdxOf(Lst(Num(1), Num(2)), Num(0)));
+        }
+
+        [Fact]
+        public void Parse_ShouldParseIndexingOfSelf()
+        {
+            // Dostosuj konstruktor Self do swojej definicji (tak jak w istniejących testach 'ja').
+            AssertExpression("ja[0]", IdxOf(new Self(Op(TokenType.SELF, "ja")), Num(0)));
+        }
+
+        [Fact]
+        public void Parse_ShouldParseMixedIndexingPropertyAndCallChain()
+        {
+            // a[0].b(1)[2].c
+            AssertExpression("a[0].b(1)[2].c",
+                new Get(IdxOf(Invoke(new Get(Idx("a", Num(0)), Id("b")), Num(1)), Num(2)), Id("c")));
+        }
+
+        [Fact]
+        public void Parse_ShouldParseAssignmentToChainedIndex()
+        {
+            AssertExpression("m[0][1] = 5", IdxSetOf(Idx("m", Num(0)), Num(1), Num(5)));
+        }
+
+        [Fact]
+        public void Parse_ShouldParseAssignmentToIndexedProperty()
+        {
+            AssertExpression("a.b[0] = 5", IdxSetOf(new Get(V("a"), Id("b")), Num(0), Num(5)));
+        }
+
+        [Fact]
+        public void Parse_ShouldParseAssignmentToIndexOfCallResult()
+        {
+            AssertExpression("f()[0] = 5", IdxSetOf(Invoke(V("f")), Num(0), Num(5)));
+        }
+
+
     }
 }

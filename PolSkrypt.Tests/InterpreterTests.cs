@@ -2006,5 +2006,32 @@ zmienna wynik = a;").Should().Be(2.0);
         {
             AssertRuntimeError($"zmienna x = 5; x {op} 0;", "Pamiętaj cholero, nigdy nie dziel przez 0!");
         }
+
+        [Fact]
+        public void ListIndex_ChainedIndexing_ReadsAndWritesNestedElement()
+        {
+            var interpreter = ExecuteSource(@"
+zmienna m = [[1, 2], [3, 4]];
+m[1][0] = 9;
+zmienna wynik = m[1][0] + m[0][1];");
+
+            Global(interpreter, "wynik").Should().Be(11.0);
+        }
+
+        [Fact]
+        public void ListIndex_OnFieldAndCallResult_Works()
+        {
+            Eval(@"
+klasa K { @init() { ja.l = [10, 20]; } metoda daj() { zwróć ja.l; } }
+zmienna k = K();
+k.l[1] = 99;
+zmienna wynik = k.daj()[1];").Should().Be(99.0);
+        }
+
+        [Fact]
+        public void ListIndex_ChainedOnNonList_ThrowsRuntimeErrorWithMessage()
+        {
+            AssertRuntimeError("zmienna m = [1, 2]; zmienna wynik = m[0][0];", "musi być listą");
+        }
     }
 }
