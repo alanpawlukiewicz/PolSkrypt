@@ -1,4 +1,5 @@
 ﻿using PolSkrypt.Errors.Exceptions;
+using PolSkrypt.Helpers;
 using PolSkrypt.Lexing;
 
 namespace PolSkrypt.Errors
@@ -19,15 +20,15 @@ namespace PolSkrypt.Errors
             set { _hadRuntimeError = value; }
         }
 
+        private static void WriteError(string message)
+        {
+            LineTrackingWriter.EnsureNewLine();
+            Console.Error.WriteLine(message);
+        }
+
         public static void Error(int line, string message)
         {
             Report(line, string.Empty, message);
-        }
-
-        public static void Error(string name, string message)
-        {
-            Console.Error.WriteLine($"Błąd przy {name}: {message}");
-            _hadError = true;
         }
 
         public static void Error(Token token, string message)
@@ -43,21 +44,27 @@ namespace PolSkrypt.Errors
 
         }
 
+        public static void Error(string name, string message)
+        {
+            WriteError($"Błąd przy {name}: {message}");
+            _hadError = true;
+        }
+
         public static void RuntimeError(RuntimeException ex)
         {
             if (ex.Token == null)
             {
-                Console.Error.WriteLine($"Błąd: {ex.Message}");
+                WriteError($"Błąd: {ex.Message}");
                 _hadRuntimeError = true;
                 return;
             }
-            Console.Error.WriteLine($"[Linia {ex.Token.Line}] Błąd: {ex.Message}");
+            WriteError($"[Linia {ex.Token.Line}] Błąd: {ex.Message}");
             _hadRuntimeError = true;
         }
 
         private static void Report(int line, string where, string message)
         {
-            Console.Error.WriteLine($"[Linia {line}] Błąd {where}: {message}");
+            WriteError($"[Linia {line}] Błąd {where}: {message}");
             _hadError = true;
         }
     }

@@ -209,6 +209,7 @@ namespace PolSkrypt.Interpretation
         object? IStmtVisitor<object?>.VisitPrintStmt(Print statement)
         {
             object? value = Evaluate(statement.Expression);
+            LineTrackingWriter.EnsureNewLine();
             Console.WriteLine(StringHelper.Stringify(value));
             return null;
         }

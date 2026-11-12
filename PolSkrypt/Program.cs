@@ -1,5 +1,7 @@
-﻿using PolSkrypt.Constants;
+﻿using PolSkrypt;
+using PolSkrypt.Constants;
 using PolSkrypt.Errors;
+using PolSkrypt.Helpers;
 using PolSkrypt.Interpretation;
 using PolSkrypt.Lexing;
 using PolSkrypt.Parsing;
@@ -47,12 +49,16 @@ public class Program
 
     private static void RunPrompt()
     {
+        LineTrackingWriter.Install();
+
         Console.WriteLine($"PolSkrypt v{InterpreterVersion.CurrentVersion} REPL");
         for (; ; )
         {
+            LineTrackingWriter.EnsureNewLine();
             Console.Write("> ");
             string? line = Console.ReadLine();
             if (line == null) break;
+            LineTrackingWriter.MarkLineStart();
             Run(line, true);
             ErrorHandler.HadError = false;
         }
