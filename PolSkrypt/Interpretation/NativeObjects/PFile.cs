@@ -1,65 +1,85 @@
-﻿using PolSkrypt.Errors.Exceptions;
+﻿using PolSkrypt.Constants;
+using PolSkrypt.Errors.Exceptions;
 using System.Text;
 
 namespace PolSkrypt.Interpretation.NativeObjects
 {
+    // Claude: generating class
     public class PFile : IDisposable
     {
-        private readonly FileStream _stream;
-        private readonly StreamReader? _reader;
-        private readonly StreamWriter? _writer;
-        public bool Closed { get; private set; }
+        private static readonly UTF8Encoding Utf8 = new(false);
 
-        private static readonly UTF8Encoding _utf8 = new(false);
+        private readonly FileStream _stream;
+        public bool Closed { get; private set; }
 
         public PFile(FileStream stream)
         {
             _stream = stream;
-            if (stream.CanRead) _reader = new StreamReader(stream, _utf8, false, 1024, leaveOpen: true);
-            if (stream.CanWrite) _writer = new StreamWriter(stream, _utf8, 1024, leaveOpen: true)
-            {
-                AutoFlush = true
-            };
         }
-
-        public void Write(string text)
-        {
-            EnsureOpen(); RequireWriter();
-            _writer!.Write(text);
-        }
-
-        
 
         public string? ReadLine()
         {
             EnsureOpen(); RequireReader();
-            _writer?.Flush();
-            var buf = new List<byte>();
+
+            bool atStart = _stream.Position == 0;
+            var buffer = new List<byte>();
             int b;
+
             while ((b = _stream.ReadByte()) != -1)
             {
                 if (b == '\n')
                 {
-                    if (buf.Count > 0 && buf[^1] == '\r') buf.RemoveAt(buf.Count - 1);
-                    return _utf8.GetString(buf.ToArray());
+                    if (buffer.Count > 0 && buffer[^1] == '\r')
+                        buffer.RemoveAt(buffer.Count - 1);
+
+                    return Decode(buffer, atStart);
                 }
-                buf.Add((byte)b);
+                buffer.Add((byte)b);
             }
-            return buf.Count == 0 ? null : _utf8.GetString(buf.ToArray());
+
+            return buffer.Count == 0 ? null : Decode(buffer, atStart);
         }
 
         public string ReadAll()
         {
             EnsureOpen(); RequireReader();
-            _writer?.Flush();
+
+            bool atStart = _stream.Position == 0;
             using var ms = new MemoryStream();
             _stream.CopyTo(ms);
-            return _utf8.GetString(ms.ToArray());
+
+            return Decode(ms.ToArray(), atStart);
         }
 
-        public bool Eof() { EnsureOpen(); RequireReader(); _writer?.Flush(); return _stream.Position >= _stream.Length; }
+        public void Write(string text)
+        {
+            EnsureOpen(); RequireWriter();
 
-        public void Seek(long pos) { EnsureOpen(); /*...*/ _writer?.Flush(); _stream.Seek(pos, SeekOrigin.Begin); }
+            var bytes = Utf8.GetBytes(text);
+            _stream.Write(bytes, 0, bytes.Length);
+            _stream.Flush();
+        }
+
+        public bool Eof()
+        {
+            EnsureOpen(); RequireReader();
+            return _stream.Position >= _stream.Length;
+        }
+
+        public long Tell()
+        {
+            EnsureOpen();
+            return _stream.Position;
+        }
+
+        public void Seek(long pos)
+        {
+            EnsureOpen();
+            if (pos < 0)
+                throw new RuntimeException("Pozycja nie może być ujemna.");
+
+            _stream.Seek(pos, SeekOrigin.Begin);
+        }
 
         public void Rewind() => Seek(0);
 
@@ -67,31 +87,41 @@ namespace PolSkrypt.Interpretation.NativeObjects
         {
             if (Closed) return;
             Closed = true;
-            try { _writer?.Flush(); }
+
+            try { _stream.Flush(); }
             finally { _stream.Dispose(); }
+        }
+
+        private static string Decode(IEnumerable<byte> bytes, bool atFileStart)
+        {
+            var text = Utf8.GetString(bytes.ToArray());
+
+            if (atFileStart && text.Length > 0 && text[0] == '\uFEFF')
+                text = text[1..];
+
+            return text;
         }
 
         private void EnsureOpen()
         {
-            if (Closed) 
+            if (Closed)
                 throw new RuntimeException("Plik jest zamknięty.");
         }
+
         private void RequireReader()
         {
-            if (_reader == null) 
+            if (!_stream.CanRead)
                 throw new RuntimeException("Plik nie jest otwarty w trybie czytania.");
         }
+
         private void RequireWriter()
         {
-            if (_writer == null) 
+            if (!_stream.CanWrite)
                 throw new RuntimeException("Plik nie jest otwarty w trybie zapisu.");
         }
 
         public void Dispose() => Close();
 
-        public override string ToString()
-        {
-            return "PLIK";
-        }
+        public override string ToString() => Keywords.FILE_STRING;
     }
 }

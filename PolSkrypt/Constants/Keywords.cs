@@ -12,5 +12,6 @@
         public const string SELF = "ja";
         public const string SUPER = "super";
         public const string FILE = "Plik";
+        public const string FILE_STRING = "PLIK";
     }
 }
