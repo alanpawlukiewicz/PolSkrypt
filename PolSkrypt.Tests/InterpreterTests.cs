@@ -1501,7 +1501,6 @@ zmienna wynik = l[1].daj();").Should().Be(2.0);
 
         [Theory]
         [InlineData("zmienna x = 5; zmienna wynik = x[0];")]
-        [InlineData("zmienna x = \"tekst\"; zmienna wynik = x[0];")]
         [InlineData("zmienna x = wartość_pusta; zmienna wynik = x[0];")]
         [InlineData("zmienna x = 5; x[0] = 1;")]
         public void ListIndex_OnNonList_ThrowsRuntimeErrorWithMessage(string source)

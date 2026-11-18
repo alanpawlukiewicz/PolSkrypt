@@ -614,20 +614,31 @@ namespace PolSkrypt.Interpretation
         public object? VisitListIndexExpression(PListIndex expression)
         {
             var target = Evaluate(expression.Target);
-            if (target is not List<object?> list)
-            {
-                throw new RuntimeException(expression.Bracket, "Zmienna musi być listą aby odnosić się do jej indeksów.");
-            }
             var index = Evaluate(expression.Index);
-            try
+            if (target is List<object?> list)
             {
-                return list[ListHelper.HandleIndex(index, expression.Bracket)];
+                try
+                {
+                    return list[ListHelper.HandleIndex(index, expression.Bracket)];
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    throw new RuntimeException(expression.Bracket, "Indeks znajduje się poza zakresem listy.");
+                }
             }
-            catch (ArgumentOutOfRangeException)
+            else if (target is string str)
             {
-                throw new RuntimeException(expression.Bracket, "Indeks znajduje się poza zakresem listy.");
+                try
+                {
+                    return str[ListHelper.HandleIndex(index, expression.Bracket)].ToString();
+                }
+                catch (IndexOutOfRangeException)
+                {
+                    throw new RuntimeException(expression.Bracket, "Indeks znajduje się poza zakresem ciągu znaków.");
+                }
             }
-
+            
+            throw new RuntimeException(expression.Bracket, "Zmienna musi być listą lub ciągiem znaków aby odnosić się do jej indeksów.");
         }
 
         public object? VisitPListIndexAssignExpression(PListIndexAssign expression)
