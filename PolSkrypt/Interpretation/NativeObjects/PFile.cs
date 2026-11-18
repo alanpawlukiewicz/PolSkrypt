@@ -16,7 +16,10 @@ namespace PolSkrypt.Interpretation.NativeObjects
         {
             _stream = stream;
             if (stream.CanRead) _reader = new StreamReader(stream, _utf8, false, 1024, leaveOpen: true);
-            if (stream.CanWrite) _writer = new StreamWriter(stream, _utf8, 1024, leaveOpen: true);
+            if (stream.CanWrite) _writer = new StreamWriter(stream, _utf8, 1024, leaveOpen: true)
+            {
+                AutoFlush = true
+            };
         }
 
         public void Write(string text)
