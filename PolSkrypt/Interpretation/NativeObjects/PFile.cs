@@ -113,9 +113,11 @@ namespace PolSkrypt.Interpretation.NativeObjects
 
             bool atStart = _stream.Position == 0;
             var bytes = new List<byte>();
+            int charsRead = 0;
 
-            for (int i = 0; i < count; i++)
+            while (charsRead < count)
             {
+                long posBeforeChar = _stream.Position;
                 int b = _stream.ReadByte();
                 if (b == -1) break;
                 bytes.Add((byte)b);
@@ -131,6 +133,18 @@ namespace PolSkrypt.Interpretation.NativeObjects
                     if (next == -1) break;
                     bytes.Add((byte)next);
                 }
+
+                if (atStart && posBeforeChar == 0)
+                {
+                    var tempText = Utf8.GetString(bytes.ToArray());
+                    if (tempText == "\uFEFF")
+                    {
+                        bytes.Clear();
+                        continue;
+                    }
+                }
+
+                charsRead++;
             }
 
             return Decode(bytes, atStart);
