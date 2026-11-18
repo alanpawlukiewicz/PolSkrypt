@@ -1,7 +1,7 @@
 ﻿using PolSkrypt.Contracts;
-using PolSkrypt.Entities;
 using PolSkrypt.Errors.Exceptions;
 using PolSkrypt.Helpers;
+using PolSkrypt.Interpretation.NativeObjects;
 using PolSkrypt.Lexing;
 using System.Text;
 

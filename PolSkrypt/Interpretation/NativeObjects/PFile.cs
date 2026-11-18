@@ -1,7 +1,7 @@
 ﻿using PolSkrypt.Errors.Exceptions;
 using System.Text;
 
-namespace PolSkrypt.Entities
+namespace PolSkrypt.Interpretation.NativeObjects
 {
     public class PFile : IDisposable
     {
@@ -10,19 +10,13 @@ namespace PolSkrypt.Entities
         private readonly StreamWriter? _writer;
         public bool Closed { get; private set; }
 
+        private static readonly UTF8Encoding _utf8 = new(false);
+
         public PFile(FileStream stream)
         {
             _stream = stream;
-            var enc = new UTF8Encoding(false);
-            if (stream.CanRead) _reader = new StreamReader(stream, enc, false, 1024, leaveOpen: true);
-            if (stream.CanWrite) _writer = new StreamWriter(stream, enc, 1024, leaveOpen: true);
-        }
-
-        public string? ReadLine()
-        {
-            EnsureOpen(); RequireReader();
-            _writer?.Flush();
-            return _reader!.ReadLine();
+            if (stream.CanRead) _reader = new StreamReader(stream, _utf8, false, 1024, leaveOpen: true);
+            if (stream.CanWrite) _writer = new StreamWriter(stream, _utf8, 1024, leaveOpen: true);
         }
 
         public void Write(string text)
@@ -31,30 +25,47 @@ namespace PolSkrypt.Entities
             _writer!.Write(text);
         }
 
-        public bool Eof()
+        
+
+        public string? ReadLine()
         {
             EnsureOpen(); RequireReader();
-            return _reader!.Peek() == -1;
+            _writer?.Flush();
+            var buf = new List<byte>();
+            int b;
+            while ((b = _stream.ReadByte()) != -1)
+            {
+                if (b == '\n')
+                {
+                    if (buf.Count > 0 && buf[^1] == '\r') buf.RemoveAt(buf.Count - 1);
+                    return _utf8.GetString(buf.ToArray());
+                }
+                buf.Add((byte)b);
+            }
+            return buf.Count == 0 ? null : _utf8.GetString(buf.ToArray());
         }
 
-        public void Seek(long pos)
+        public string ReadAll()
         {
-            EnsureOpen();
-            if (pos < 0) 
-                throw new RuntimeException("Pozycja nie może być ujemna.");
+            EnsureOpen(); RequireReader();
             _writer?.Flush();
-            _reader?.DiscardBufferedData();
-            _stream.Seek(pos, SeekOrigin.Begin);
+            using var ms = new MemoryStream();
+            _stream.CopyTo(ms);
+            return _utf8.GetString(ms.ToArray());
         }
+
+        public bool Eof() { EnsureOpen(); RequireReader(); _writer?.Flush(); return _stream.Position >= _stream.Length; }
+
+        public void Seek(long pos) { EnsureOpen(); /*...*/ _writer?.Flush(); _stream.Seek(pos, SeekOrigin.Begin); }
 
         public void Rewind() => Seek(0);
 
         public void Close()
         {
             if (Closed) return;
-            _writer?.Flush();
-            _stream.Dispose();
             Closed = true;
+            try { _writer?.Flush(); }
+            finally { _stream.Dispose(); }
         }
 
         private void EnsureOpen()

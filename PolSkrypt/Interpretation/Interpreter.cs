@@ -1,12 +1,12 @@
 ﻿using PolSkrypt.Constants;
 using PolSkrypt.Contracts;
-using PolSkrypt.Entities;
 using PolSkrypt.Errors;
 using PolSkrypt.Errors.Exceptions;
 using PolSkrypt.Helpers;
 using PolSkrypt.Interpretation.Callables;
 using PolSkrypt.Interpretation.Callables.FileCallables;
 using PolSkrypt.Interpretation.Callables.NativeCallables;
+using PolSkrypt.Interpretation.NativeObjects;
 using PolSkrypt.Lexing;
 using PolSkrypt.Parsing.Expressions;
 using PolSkrypt.Parsing.Expressions.ListExpressions;
