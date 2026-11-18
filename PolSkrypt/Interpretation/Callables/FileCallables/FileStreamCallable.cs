@@ -3,7 +3,6 @@ using PolSkrypt.Errors.Exceptions;
 using PolSkrypt.Helpers;
 using PolSkrypt.Interpretation.NativeObjects;
 using PolSkrypt.Lexing;
-using System.Text;
 
 namespace PolSkrypt.Interpretation.Callables.FileCallables
 {
@@ -11,17 +10,20 @@ namespace PolSkrypt.Interpretation.Callables.FileCallables
     {
         private enum FileCallType
         {
-            READ, READ_LINE, APPEND, APPEND_LINE, 
-            CLOSE, SEEK
+            READ, READ_LINE, APPEND, APPEND_LINE,
+            CLOSE, SEEK, EOF, REWIND
         }
 
-        private static readonly Dictionary<string, FileCallType> _fileFunctions = new Dictionary<string, FileCallType>{
+        private static readonly Dictionary<string, FileCallType> _fileFunctions = new()
+        {
             { "czytaj", FileCallType.READ },
             { "czytaj_linie", FileCallType.READ_LINE },
             { "wpisz", FileCallType.APPEND },
             { "wpisz_linie", FileCallType.APPEND_LINE },
             { "zamknij", FileCallType.CLOSE },
-            { "ustaw", FileCallType.SEEK }
+            { "ustaw", FileCallType.SEEK },
+            { "koniec", FileCallType.EOF },
+            { "przewiń", FileCallType.REWIND }
         };
 
         private readonly PFile _file;
@@ -30,11 +32,7 @@ namespace PolSkrypt.Interpretation.Callables.FileCallables
 
         public FileStreamCallable(PFile file, Token name)
         {
-            if (_fileFunctions.ContainsKey(name.Lexeme))
-            {
-                _callType = _fileFunctions[name.Lexeme];
-            }
-            else
+            if (!_fileFunctions.TryGetValue(name.Lexeme, out _callType))
             {
                 throw new RuntimeException(name, "Podano nieprawidłową funkcję pliku.");
             }
@@ -43,118 +41,84 @@ namespace PolSkrypt.Interpretation.Callables.FileCallables
             _name = name;
         }
 
-        public int? Arity { get 
-            { 
-                if (_callType == FileCallType.READ || _callType == FileCallType.READ_LINE
-                    || _callType == FileCallType.CLOSE)
-                {
-                    return 0;
-                }
-                else if (_callType == FileCallType.APPEND || _callType == FileCallType.APPEND_LINE
-                    || _callType == FileCallType.SEEK)
-                {
-                    return 1;
-                }
-                return null;
-            }
-        }
+        public int? Arity => _callType switch
+        {
+            FileCallType.APPEND or FileCallType.APPEND_LINE or FileCallType.SEEK => 1,
+            _ => 0
+        };
 
         public object? Call(Interpreter interpreter, List<object?> arguments)
         {
-            switch (_callType)
-            {
-                case FileCallType.READ:
-                    return ReadFile();
-                case FileCallType.READ_LINE:
-                    return ReadLine();
-                case FileCallType.APPEND:
-                    AppendToFile(arguments[0]);
-                    break;
-                case FileCallType.APPEND_LINE:
-                    AppendLine(arguments[0]);
-                    break;
-                case FileCallType.CLOSE:
-                    CloseFile();
-                    return null;
-                case FileCallType.SEEK:
-                    Seek(arguments[0]);
-                    break;
-            }
-
-            return _file;
-        }
-
-        private string ReadFile()
-        {
             try
             {
-                string text = string.Empty;
-                string? line;
-                while ((line = _file.ReadLine()) != null)
+                switch (_callType)
                 {
-                    text += line + "\n";
+                    case FileCallType.READ:
+                        return _file.ReadAll();
+
+                    case FileCallType.READ_LINE:
+                        return _file.ReadLine();
+
+                    case FileCallType.EOF:
+                        return _file.Eof();
+
+                    case FileCallType.CLOSE:
+                        _file.Close();
+                        return null;
+
+                    case FileCallType.APPEND:
+                        _file.Write(StringHelper.Stringify(arguments[0]));
+                        return _file;
+
+                    case FileCallType.APPEND_LINE:
+                        _file.Write(StringHelper.Stringify(arguments[0]) + "\n");
+                        return _file;
+
+                    case FileCallType.SEEK:
+                        _file.Seek(ParseIndex(arguments[0]));
+                        return _file;
+
+                    case FileCallType.REWIND:
+                        _file.Rewind();
+                        return _file;
+
+                    default:
+                        throw new RuntimeException(_name, "Podano nieprawidłową funkcję pliku.");
                 }
-
-                return text.Length == 0 ? text : text[..^1];
             }
-            catch (ArgumentException)
+            catch (NotSupportedException)
             {
-                throw new RuntimeException("Plik nie jest otworzony w trybie czytania.");
+                throw new RuntimeException(_name, "Ta operacja nie jest obsługiwana dla tego pliku.");
+            }
+            catch (ObjectDisposedException)
+            {
+                throw new RuntimeException(_name, "Plik jest zamknięty.");
+            }
+            catch (IOException)
+            {
+                throw new RuntimeException(_name,
+                    "Błąd operacji na pliku (np. ustawienie pozycji przed końcem w trybie dopisywania \"a\", " +
+                    "lub brak miejsca na dysku).");
             }
         }
 
-        private string? ReadLine()
+        private long ParseIndex(object? index)
         {
-            try
+            if (index is not double value
+                || double.IsNaN(value)
+                || value % 1 != 0
+                || value < 0
+                || value >= long.MaxValue)
             {
-                return _file.ReadLine();
+                throw new RuntimeException(_name, "Indeks musi być nieujemną liczbą całkowitą.");
             }
-            catch (ArgumentException)
-            {
-                throw new RuntimeException("Plik nie jest otworzony w trybie czytania.");
-            }
-            
+
+            return (long)value;
         }
 
-        private void AppendToFile(object? appendedText)
+        public override string ToString()
         {
-            try
-            {
-                _file.Write(StringHelper.Stringify(appendedText));
-            }
-            catch (ArgumentException)
-            {
-                throw new RuntimeException("Plik nie jest otworzony w trybie wpisywania.");
-            }
-        }
-
-        private void AppendLine(object? appendedText)
-        {
-            try
-            {
-                _file.Write(StringHelper.Stringify(appendedText) + "\n");
-            }
-            catch (ArgumentException)
-            {
-                throw new RuntimeException("Plik nie jest otworzony w trybie wpisywania.");
-            }
-        }
-
-        private void CloseFile()
-        {
-            _file.Close();
-        }
-
-        private void Seek(object? index)
-        {
-            if (index is not double parsedIdx || parsedIdx % 1 != 0)
-            {
-                throw new RuntimeException("Indeks musi być dodatnią liczbą całkowitą.");
-            }
-            else
-            {
-                _file.Seek((long)parsedIdx);
-            }
+            return $"<funkcja pliku {_name.Lexeme}>";
         }
     }
 }
