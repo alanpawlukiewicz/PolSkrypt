@@ -10,21 +10,27 @@ namespace PolSkrypt.Interpretation.Callables.FileCallables
     {
         private enum FileCallType
         {
-            READ, READ_LINE, APPEND, APPEND_LINE,
-            CLOSE, SEEK, EOF, REWIND, POSITION
+            READ, READ_LINE, READ_CHARS, APPEND, APPEND_LINE,
+            CLOSE, SEEK, EOF, REWIND,
+            TELL, SIZE, TRUNCATE, FLUSH, IS_CLOSED
         }
 
         private static readonly Dictionary<string, FileCallType> _fileFunctions = new()
         {
             { "czytaj", FileCallType.READ },
             { "czytaj_linie", FileCallType.READ_LINE },
+            { "czytaj_znaki", FileCallType.READ_CHARS },
             { "wpisz", FileCallType.APPEND },
             { "wpisz_linie", FileCallType.APPEND_LINE },
             { "zamknij", FileCallType.CLOSE },
             { "ustaw", FileCallType.SEEK },
             { "koniec", FileCallType.EOF },
             { "przewiń", FileCallType.REWIND },
-            { "pozycja", FileCallType.POSITION }
+            { "pozycja", FileCallType.TELL },
+            { "rozmiar", FileCallType.SIZE },
+            { "przytnij", FileCallType.TRUNCATE },
+            { "opróżnij", FileCallType.FLUSH },
+            { "zamknięty", FileCallType.IS_CLOSED }
         };
 
         private readonly PFile _file;
@@ -44,7 +50,8 @@ namespace PolSkrypt.Interpretation.Callables.FileCallables
 
         public int? Arity => _callType switch
         {
-            FileCallType.APPEND or FileCallType.APPEND_LINE or FileCallType.SEEK => 1,
+            FileCallType.APPEND or FileCallType.APPEND_LINE
+                or FileCallType.SEEK or FileCallType.READ_CHARS => 1,
             _ => 0
         };
 
@@ -83,8 +90,25 @@ namespace PolSkrypt.Interpretation.Callables.FileCallables
                         _file.Rewind();
                         return _file;
 
-                    case FileCallType.POSITION:
-                        return _file.Tell();
+                    case FileCallType.READ_CHARS:
+                        return _file.ReadChars(ParseCount(arguments[0]));
+
+                    case FileCallType.TELL:
+                        return (double)_file.Tell();
+
+                    case FileCallType.SIZE:
+                        return (double)_file.Length;
+
+                    case FileCallType.TRUNCATE:
+                        _file.Truncate();
+                        return _file;
+
+                    case FileCallType.FLUSH:
+                        _file.Flush();
+                        return _file;
+
+                    case FileCallType.IS_CLOSED:
+                        return _file.Closed;
 
                     default:
                         throw new RuntimeException(_name, "Podano nieprawidłową funkcję pliku.");
@@ -118,6 +142,20 @@ namespace PolSkrypt.Interpretation.Callables.FileCallables
             }
 
             return (long)value;
+        }
+
+        private int ParseCount(object? count)
+        {
+            if (count is not double value
+                || double.IsNaN(value)
+                || value % 1 != 0
+                || value < 0
+                || value > int.MaxValue)
+            {
+                throw new RuntimeException(_name, "Liczba znaków musi być nieujemną liczbą całkowitą.");
+            }
+
+            return (int)value;
         }
 
         public override string ToString()

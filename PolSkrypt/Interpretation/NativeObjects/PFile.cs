@@ -1,5 +1,6 @@
 ﻿using PolSkrypt.Constants;
 using PolSkrypt.Errors.Exceptions;
+using System.Reflection.PortableExecutable;
 using System.Text;
 
 namespace PolSkrypt.Interpretation.NativeObjects
@@ -11,6 +12,8 @@ namespace PolSkrypt.Interpretation.NativeObjects
 
         private readonly FileStream _stream;
         public bool Closed { get; private set; }
+
+        public long Length { get { EnsureOpen(); return _stream.Length; } }
 
         public PFile(FileStream stream)
         {
@@ -92,6 +95,47 @@ namespace PolSkrypt.Interpretation.NativeObjects
             finally { _stream.Dispose(); }
         }
 
+        public void Flush()
+        {
+            EnsureOpen();
+            _stream.Flush();
+        }
+
+        public void Truncate()
+        {
+            EnsureOpen(); RequireWriter();
+            _stream.SetLength(_stream.Position);
+        }
+
+        public string ReadChars(int count)
+        {
+            EnsureOpen(); RequireReader();
+
+            bool atStart = _stream.Position == 0;
+            var bytes = new List<byte>();
+
+            for (int i = 0; i < count; i++)
+            {
+                int b = _stream.ReadByte();
+                if (b == -1) break;
+                bytes.Add((byte)b);
+
+                int extra = (b & 0xE0) == 0xC0 ? 1
+                          : (b & 0xF0) == 0xE0 ? 2
+                          : (b & 0xF8) == 0xF0 ? 3
+                          : 0;
+
+                for (int j = 0; j < extra; j++)
+                {
+                    int next = _stream.ReadByte();
+                    if (next == -1) break;
+                    bytes.Add((byte)next);
+                }
+            }
+
+            return Decode(bytes, atStart);
+        }
+
         private static string Decode(IEnumerable<byte> bytes, bool atFileStart)
         {
             var text = Utf8.GetString(bytes.ToArray());
@@ -119,6 +163,7 @@ namespace PolSkrypt.Interpretation.NativeObjects
             if (!_stream.CanWrite)
                 throw new RuntimeException("Plik nie jest otwarty w trybie zapisu.");
         }
+
 
         public void Dispose() => Close();
 
