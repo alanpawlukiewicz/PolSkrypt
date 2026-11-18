@@ -11,7 +11,7 @@ namespace PolSkrypt.Interpretation.Callables.FileCallables
         private enum FileCallType
         {
             READ, READ_LINE, APPEND, APPEND_LINE,
-            CLOSE, SEEK, EOF, REWIND
+            CLOSE, SEEK, EOF, REWIND, POSITION
         }
 
         private static readonly Dictionary<string, FileCallType> _fileFunctions = new()
@@ -23,7 +23,8 @@ namespace PolSkrypt.Interpretation.Callables.FileCallables
             { "zamknij", FileCallType.CLOSE },
             { "ustaw", FileCallType.SEEK },
             { "koniec", FileCallType.EOF },
-            { "przewiń", FileCallType.REWIND }
+            { "przewiń", FileCallType.REWIND },
+            { "pozycja", FileCallType.POSITION }
         };
 
         private readonly PFile _file;
@@ -81,6 +82,9 @@ namespace PolSkrypt.Interpretation.Callables.FileCallables
                     case FileCallType.REWIND:
                         _file.Rewind();
                         return _file;
+
+                    case FileCallType.POSITION:
+                        return _file.Tell();
 
                     default:
                         throw new RuntimeException(_name, "Podano nieprawidłową funkcję pliku.");
