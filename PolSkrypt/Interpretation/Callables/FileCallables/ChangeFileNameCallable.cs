@@ -14,15 +14,13 @@ namespace PolSkrypt.Interpretation.Callables.FileCallables
             var oldFilePath = StringHelper.Stringify(arguments[0]);
             var newFilePath = StringHelper.Stringify(arguments[1]);
 
-            try
-            {
-                FileSystem.RenameFile(oldFilePath, newFilePath);
-            }
-            catch(ArgumentException)
-            {
-                throw new RuntimeException("Nieprawidłowe argumenty.");
-            }
-            
+            try { File.Move(oldFilePath, newFilePath); }
+            catch (FileNotFoundException) { throw new RuntimeException("Plik nie istnieje."); }
+            catch (DirectoryNotFoundException) { throw new RuntimeException("Nieprawidłowa ścieżka pliku."); }
+            catch (UnauthorizedAccessException) { throw new RuntimeException("Odmowa dostępu do pliku."); }
+            catch (ArgumentException) { throw new RuntimeException("Nieprawidłowe argumenty."); }
+            catch (IOException) { throw new RuntimeException("Nie można przemianować pliku (docelowy już istnieje lub plik jest używany)."); }
+
             return null;
         }
 
