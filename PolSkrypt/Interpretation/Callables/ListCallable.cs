@@ -145,6 +145,11 @@ namespace PolSkrypt.Interpretation.Callables
             }
         }
 
+        public override string ToString()
+        {
+            return $"<funkcja listy {_name.Lexeme}>";
+        }
+
         private void HandleInsert(int index, object? argument)
         {
             try

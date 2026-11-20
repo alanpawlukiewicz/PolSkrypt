@@ -37,5 +37,10 @@ namespace PolSkrypt.Interpretation.Callables
 
             return null;
         }
+
+        public override string ToString()
+        {
+            return "<funkcja anonimowa>";
+        }
     }
 }

@@ -27,6 +27,11 @@ namespace PolSkrypt.Interpretation
         private readonly ModuleLoader _modules;
         public ModuleLoader Modules => _modules;
 
+        // The native class Plik. Kept as a field so that jest_instancją / klasa_obiektu
+        // can relate open files (PFile) to it by reference, not by name.
+        private readonly FileClassCallable _fileClass = new();
+        public FileClassCallable FileClass => _fileClass;
+
         public Interpreter()
         {
             _builtins = new Env();
@@ -38,7 +43,8 @@ namespace PolSkrypt.Interpretation
             _builtins.Define("napis", new StringCallable());
             _builtins.Define("typ", new TypeCallable());
             _builtins.Define("jest_instancją", new IsInstanceCallable());
-            _builtins.Define("Plik", new FileClassCallable());
+            _builtins.Define("klasa_obiektu", new ObjectClassCallable());
+            _builtins.Define(Keywords.FILE_CLASS, _fileClass);
 
             _globals = new Env(_builtins);
             _environment = _globals;
@@ -385,7 +391,17 @@ namespace PolSkrypt.Interpretation
                 throw new RuntimeException(expression.Paren,
                     $"Oczekiwano {fun.Arity} argumentów, ale otrzymano {arguments.Count}.");
             }
-            return fun.Call(this, arguments);
+
+            try
+            {
+                return fun.Call(this, arguments);
+            }
+            catch (RuntimeException ex) when (ex.Token == null && ex.GetType() == typeof(RuntimeException))
+            {
+                // Native functions do not know where they were called from, so their errors have no token.
+                // Attach the call site, so the message shows the line (and file) of the call.
+                throw new RuntimeException(expression.Paren, ex.Message);
+            }
         }
 
         public object? VisitFunctionStmt(Function statement)

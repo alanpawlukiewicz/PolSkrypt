@@ -14,7 +14,7 @@ namespace PolSkrypt.Interpretation.Callables.FileCallables
 
         public int? Arity => 0;
 
-        public string Name => Keywords.FILE;
+        public string Name => Keywords.FILE_CLASS;
 
         public ICallable? FindStaticMethod(string name)
         {

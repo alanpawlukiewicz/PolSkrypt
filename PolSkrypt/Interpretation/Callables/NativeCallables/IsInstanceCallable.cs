@@ -1,5 +1,7 @@
-﻿using PolSkrypt.Contracts;
+﻿using PolSkrypt.Constants;
+using PolSkrypt.Contracts;
 using PolSkrypt.Errors.Exceptions;
+using PolSkrypt.Interpretation.NativeObjects;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -12,8 +14,12 @@ namespace PolSkrypt.Interpretation.Callables.NativeCallables
 
         public object? Call(Interpreter interpreter, List<object?> arguments)
         {
-            if (arguments[1] is not ClassCallable target)
+            if (arguments[1] is not IClassCallable target)
                 throw new RuntimeException("Drugi argument 'jest_instancją' musi być klasą.");
+
+            // Open files are instances of the native class Plik.
+            if (arguments[0] is PFile)
+                return target == interpreter.FileClass;
 
             if (arguments[0] is not Instance instance)
                 return false;
@@ -24,5 +30,9 @@ namespace PolSkrypt.Interpretation.Callables.NativeCallables
             return false;
         }
 
+        public override string ToString()
+        {
+            return FunctionConstants.NATIVE_FN_STRING;
+        }
     }
 }

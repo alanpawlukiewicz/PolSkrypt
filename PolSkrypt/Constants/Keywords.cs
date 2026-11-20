@@ -12,6 +12,7 @@
         public const string SELF = "ja";
         public const string SUPER = "super";
         public const string FILE = "PLIK";
+        public const string FILE_CLASS = "Plik";
         public const string CLASS = "KLASA";
         public const string FUNCTION = "FUNKCJA";
         public const string INSTANCE = "INSTANCJA";

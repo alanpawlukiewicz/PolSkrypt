@@ -27,5 +27,10 @@ namespace PolSkrypt.Interpretation.Callables.NativeCallables
             };
         }
 
+        public override string ToString()
+        {
+            return FunctionConstants.NATIVE_FN_STRING;
+        }
+
     }
 }
