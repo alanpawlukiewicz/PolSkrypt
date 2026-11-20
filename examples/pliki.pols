@@ -1,0 +1,45 @@
+// Praca z plikami: zapis, dopisywanie, odczyt linia po linii, zmiana nazwy i usuwanie.
+// Pokazuje: klasę Plik i metody otwartego pliku.
+// Program tworzy pliki w bieżącym katalogu i usuwa je na końcu.
+
+zmienna sciezka = "zakupy.txt";
+
+// 1. Zapis (tryb "w" tworzy plik albo czyści istniejący)
+zmienna plik = Plik.otwórz(sciezka, "w");
+plik.wpisz_linie("chleb").wpisz_linie("mleko").wpisz_linie("jabłka");
+plik.zamknij();
+
+// 2. Dopisywanie na końcu (tryb "a")
+plik = Plik.otwórz(sciezka, "a");
+plik.wpisz_linie("masło");
+plik.zamknij();
+
+// 3. Odczyt linia po linii (czytaj_linie zwraca wartość_pusta na końcu pliku)
+plik = Plik.otwórz(sciezka, "r");
+wypisz("Lista zakupów (" & plik.rozmiar() & " bajtów):\n");
+
+zmienna produkty = [];
+zmienna linia = plik.czytaj_linie();
+podczas_gdy (linia != wartość_pusta) {
+    produkty.dodaj(linia);
+    wypisz("  " & produkty.długość() & ". " & linia & "\n");
+    linia = plik.czytaj_linie();
+}
+
+// 4. Powrót na początek i odczyt pierwszych znaków
+plik.przewiń();
+wypisz("Pierwsze 5 znaków: " & plik.czytaj_znaki(5) & "\n");
+plik.zamknij();
+wypisz("Plik zamknięty: " & plik.zamknięty() & "\n");
+
+// 5. Sprawdzenie produktu
+wypisz("Czy kupić mleko? " & (produkty.zawiera("mleko") ? "tak" : "nie") & "\n");
+
+// 6. Zmiana nazwy i usunięcie
+zmienna archiwum = "zakupy_archiwum.txt";
+Plik.przemianuj(sciezka, archiwum);
+wypisz("Po zmianie nazwy: " & sciezka & " istnieje = " & Plik.istnieje(sciezka)
+    & ", " & archiwum & " istnieje = " & Plik.istnieje(archiwum) & "\n");
+
+Plik.usuń(archiwum);
+wypisz("Po usunięciu: " & archiwum & " istnieje = " & Plik.istnieje(archiwum) & "\n");

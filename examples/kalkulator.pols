@@ -1,0 +1,49 @@
+// Prosty kalkulator działający w pętli.
+// Pokazuje: wprowadź, liczba, porównywanie napisów, pętle z przerwij.
+//
+// Wpisz pierwszą liczbę, działanie (+ - * / % **) i drugą liczbę.
+// Wpisz "koniec" zamiast działania, żeby zakończyć.
+// Liczby ułamkowe wpisuje się z kropką, np. 2.5.
+
+funkcja oblicz(a, dzialanie, b) {
+    jeżeli (dzialanie == "+") { zwróć a + b; }
+    jeżeli (dzialanie == "-") { zwróć a - b; }
+    jeżeli (dzialanie == "*") { zwróć a * b; }
+    jeżeli (dzialanie == "**") { zwróć a ** b; }
+    jeżeli (dzialanie == "/" lub dzialanie == "%") {
+        jeżeli (b == 0) {
+            zwróć "nie można dzielić przez 0";
+        }
+        zwróć dzialanie == "/" ? a / b : a % b;
+    }
+    zwróć "nieznane działanie '" & dzialanie & "'";
+}
+
+wypisz("Kalkulator PolSkrypt\n");
+
+podczas_gdy (prawda) {
+    wypisz("\nPierwsza liczba: ");
+    zmienna wejscie = wprowadź();
+    // wartość_pusta oznacza koniec wejścia (np. Ctrl+Z / Ctrl+D)
+    jeżeli (wejscie == wartość_pusta lub wejscie == "koniec") {
+        przerwij;
+    }
+    zmienna a = liczba(wejscie);
+
+    wypisz("Działanie: ");
+    zmienna dzialanie = wprowadź();
+    jeżeli (dzialanie == wartość_pusta lub dzialanie == "koniec") {
+        przerwij;
+    }
+
+    wypisz("Druga liczba: ");
+    wejscie = wprowadź();
+    jeżeli (wejscie == wartość_pusta lub wejscie == "koniec") {
+        przerwij;
+    }
+    zmienna b = liczba(wejscie);
+
+    wypisz(a & " " & dzialanie & " " & b & " = " & oblicz(a, dzialanie, b) & "\n");
+}
+
+wypisz("\nDo zobaczenia!\n");

@@ -1,0 +1,43 @@
+// Moduł z figurami geometrycznymi.
+// Nazwy zaczynające się od "_" są prywatne i nie można ich zaimportować.
+
+zmienna PI = 3.141592653589793;
+zmienna _utworzone = 0;
+
+klasa Figura {
+    konstruktor() {
+        _utworzone += 1;
+    }
+
+    metoda opis() {
+        zwróć ja.nazwa() & ": pole = " & ja.pole() & ", obwód = " & ja.obwod();
+    }
+}
+
+klasa Prostokat dziedziczy_po Figura {
+    konstruktor(a, b) {
+        super.konstruktor();
+        ja.a = a;
+        ja.b = b;
+    }
+
+    metoda nazwa() { zwróć "prostokąt " & ja.a & "x" & ja.b; }
+    metoda pole() { zwróć ja.a * ja.b; }
+    metoda obwod() { zwróć 2 * (ja.a + ja.b); }
+}
+
+klasa Kolo dziedziczy_po Figura {
+    konstruktor(r) {
+        super.konstruktor();
+        ja.r = r;
+    }
+
+    metoda nazwa() { zwróć "koło r=" & ja.r; }
+    metoda pole() { zwróć PI * ja.r ** 2; }
+    metoda obwod() { zwróć 2 * PI * ja.r; }
+}
+
+// Funkcja modułu widzi zmienne tego modułu, także prywatne.
+funkcja ile_utworzono() {
+    zwróć _utworzone;
+}

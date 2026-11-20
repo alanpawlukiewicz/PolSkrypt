@@ -1,0 +1,71 @@
+// Sortowanie list: sortowanie bąbelkowe i szybkie (quicksort).
+// Pokazuje: listy, metody list, rekurencję, przekazywanie list przez referencję.
+
+funkcja zamien(lista, i, j) {
+    zmienna tmp = lista[i];
+    lista[i] = lista[j];
+    lista[j] = tmp;
+}
+
+// Sortuje listę w miejscu (zmienia przekazaną listę).
+funkcja sortuj_babelkowo(lista) {
+    zmienna n = lista.długość();
+    dla (zmienna i = 0; i < n - 1; i += 1) {
+        zmienna zamieniono = fałsz;
+        dla (zmienna j = 0; j < n - 1 - i; j += 1) {
+            jeżeli (lista[j] > lista[j + 1]) {
+                zamien(lista, j, j + 1);
+                zamieniono = prawda;
+            }
+        }
+        // jeśli w całym przejściu nic nie zamieniono, lista jest już posortowana
+        jeżeli (!zamieniono) {
+            przerwij;
+        }
+    }
+}
+
+// Quicksort z podziałem Lomuto: elementem dzielącym jest ostatni element zakresu.
+funkcja podziel(lista, od, do_) {
+    zmienna os = lista[do_];
+    zmienna i = od;
+    dla (zmienna j = od; j < do_; j += 1) {
+        jeżeli (lista[j] < os) {
+            zamien(lista, i, j);
+            i += 1;
+        }
+    }
+    zamien(lista, i, do_);
+    zwróć i;
+}
+
+funkcja quicksort(lista, od, do_) {
+    jeżeli (od < do_) {
+        zmienna p = podziel(lista, od, do_);
+        quicksort(lista, od, p - 1);
+        quicksort(lista, p + 1, do_);
+    }
+}
+
+// Zwraca posortowaną kopię, nie zmieniając oryginału.
+funkcja posortowane(lista) {
+    zmienna kopia = lista.kopiuj();
+    quicksort(kopia, 0, kopia.długość() - 1);
+    zwróć kopia;
+}
+
+zmienna dane = [38, 27, 43, 3, 9, 82, 10, 3];
+
+zmienna a = dane.kopiuj();
+sortuj_babelkowo(a);
+wypisz("Dane:                " & dane & "\n");
+wypisz("Sortowanie bąbelkowe: " & a & "\n");
+
+zmienna b = posortowane(dane);
+wypisz("Quicksort:            " & b & "\n");
+wypisz("Oryginał bez zmian:   " & dane & "\n");
+
+// Operatory < i > działają tylko na liczbach, więc sortować można listy liczb.
+zmienna ulamki = [0.5, -3, 2.25, -0.75, 1];
+wypisz("Ujemne i ułamki:      " & posortowane(ulamki) & "\n");
+wypisz("Pusta lista:          " & posortowane([]) & "\n");

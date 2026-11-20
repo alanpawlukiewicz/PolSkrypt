@@ -1,0 +1,53 @@
+// Liczby pierwsze: sito Eratostenesa oraz sprawdzanie pojedynczej liczby.
+// Pokazuje: listy, pętle "dla" i "podczas_gdy", funkcje, operator %.
+
+funkcja sito(n) {
+    // jest_pierwsza[i] mówi, czy liczba i jest pierwsza
+    zmienna jest_pierwsza = [];
+    dla (zmienna i = 0; i <= n; i += 1) {
+        jest_pierwsza.dodaj(prawda);
+    }
+    jest_pierwsza[0] = fałsz;
+    jest_pierwsza[1] = fałsz;
+
+    dla (zmienna i = 2; i * i <= n; i += 1) {
+        jeżeli (jest_pierwsza[i]) {
+            // wykreślamy wszystkie wielokrotności i, zaczynając od i * i
+            dla (zmienna j = i * i; j <= n; j += i) {
+                jest_pierwsza[j] = fałsz;
+            }
+        }
+    }
+
+    zmienna pierwsze = [];
+    dla (zmienna i = 2; i <= n; i += 1) {
+        jeżeli (jest_pierwsza[i]) {
+            pierwsze.dodaj(i);
+        }
+    }
+    zwróć pierwsze;
+}
+
+funkcja czy_pierwsza(n) {
+    jeżeli (n < 2) {
+        zwróć fałsz;
+    }
+    zmienna d = 2;
+    podczas_gdy (d * d <= n) {
+        jeżeli (n % d == 0) {
+            zwróć fałsz;
+        }
+        d += 1;
+    }
+    zwróć prawda;
+}
+
+zmienna pierwsze = sito(100);
+wypisz("Liczby pierwsze do 100: " & pierwsze & "\n");
+wypisz("Jest ich: " & pierwsze.długość() & "\n");
+
+zmienna sprawdzane = [1, 2, 17, 21, 97, 7919];
+dla (zmienna i = 0; i < sprawdzane.długość(); i += 1) {
+    zmienna n = sprawdzane[i];
+    wypisz(n & (czy_pierwsza(n) ? " jest pierwsza" : " nie jest pierwsza") & "\n");
+}

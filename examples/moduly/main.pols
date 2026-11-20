@@ -1,0 +1,36 @@
+// Importowanie modułów. Uruchom: PolSkrypt examples/moduly/main.pols
+// Ścieżki importu są liczone względem tego pliku, więc katalog uruchomienia nie ma znaczenia.
+//
+// moduly/
+// ├── main.pols                 (ten plik)
+// ├── geometria.pols
+// └── narzedzia/
+//     └── statystyka.pols
+
+// Import całego modułu pod nazwą "geo": zawartość odczytuje się przez kropkę.
+importuj "geometria.pols" jako geo;
+
+// Import wybranych nazw bezpośrednio do tego pliku ("zsw" to skrót od "znajdujący_się_w").
+importuj srednia, maksimum zsw "narzedzia/statystyka.pols";
+
+zmienna figury = [geo.Prostokat(3, 4), geo.Kolo(1), geo.Prostokat(2.5, 2)];
+
+wypisz("Figury:\n");
+zmienna pola = [];
+dla (zmienna i = 0; i < figury.długość(); i += 1) {
+    wypisz("  " & figury[i].opis() & "\n");
+    pola.dodaj(figury[i].pole());
+}
+
+wypisz("Średnie pole:     " & srednia(pola) & "\n");
+wypisz("Największe pole:  " & maksimum(pola) & "\n");
+wypisz("Utworzono figur:  " & geo.ile_utworzono() & "\n");
+
+// Moduł ma własne zmienne globalne: ta zmienna PI nie zmienia PI w module geometria.
+zmienna PI = 3;
+wypisz("PI w tym pliku: " & PI & ", PI w module: " & geo.PI & "\n");
+
+wypisz(geo & " jest typu " & typ(geo) & "\n");
+
+// Odczyt prywatnej zmiennej modułu kończy się błędem:
+// wypisz(geo._utworzone);   // Błąd: '_utworzone' jest prywatne w module 'geometria'.

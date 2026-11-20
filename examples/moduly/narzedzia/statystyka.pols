@@ -1,0 +1,29 @@
+// Moduł z funkcjami statystycznymi dla list liczb.
+
+funkcja suma(lista) {
+    zmienna s = 0;
+    dla (zmienna i = 0; i < lista.długość(); i += 1) {
+        s += lista[i];
+    }
+    zwróć s;
+}
+
+funkcja srednia(lista) {
+    jeżeli (lista.pusta()) {
+        zwróć wartość_pusta;
+    }
+    zwróć suma(lista) / lista.długość();
+}
+
+funkcja maksimum(lista) {
+    jeżeli (lista.pusta()) {
+        zwróć wartość_pusta;
+    }
+    zmienna m = lista[0];
+    dla (zmienna i = 1; i < lista.długość(); i += 1) {
+        jeżeli (lista[i] > m) {
+            m = lista[i];
+        }
+    }
+    zwróć m;
+}

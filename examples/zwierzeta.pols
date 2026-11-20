@@ -1,0 +1,86 @@
+// Klasy i dziedziczenie na przykładzie zwierząt w schronisku.
+// Pokazuje: konstruktory, metody, metody statyczne, dziedziczenie, super,
+// polimorfizm, typ, jest_instancją i klasa_obiektu.
+
+klasa Zwierze {
+    konstruktor(imie, wiek) {
+        ja.imie = imie;
+        ja.wiek = wiek;
+    }
+
+    metoda dzwiek() {
+        zwróć "...";
+    }
+
+    metoda przedstaw() {
+        zwróć ja.imie & " (" & ja.wiek & " l.) mówi: " & ja.dzwiek();
+    }
+
+    // Tworzy młodsze zwierzę tej samej klasy co bieżące, nawet w klasie pochodnej.
+    metoda potomek(imie) {
+        zwróć klasa_obiektu(ja)(imie, 0);
+    }
+
+    statyczna metoda starsze(a, b) {
+        zwróć a.wiek >= b.wiek ? a : b;
+    }
+}
+
+klasa Pies dziedziczy_po Zwierze {
+    konstruktor(imie, wiek, rasa) {
+        super.konstruktor(imie, wiek);
+        ja.rasa = rasa;
+    }
+
+    metoda dzwiek() {
+        zwróć "Hau!";
+    }
+
+    metoda przedstaw() {
+        zwróć super.przedstaw() & " [rasa: " & ja.rasa & "]";
+    }
+}
+
+klasa Kot dziedziczy_po Zwierze {
+    metoda dzwiek() {
+        zwróć "Miau!";
+    }
+}
+
+klasa Kociak dziedziczy_po Kot {
+    metoda dzwiek() {
+        zwróć "miau...";
+    }
+}
+
+zmienna schronisko = [
+    Pies("Burek", 5, "kundel"),
+    Kot("Mruczek", 3),
+    Kociak("Puszek", 1),
+    Zwierze("Ziutek", 2)
+];
+
+wypisz("--- Mieszkańcy schroniska ---\n");
+dla (zmienna i = 0; i < schronisko.długość(); i += 1) {
+    wypisz(schronisko[i].przedstaw() & "\n");
+}
+
+wypisz("\n--- Koty (z kociętami) ---\n");
+dla (zmienna i = 0; i < schronisko.długość(); i += 1) {
+    zmienna z = schronisko[i];
+    jeżeli (jest_instancją(z, Kot)) {
+        wypisz(z.imie & " jest kotem, dokładniej: " & klasa_obiektu(z) & "\n");
+    }
+}
+
+wypisz("\n--- Typy ---\n");
+wypisz("typ(schronisko[0]) = " & typ(schronisko[0]) & "\n");
+wypisz("typ(Pies)          = " & typ(Pies) & "\n");
+wypisz("typ(Pies.starsze)  = " & typ(Pies.starsze) & "\n");
+
+wypisz("\n--- Metoda statyczna i potomek ---\n");
+zmienna najstarszy = Zwierze.starsze(schronisko[0], schronisko[1]);
+wypisz("Starszy z pary: " & najstarszy.imie & "\n");
+
+zmienna maly = schronisko[1].potomek("Filemon");
+wypisz(maly.przedstaw() & " - klasa: " & klasa_obiektu(maly) & "\n");

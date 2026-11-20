@@ -1,0 +1,82 @@
+// Funkcje jako wartości: funkcje anonimowe, domknięcia i funkcje wyższego rzędu.
+// Pokazuje: funkcje przekazywane jako argumenty i zwracane z funkcji, stan w domknięciu.
+
+funkcja mapuj(lista, f) {
+    zmienna wynik = [];
+    dla (zmienna i = 0; i < lista.długość(); i += 1) {
+        wynik.dodaj(f(lista[i]));
+    }
+    zwróć wynik;
+}
+
+funkcja filtruj(lista, warunek) {
+    zmienna wynik = [];
+    dla (zmienna i = 0; i < lista.długość(); i += 1) {
+        jeżeli (warunek(lista[i])) {
+            wynik.dodaj(lista[i]);
+        }
+    }
+    zwróć wynik;
+}
+
+funkcja redukuj(lista, f, poczatek) {
+    zmienna akumulator = poczatek;
+    dla (zmienna i = 0; i < lista.długość(); i += 1) {
+        akumulator = f(akumulator, lista[i]);
+    }
+    zwróć akumulator;
+}
+
+// Zwraca nową funkcję, która pamięta wartość n (domknięcie).
+funkcja mnoznik(n) {
+    zwróć funkcja (x) { zwróć x * n; };
+}
+
+// Złożenie funkcji: zloz(f, g)(x) == f(g(x))
+funkcja zloz(f, g) {
+    zwróć funkcja (x) { zwróć f(g(x)); };
+}
+
+// Licznik z prywatnym stanem, dostępnym tylko przez zwrócone funkcje.
+funkcja utworz_licznik() {
+    zmienna stan = 0;
+    zwróć [
+        funkcja () { stan += 1; zwróć stan; },
+        funkcja () { stan = 0; }
+    ];
+}
+
+zmienna liczby = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+zmienna podwojone = mapuj(liczby, mnoznik(2));
+zmienna parzyste = filtruj(liczby, funkcja (x) { zwróć x % 2 == 0; });
+zmienna suma = redukuj(liczby, funkcja (a, b) { zwróć a + b; }, 0);
+zmienna iloczyn = redukuj(liczby, funkcja (a, b) { zwróć a * b; }, 1);
+
+wypisz("Liczby:     " & liczby & "\n");
+wypisz("Podwojone:  " & podwojone & "\n");
+wypisz("Parzyste:   " & parzyste & "\n");
+wypisz("Suma:       " & suma & "\n");
+wypisz("Iloczyn:    " & iloczyn & "\n");
+
+// Suma kwadratów liczb nieparzystych, zapisana jako łańcuch operacji
+zmienna kwadrat = funkcja (x) { zwróć x ** 2; };
+zmienna wynik = redukuj(
+    mapuj(filtruj(liczby, funkcja (x) { zwróć x % 2 == 1; }), kwadrat),
+    funkcja (a, b) { zwróć a + b; },
+    0
+);
+wypisz("Suma kwadratów nieparzystych: " & wynik & "\n");
+
+zmienna plus_jeden = funkcja (x) { zwróć x + 1; };
+zmienna potroj_i_dodaj = zloz(plus_jeden, mnoznik(3));
+wypisz("3 * 5 + 1 = " & potroj_i_dodaj(5) & "\n");
+
+zmienna licznik = utworz_licznik();
+zmienna zwieksz = licznik[0];
+zmienna wyzeruj = licznik[1];
+zwieksz();
+zwieksz();
+wypisz("Licznik po dwóch wywołaniach: " & zwieksz() & "\n");
+wyzeruj();
+wypisz("Licznik po wyzerowaniu: " & zwieksz() & "\n");
