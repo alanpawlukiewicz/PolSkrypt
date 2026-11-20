@@ -10,22 +10,17 @@ namespace PolSkrypt.Interpretation.Callables.NativeCallables
 
         public object? Call(Interpreter interpreter, List<object?> arguments)
         {
-            if (arguments.Count == 1)
-            {
-                Console.Write(StringHelper.Stringify(arguments[0])
-                    .Replace("\\n", "\n")
-                    .Replace("\\t", "\t")
-                    .Replace("\\r", "\r"));
-                return null;
-            }
+            string str = string.Empty;
 
             foreach (var argument in arguments)
             {
-                Console.Write($"{StringHelper.Stringify(argument)
+                str += $"{StringHelper.Stringify(argument)
                     .Replace("\\n", "\n")
                     .Replace("\\t", "\t")
-                    .Replace("\\r", "\r")} ");
+                    .Replace("\\r", "\r")} ";
             }
+            str = str.Remove(str.Length - 1);
+            Console.Write(str);
             return null;
         }
 
