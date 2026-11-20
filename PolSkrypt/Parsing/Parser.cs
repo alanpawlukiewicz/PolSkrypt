@@ -5,6 +5,7 @@ using PolSkrypt.Lexing;
 using PolSkrypt.Parsing.Expressions;
 using PolSkrypt.Parsing.Expressions.ListExpressions;
 using PolSkrypt.Parsing.Statements;
+using System.Xml.Linq;
 
 namespace PolSkrypt.Parsing
 {
@@ -46,6 +47,10 @@ namespace PolSkrypt.Parsing
                 if (Match(TokenType.VAR))
                 {
                     return VarDeclaration();
+                }
+                if (Match(TokenType.IMPORT))
+                {
+                    return new List<Stmt> { Import() };
                 }
 
                 return new List<Stmt> { Statement() };
@@ -180,6 +185,33 @@ namespace PolSkrypt.Parsing
             }
 
             return ExpressionStatement();
+        }
+
+        private Stmt Import()
+        {
+            var keyword = Previous();
+            if (Match(TokenType.STRING))
+            {
+                var p = Previous();
+                Consume(TokenType.AS, "Oczekiwano 'jako'.");
+                var alias = Consume(TokenType.IDENTIFIER, "Oczekiwano aliasu dla importu");
+                Consume(TokenType.SEMICOLON, "Oczekiwano ';' po deklaracji importu.");
+                return new Import(p, null, alias, keyword);
+            } 
+
+            var importNames = new List<Token>() { };
+            do
+            {
+                var name = Consume(TokenType.IDENTIFIER, "Oczekiwano nazwy zmiennej.");
+                importNames.Add(name);
+            }
+            while (Match(TokenType.COMMA));
+
+            Consume(TokenType.FROM, "Oczekiwano 'znajdujący_się_w'.");
+            var path = Consume(TokenType.STRING, "Oczekiwano ścieżki importu.");
+            
+            Consume(TokenType.SEMICOLON, "Oczekiwano ';' po deklaracji importu.");
+            return new Import(path, importNames, null, keyword);
         }
 
         private Stmt ReturnStatement()
