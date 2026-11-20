@@ -1,11 +1,12 @@
 # Narzędzia PolSkrypt
 
-Wersja dokumentu: 0.2.1
+Wersja dokumentu: 1.0.0
 
 ## Spis treści
 
 1. [Analiza statyczna (resolver)](#1-analiza-statyczna-resolver)
 2. [Tryb promptu (REPL)](#2-tryb-promptu-repl)
+3. [Komunikaty błędów](#3-komunikaty-błędów)
 
 ---
 
@@ -35,6 +36,7 @@ Resolver działa automatycznie przed każdym uruchomieniem.
 | Zwrócenie wartości z konstruktora | `Nie można zwrócić wartości z konstruktora.` |
 | Dwie metody o tej samej nazwie w jednej klasie | `Metoda 'nazwa' została już zdefiniowana w tej klasie.` |
 | Dwie metody statyczne o tej samej nazwie w jednej klasie | `Metoda statyczna 'nazwa' została już zdefiniowana w tej klasie.` |
+| `importuj` poza najwyższym poziomem pliku | `Import jest dozwolony tylko na najwyższym poziomie pliku.` |
 
 #### `przerwij` poza pętlą
 
@@ -155,9 +157,23 @@ klasa B {
 }
 ```
 
+#### Import poza najwyższym poziomem
+
+Instrukcja `importuj` może wystąpić tylko bezpośrednio w pliku, poza blokami, funkcjami i klasami (zob. [modules.md](modules.md)):
+
+```text
+importuj "mat.pols" jako mat;           // poprawnie
+
+funkcja f() {
+    importuj "mat.pols" jako m;         // błąd
+}
+```
+
 ### Zasięg globalny
 
 Resolver nie śledzi zmiennych globalnych. Reguły dotyczące deklaracji są sprawdzane w trakcie czasu wykonania.
+
+Każdy importowany moduł jest analizowany przez resolver osobno, w chwili importu.
 
 ## 2. Tryb promptu (REPL)
 
@@ -204,3 +220,50 @@ Przypisanie jest wyrażeniem, więc również zwraca wartość. Przypisanie zło
 ```
 
 Wyrażenie nie wyświetli się jeżeli zostanie one zakończone znakiem `;`.
+
+### Importowanie w REPL
+
+W trybie promptu można używać `importuj`. Ścieżki są wtedy liczone względem bieżącego katalogu. Moduł zaimportowany raz pozostaje w pamięci do końca sesji, więc ponowny import tego samego pliku nie wczyta jego nowej wersji.
+
+---
+
+## 3. Komunikaty błędów
+
+Błędy są wypisywane na standardowe wyjście błędów w postaci:
+
+```text
+[Linia 3] Błąd na 'x': Oczekiwano ';' po deklaracji zmiennej.     // błąd składni
+[Linia 7] Błąd: Pamiętaj cholero, nigdy nie dziel przez 0!          // błąd czasu działania
+```
+
+### Nazwa pliku
+
+Błąd powstały w kodzie importowanego modułu zawiera dodatkowo nazwę pliku modułu (ścieżkę względem katalogu, z którego uruchomiono interpreter):
+
+```text
+[lib\dziel.pols, Linia 3] Błąd: Pamiętaj cholero, nigdy nie dziel przez 0!
+```
+
+Dotyczy to błędów składni, błędów resolvera i błędów czasu działania, także wtedy, gdy funkcja modułu zostanie wywołana z innego pliku. Błędy w pliku głównym i w REPL nie zawierają nazwy pliku.
+
+### Błędy funkcji wbudowanych
+
+Błędy zgłaszane przez funkcje i metody wbudowane (np. `liczba`, `jest_instancją`, `Plik.otwórz`, metody list i plików) wskazują linię, w której nastąpiło wywołanie. Jeśli argumenty wywołania zajmują kilka linii, wskazywana jest linia nawiasu zamykającego.
+
+```text
+zmienna a = 1;
+
+zmienna b = liczba("abc");    // [Linia 3] Błąd: Argument musi być liczbą.
+```
+
+### Kody wyjścia
+
+Przy uruchamianiu pliku interpreter kończy się kodem:
+
+| Kod | Znaczenie |
+|-----|-----------|
+| `0` | program wykonał się bez błędów |
+| `64` | niepoprawne wywołanie interpretera (więcej niż jeden argument) |
+| `65` | błąd składni lub błąd wykryty przez resolver (także w importowanym module) |
+| `66` | nie znaleziono pliku podanego przy uruchomieniu |
+| `70` | błąd czasu działania |

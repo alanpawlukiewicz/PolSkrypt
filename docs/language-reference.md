@@ -1,16 +1,18 @@
 # Referencja języka PolSkrypt
 
-Wersja dokumentu: 0.4.1
+Wersja dokumentu: 1.0.0
 
 Dokumentacja jest podzielona na kilka plików:
 
 | Plik | Zawartość |
 |------|-----------|
 | `language-reference.md` (ten plik) | podstawy języka: składnia, typy, zmienne, operatory, instrukcje sterujące, funkcje |
-| [`classes.md`](classes.md) | klasy, metody, dziedziczenie, `super` |
+| [`classes.md`](classes.md) | klasy, metody, dziedziczenie, `super`, sprawdzanie klasy obiektu |
 | [`lists.md`](lists.md) | listy i metody natywne list |
-| [`builtin-functions.md`](builtin-functions.md) | funkcje wbudowane (`wypisz`, `liczba`, `typ` itd.) |
-| [`tools.md`](tools.md) | narzędzia: analiza statyczna (resolver) i tryb promptu (REPL) |
+| [`builtin-functions.md`](builtin-functions.md) | funkcje wbudowane (`wypisz`, `liczba`, `typ`, `jest_instancją` itd.) |
+| [`files.md`](files.md) | operacje na plikach: klasa `Plik` i metody otwartego pliku |
+| [`modules.md`](modules.md) | moduły i importowanie (`importuj`) |
+| [`tools.md`](tools.md) | narzędzia: analiza statyczna (resolver), komunikaty błędów i tryb promptu (REPL) |
 
 ## Spis treści
 
@@ -24,6 +26,8 @@ Dokumentacja jest podzielona na kilka plików:
 8. [Klasy i dziedziczenie](classes.md)
 9. [Listy](lists.md)
 10. [Funkcje wbudowane](builtin-functions.md)
+11. [Pliki](files.md)
+12. [Moduły i importowanie](modules.md)
 
 ---
 
@@ -46,7 +50,9 @@ Wielkość liter ma znaczenie (`x` i `X` to różne zmienne).
 
 Nie mogą być używane jako identyfikatory:
 
-`zmienna` `zm` `funkcja` `jeżeli` `w_przeciwnym_wypadku` `wpw` `podczas_gdy` `pgdy` `dla` `prawda` `fałsz` `wartość_pusta` `lub` `oraz` `zwróć` `przerwij` `klasa` `metoda` `statyczna` `dziedziczy_po` `ja` `super`
+`zmienna` `zm` `funkcja` `jeżeli` `w_przeciwnym_wypadku` `wpw` `podczas_gdy` `pgdy` `dla` `prawda` `fałsz` `wartość_pusta` `lub` `oraz` `zwróć` `przerwij` `klasa` `metoda` `statyczna` `dziedziczy_po` `ja` `super` `importuj` `znajdujący_się_w` `zsw` `jako`
+
+Słowa `importuj`, `znajdujący_się_w`, `zsw` i `jako` są zarezerwowane od wersji 1.0.0 (zob. [Moduły](modules.md)).
 
 Dodatkowo wewnątrz ciała klasy specjalne znaczenie ma nazwa `konstruktor` (zob. [Klasy](classes.md)).
 
@@ -59,6 +65,7 @@ Dla najczęściej używanych słów kluczowych istnieją krótsze aliasy. Alias 
 | `zmienna` | `zm` |
 | `w_przeciwnym_wypadku` | `wpw` |
 | `podczas_gdy` | `pgdy` |
+| `znajdujący_się_w` | `zsw` |
 
 ```text
 zm i = 0;
@@ -72,7 +79,7 @@ pgdy (i < 3) {
 }
 ```
 
-> **Uwaga:** aliasy są również słowami kluczowymi, więc nie można używać ich jako nazw zmiennych ani funkcji. Dotyczy to także istniejących programów, które mają zmienną o nazwie `zm`, `wpw` lub `pgdy`. Identyfikatory tylko *zaczynające się* od aliasu (np. `zm1`, `wpwx`) są poprawne.
+> **Uwaga:** aliasy są również słowami kluczowymi, więc nie można używać ich jako nazw zmiennych ani funkcji. Dotyczy to także istniejących programów, które mają zmienną o nazwie `zm`, `wpw`, `pgdy` lub `zsw`. Identyfikatory tylko *zaczynające się* od aliasu (np. `zm1`, `wpwx`) są poprawne.
 
 ### Instrukcje i średniki
 
@@ -84,6 +91,8 @@ zmienna x = 5;  // poprawnie
 wypisz(x);      // poprawnie
 zmienna y = 10  // błąd
 ```
+
+Instrukcja `importuj` również kończy się średnikiem.
 
 Średnika **nie** stawia się po:
 
@@ -124,12 +133,27 @@ x = "pięć";          // teraz napis
 | Funkcja | `funkcja (a, b) { ... }` | funkcje są wartościami pierwszej klasy: można je przypisywać do zmiennych i przekazywać dalej |
 | Klasa | `klasa K { ... }` | klasy są wartościami; wywołanie klasy tworzy instancję |
 | Instancja | `K(1, 2)` | obiekt utworzony z klasy; przechowuje pola i udostępnia metody |
+| Moduł | `importuj "m.pols" jako m;` | zaimportowany plik; jego zawartość odczytuje się przez `.` (zob. [Moduły](modules.md)) |
+| Plik | `Plik.otwórz("a.txt", "r")` | otwarty plik (zob. [Pliki](files.md)) |
+
+Nazwę rodzaju wartości zwraca funkcja `typ` (np. `LICZBA`, `FUNKCJA`, `INSTANCJA`), a klasę obiektu sprawdzają `jest_instancją` i `klasa_obiektu` (zob. [Funkcje wbudowane](builtin-functions.md)).
 
 ### Liczba
 
 Wszystkie liczby są typu double, więc `1` i `1.0` to ta sama wartość. Dzielenie przez 0 jest błędem (nie daje nieskończoności). Dotyczy to wszystkich operatorów z dzielnikiem: `/`, `%`, `/=` i `%=`.
 
 W literałach liczbowych dozwolone są wyłącznie cyfry `0-9`; inne znaki Unicode będące cyframi (np. cyfry arabsko-indyjskie) nie są traktowane jako liczby.
+
+Separatorem dziesiętnym jest zawsze **kropka**, niezależnie od ustawień językowych systemu. Dotyczy to zarówno literałów w kodzie, jak i zamiany liczby na napis (`wypisz`, `napis`, `&`) i napisu na liczbę (`liczba`). Ten sam program wypisuje więc to samo na każdym komputerze:
+
+```text
+wypisz(1 / 4);        // wypisze: 0.25
+wypisz("x" & 1.5);    // wypisze: x1.5
+liczba("2.5");        // 2.5
+liczba("2,5");        // błąd
+```
+
+Wartości, które nie są zwykłymi liczbami (np. wynik `10 ** 400`), są wypisywane jako `nieskończoność`, `-nieskończoność` i `nie-liczba`. Zero ujemne jest wypisywane jako `0`.
 
 ### Napis
 
@@ -140,6 +164,19 @@ wypisz(1 + 2);        // wypisze: 3
 wypisz("a" & 1);      // wypisze: a1
 wypisz("a" + 1);      // błąd
 ```
+
+#### Indeksowanie napisów
+
+Do pojedynczych znaków napisu można się odwoływać przez indeks, tak jak do elementów listy. Wynikiem jest jednoznakowy napis. Indeks zaczyna się od zera.
+
+```text
+zmienna s = "żółw";
+wypisz(s[0]);              // wypisze: ż
+wypisz("kot"[2]);          // wypisze: t
+wypisz(("ko" & "t")[1]);   // wypisze: o
+```
+
+Napisy są niezmienne, więc przypisanie do znaku (`s[0] = "x";`) jest błędem. Indeks musi być nieujemną liczbą całkowitą mniejszą od długości napisu.
 
 > **Uwaga:** operator `.` nie służy już do konkatenacji (zdezaprobowany w 0.3.0 razem z `.=`). Kropka oznacza teraz dostęp do pól i metod (zob. [Klasy](classes.md)).
 
@@ -199,6 +236,7 @@ Zasady są następujące:
 | `[1, 2]` | prawda |
 | funkcja | prawda |
 | klasa, instancja | prawda |
+| moduł, plik | prawda |
 
 Do sprawdzenia, czy lista jest pusta, służy metoda `pusta()` (zob. [lists.md](lists.md)).
 
@@ -231,6 +269,8 @@ zm nazwa = wyrażenie;        // alias
 
 - Zmienna musi być zadeklarowana (`zmienna` lub `zm`) przed użyciem.
 - Ponowna deklaracja zmiennej o tej samej nazwie w tym samym zasięgu jest **błędem**. Dotyczy to zarówno zmiennych w blokach, jak i zmiennych globalnych (do wersji 0.2.0 zmienne globalne były w takim przypadku nadpisywane). Żeby zmienić wartość istniejącej zmiennej, użyj przypisania: `x = 2;`.
+- Funkcje wbudowane (`wypisz`, `typ`, `Plik` itd.) znajdują się w osobnym zasięgu, nadrzędnym wobec zasięgu globalnego pliku. Zmienna globalna o tej samej nazwie (np. `zmienna typ = 1;`) przesłania funkcję wbudowaną w tym pliku, zamiast powodować błąd ponownej deklaracji.
+- Każdy plik ma własny zasięg globalny. Zmienne globalne jednego pliku nie są widoczne w plikach, które on importuje (zob. [Moduły](modules.md)).
 - Błędy tego typu w zasięgach lokalnych są wykrywane już na etapie statycznej analizy kodu (Resolver), przed uruchomieniem programu. Resolver nie śledzi zmiennych globalnych (zob. [tools.md](tools.md)).
 - Zasięg jest blokowy: zmienna istnieje do końca bloku `{ }`.
 - Zmienna wewnętrzna może przesłonić zewnętrzną (shadowing).
@@ -258,7 +298,7 @@ x = 3;           // poprawnie: przypisanie
 
 | Typ | Operatory | Łączność |
 |------|-----------|----------|
-| Wyrażenie, wywołanie, dostęp do pola, indeksowanie listy | `()` `.` `[]` | lewostronna |
+| Wyrażenie, wywołanie, dostęp do pola, indeksowanie listy lub napisu | `()` `.` `[]` | lewostronna |
 | Potęgowy | `**` | prawostronna |
 | Jednoargumentowy | `-` `!` | prawostronna |
 | Multiplikatywny | `*` `/` `%` | lewostronna |
@@ -337,6 +377,9 @@ wypisz(5 oraz 7);  // wypisze: 7
 | `2 ** -1` | `0.5` |
 | `-7 % 3` | `-1` |
 | `[1] == [1]` | `fałsz` |
+| `1 / 4` | `0.25` (zawsze z kropką) |
+| `"abc"[1]` | `"b"` |
+| `"abc"[3]` | *błąd* |
 
 ---
 

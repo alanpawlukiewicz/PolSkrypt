@@ -1,6 +1,6 @@
 # Klasy i dziedziczenie w PolSkrypt
 
-Wersja dokumentu: 0.4.0
+Wersja dokumentu: 1.0.0
 
 Część referencji języka PolSkrypt (zob. [language-reference.md](language-reference.md)).
 
@@ -8,7 +8,8 @@ Część referencji języka PolSkrypt (zob. [language-reference.md](language-ref
 
 1. [Klasy](#1-klasy)
 2. [Dziedziczenie](#2-dziedziczenie)
-3. [Błędy związane z klasami](#3-błędy-związane-z-klasami)
+3. [Sprawdzanie klasy obiektu](#3-sprawdzanie-klasy-obiektu)
+4. [Błędy związane z klasami](#4-błędy-związane-z-klasami)
 
 ---
 
@@ -230,7 +231,52 @@ Konstruktor klasy bazowej nie jest wywoływany automatycznie (wymaga użycia `su
 
 ---
 
-## 3. Błędy związane z klasami
+## 3. Sprawdzanie klasy obiektu
+
+Funkcja `typ` zwraca dla każdej instancji `INSTANCJA`, a dla każdej klasy `KLASA`, niezależnie od ich nazw. Do sprawdzenia, jakiej klasy jest obiekt, służą dwie funkcje wbudowane (szczegóły w [builtin-functions.md](builtin-functions.md)):
+
+| Funkcja | Pytanie | Uwzględnia dziedziczenie |
+|---------|---------|--------------------------|
+| `jest_instancją(x, K)` | czy `x` jest obiektem klasy `K` lub klasy po niej dziedziczącej? | tak |
+| `klasa_obiektu(x)` | z jakiej dokładnie klasy utworzono `x`? | nie |
+
+```text
+klasa Zwierze {
+    konstruktor(imie) { ja.imie = imie; }
+}
+klasa Pies dziedziczy_po Zwierze { }
+klasa Kot dziedziczy_po Zwierze { }
+
+zmienna burek = Pies("Burek");
+
+wypisz(typ(burek));                       // wypisze: INSTANCJA
+wypisz(jest_instancją(burek, Pies));      // wypisze: PRAWDA
+wypisz(jest_instancją(burek, Zwierze));   // wypisze: PRAWDA
+wypisz(jest_instancją(burek, Kot));       // wypisze: FAŁSZ
+wypisz(klasa_obiektu(burek) == Pies);     // wypisze: PRAWDA
+wypisz(klasa_obiektu(burek) == Zwierze);  // wypisze: FAŁSZ
+```
+
+Wynik `klasa_obiektu` jest zwykłą klasą, więc można go użyć do utworzenia nowego obiektu tej samej klasy, np. w metodzie, która nie zna klasy pochodnej:
+
+```text
+klasa Zwierze {
+    konstruktor(imie) { ja.imie = imie; }
+    metoda sklonuj(noweImie) {
+        zwróć klasa_obiektu(ja)(noweImie);   // tworzy obiekt tej samej klasy co ja
+    }
+}
+klasa Pies dziedziczy_po Zwierze { }
+
+zmienna azor = Pies("Burek").sklonuj("Azor");
+wypisz(klasa_obiektu(azor));                // wypisze: <klasa Pies>
+```
+
+Klasy są porównywane jako obiekty, a nie po nazwie. Dwie różne klasy o tej samej nazwie (np. zadeklarowane w dwóch modułach albo w dwóch wywołaniach tej samej funkcji) są dla obu funkcji różnymi klasami.
+
+---
+
+## 4. Błędy związane z klasami
 
 ### Błędy wykrywane przed uruchomieniem (resolver)
 
@@ -252,7 +298,7 @@ Poniższe błędy są zgłaszane przez analizę statyczną (zob. [tools.md](tool
 
 - Odczyt nieistniejącego atrybutu lub metody instancji.
 - Wywołanie metody statycznej, której klasa nie ma (także gdy istnieje metoda zwykła o tej nazwie).
-- Odczyt właściwości (`x.y`) z wartości, która nie jest instancją, klasą ani listą (np. liczby lub napisu).
+- Odczyt właściwości (`x.y`) z wartości, która nie jest instancją, klasą, listą, modułem ani otwartym plikiem (np. liczby lub napisu).
 - Zapis atrybutu (`x.y = 1`) na wartości, która nie jest instancją (np. na klasie, liście lub liczbie).
 - Wywołanie konstruktora z niepoprawną liczbą argumentów.
 - Klasa bazowa, która nie jest klasą (np. `zmienna X = 5; klasa A dziedziczy_po X { }`) albo nie jest zdefiniowana.

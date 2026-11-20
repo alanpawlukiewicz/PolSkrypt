@@ -1,6 +1,6 @@
 # Listy w PolSkrypt
 
-Wersja dokumentu: 0.4.1
+Wersja dokumentu: 1.0.0
 
 Część referencji języka PolSkrypt (zob. [language-reference.md](language-reference.md)).
 
@@ -75,6 +75,8 @@ funkcja()[0][1] // poprawnie
 [1, 2, 3][1]    // poprawnie
 ```
 
+W ten sam sposób (tylko do odczytu) można indeksować napisy, np. `"abc"[1]` daje `"b"` (zob. [Indeksowanie napisów](language-reference.md#indeksowanie-napisów)).
+
 ---
 
 ## 3. Semantyka referencyjna
@@ -124,10 +126,38 @@ l.dodaj(3);
 | `długość()` | zwraca liczbę elementów listy |
 | `pusta()` | zwraca `prawda`, jeśli lista nie ma elementów |
 | `zawiera(x)` | zwraca `prawda`, jeśli lista zawiera wartość `x` |
-| `szukaj(x)` | zwraca indeks pierwszego wystąpienia `x` |
+| `szukaj(x)` | zwraca indeks pierwszego wystąpienia `x`; jeśli `x` nie występuje, zwraca `wartość_pusta` |
 | `policz(x)` | zwraca liczbę wystąpień wartości `x` w liście |
 | `kopiuj()` | zwraca nową listę z tymi samymi elementami (kopia płytka) |
 | `wyczyść()` | usuwa wszystkie elementy listy, zwraca zmodyfikowaną listę |
+
+Metody `zawiera`, `szukaj` i `policz` porównują elementy tak samo jak operator `==`: wartość i typ muszą się zgadzać (`1` i `"1"` to różne wartości), a listy i instancje są porównywane przez referencję. Lista może zawierać `wartość_pusta` i można jej szukać jak każdej innej wartości:
+
+```text
+zmienna l = [1, wartość_pusta, "1"];
+wypisz(l.szukaj("1"));            // wypisze: 2
+wypisz(l.szukaj(wartość_pusta));  // wypisze: 1
+wypisz(l.policz(1));              // wypisze: 1
+```
+
+Kopia tworzona przez `kopiuj()` jest **płytka**: nowa lista zawiera te same elementy, więc zagnieżdżone listy są współdzielone z oryginałem:
+
+```text
+zmienna a = [[1], 2];
+zmienna b = a.kopiuj();
+b[1] = 9;        // a się nie zmienia
+b[0][0] = 5;     // a[0] to ta sama lista, więc a == [[5], 2]
+```
+
+Metodę można pobrać jako wartość i wywołać później. Pozostaje ona związana ze swoją listą:
+
+```text
+zmienna l = [];
+zmienna dodajDoL = l.dodaj;
+dodajDoL(1);
+wypisz(l);        // wypisze: [1]
+wypisz(dodajDoL); // wypisze: <funkcja listy dodaj>
+```
 
 ### Przykład
 
@@ -151,9 +181,13 @@ Błędy czasu działania związane z listami:
 | Sytuacja | Przykład |
 |----------|----------|
 | odczyt lub zapis poza zakresem listy | `zmienna l = [1, 2, 3]; l[3];`, `l[3] = 1;`, `zmienna p = []; p[0];` |
-| indeksowanie wartości, która nie jest listą | `zmienna x = 5; x[0];`, `x[0] = 1;`, także dla napisów i `wartość_pusta` |
+| odczyt przez indeks wartości, która nie jest listą ani napisem | `zmienna x = 5; x[0];`, także dla `wartość_pusta` |
+| zapis przez indeks do wartości, która nie jest listą | `x[0] = 1;`, także dla napisów: `"abc"[0] = "x";` |
 | zapis atrybutu na liście | `l.pole = 1;` |
 | wpisanie indeksu jako liczba ujemna lub zmiennoprzecinkowa | `l[-1]`, `l[1.5]` |
+| indeks, który nie jest liczbą | `l["0"]` |
+| nieznana metoda listy | `l.sortuj();` (komunikat `Podano niepoprawną funkcję listy.`) |
+| zła liczba argumentów metody | `l.usuń();`, `l.wstaw(0);` |
 
 Błędy wykrywane przed uruchomieniem (resolver, zob. [tools.md](tools.md)):
 

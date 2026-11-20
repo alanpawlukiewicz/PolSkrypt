@@ -5,7 +5,45 @@ Wszystkie istotne zmiany w projekcie są opisywane w tym pliku.
 Format oparty na [Keep a Changelog](https://keepachangelog.com/pl/1.1.0/),
 a numeracja wersji zgodna z [Semantic Versioning](https://semver.org/lang/pl/).
 
-## [Niewydane]
+## [1.0.0] 2026-11-20
+
+### Dodano
+- Moduły i importowanie kodu z innych plików:
+  - `importuj "plik.pols" jako nazwa;` importuje cały moduł jako obiekt (`nazwa.funkcja()`),
+  - `importuj a, b znajdujący_się_w "plik.pols";` (alias `zsw`) importuje wybrane nazwy.
+- Słowa kluczowe `importuj`, `znajdujący_się_w`, `zsw`, `jako`.
+- Właściwości modułów:
+  - każdy moduł ma własny zasięg globalny i jest wykonywany tylko raz, nawet przy wielokrotnym imporcie;
+  - ścieżki są liczone względem pliku, który importuje;
+  - nazwy zaczynające się od `_` są prywatne;
+  - wykrywane są importy cykliczne.
+- Klasa natywna `Plik` z metodami statycznymi `otwórz`, `istnieje`, `usuń`, `przemianuj`.
+- Tryby otwarcia pliku `"r"`, `"w"`, `"a"`, `"rw"`.
+- Metody otwartego pliku: `czytaj`, `czytaj_linie`, `czytaj_znaki`, `wpisz`, `wpisz_linie`, `zamknij`, `zamknięty`, `ustaw`, `przewiń`, `pozycja`, `rozmiar`, `koniec`, `przytnij`, `opróżnij`.
+- Indeksowanie napisów (tylko odczyt), np. `"abc"[1]` zwraca `"b"`.
+- Funkcja natywna `jest_instancją(x, K)` sprawdzająca, czy obiekt jest instancją klasy lub klasy po niej dziedziczącej.
+- Funkcja natywna `klasa_obiektu(x)` zwracająca klasę obiektu.
+- Nazwa pliku w komunikatach błędów powstałych w importowanych modułach, np. `[lib\dziel.pols, Linia 3]`.
+- Numer linii w komunikatach błędów zgłaszanych przez funkcje i metody wbudowane (np. `liczba`, metody list i plików).
+- Funkcja natywna `typ` zwraca nowe wartości: `FUNKCJA`, `KLASA`, `INSTANCJA`, `MODUŁ`, `PLIK`.
+- Czytelne opisy wartości specjalnych: `nieskończoność`, `-nieskończoność`, `nie-liczba`.
+- Dokumentacja: [files.md](docs/files.md), [modules.md](docs/modules.md), opis komunikatów błędów i kodów wyjścia w [tools.md](docs/tools.md).
+
+### Zmieniono
+- **Funkcja natywna `typ` zwraca zawsze jedną ze stałych nazw typów, niezależnie od nazw funkcji i klas.** Dla funkcji zwraca `FUNKCJA` zamiast np. `<funkcja f>`, dla klasy `KLASA` zamiast `<klasa K>`, a dla instancji `INSTANCJA` zamiast `<instancja klasy K>`.
+- **Liczby są zawsze zapisywane i odczytywane z kropką dziesiętną, niezależnie od ustawień językowych systemu.** Dotyczy to `napis`, `wypisz`, operatora `&` i funkcji `liczba`. Wcześniej na polskim systemie `napis(3.5)` zwracało `"3,5"`.
+- Funkcja natywna `liczba` przyjmuje tylko liczby i napisy. Przecinek nie jest akceptowany jako separator dziesiętny ani separator tysięcy. Dozwolony jest zapis wykładniczy (np. `"1e3"`).
+- Funkcja natywna `wypisz` z wieloma argumentami nie dodaje już spacji po ostatnim argumencie.
+- Funkcje wbudowane znajdują się w osobnym zasięgu nadrzędnym. Zmienna globalna o tej samej nazwie co funkcja wbudowana przesłania ją, zamiast powodować błąd ponownej deklaracji.
+- Zero ujemne jest wypisywane jako `0` zamiast `-0`.
+- Słowa `importuj`, `znajdujący_się_w`, `zsw` i `jako` są teraz zarezerwowane i nie mogą być nazwami zmiennych.
+
+### Naprawiono
+- Metody list `szukaj` i `policz` kończące działanie interpretera, gdy lista zawierała `wartość_pusta`.
+- Funkcja natywna `liczba` niepotrafiąca odczytać liczby z kropką (np. `liczba("3.5")`) na systemach z polskimi ustawieniami językowymi.
+- Funkcja natywna `typ`, funkcje anonimowe i metody list wypisywane jako wewnętrzne nazwy klas interpretera (np. `PolSkrypt.Interpretation.Callables.ListCallable`) zamiast `<funkcja natywna>`, `<funkcja anonimowa>`, `<funkcja listy dodaj>`.
+- Błędy funkcji natywnych (np. `liczba("abc")`) wypisywane bez numeru linii.
+- Dokumentacja funkcji `wypisz` podająca sekwencję `\b` zamiast obsługiwanej `\t`.
 
 ## [0.4.1] 2026-11-12
 
@@ -79,6 +117,7 @@ a numeracja wersji zgodna z [Semantic Versioning](https://semver.org/lang/pl/).
 - Funkcje natywne: `zegar`, `wypisz`, `wprowadź`
 
 [Niewydane]: https://github.com/alanpawlukiewicz/PolSkrypt/tree/master
+[0.4.1]: https://github.com/alanpawlukiewicz/PolSkrypt/releases/tag/v1.0.0
 [0.4.1]: https://github.com/alanpawlukiewicz/PolSkrypt/releases/tag/v0.4.1
 [0.4.0]: https://github.com/alanpawlukiewicz/PolSkrypt/releases/tag/v0.4.0
 [0.3.0]: https://github.com/alanpawlukiewicz/PolSkrypt/releases/tag/v0.3.0
