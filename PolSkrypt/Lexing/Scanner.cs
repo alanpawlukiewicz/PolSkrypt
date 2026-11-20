@@ -39,7 +39,8 @@ namespace PolSkrypt.Lexing
             {"dziedziczy_po", TokenType.EXTENDS },
             { "importuj", TokenType.IMPORT },
             { "znajdujący_się_w", TokenType.FROM },
-            { "zsw", TokenType.FROM }
+            { "zsw", TokenType.FROM },
+            { "jako", TokenType.AS }
         };
 
         public Scanner(string source)
