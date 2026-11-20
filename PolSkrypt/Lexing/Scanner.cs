@@ -36,7 +36,10 @@ namespace PolSkrypt.Lexing
             {"przerwij", TokenType.BREAK },
             {"metoda",  TokenType.METHOD},
             {"statyczna", TokenType.STATIC },
-            {"dziedziczy_po", TokenType.EXTENDS }
+            {"dziedziczy_po", TokenType.EXTENDS },
+            { "importuj", TokenType.IMPORT },
+            { "znajdujący_się_w", TokenType.FROM },
+            { "zsw", TokenType.FROM }
         };
 
         public Scanner(string source)

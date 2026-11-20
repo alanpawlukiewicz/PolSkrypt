@@ -22,7 +22,7 @@
         // Keywords.
         AND, CLASS, ELSE, FALSE, FUN, FOR, IF, NULL, OR,
         RETURN, SUPER, SELF, TRUE, VAR, WHILE, BREAK,
-        METHOD, STATIC, EXTENDS,
+        METHOD, STATIC, EXTENDS, IMPORT, FROM,
 
         EOF
     }
