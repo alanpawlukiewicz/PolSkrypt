@@ -1,5 +1,6 @@
 ﻿using PolSkrypt.Constants;
 using PolSkrypt.Contracts;
+using PolSkrypt.Interpretation.NativeObjects;
 
 namespace PolSkrypt.Interpretation.Callables.NativeCallables
 {
@@ -9,31 +10,22 @@ namespace PolSkrypt.Interpretation.Callables.NativeCallables
 
         public object? Call(Interpreter interpreter, List<object?> arguments)
         {
-            var argument = arguments[0];
-            if (argument is double)
+            return arguments[0] switch
             {
-                return Keywords.NUMBER;
-            }
-            else if (argument is string)
-            {
-                return Keywords.STRING;
-            }
-            else if (argument is bool)
-            {
-                return Keywords.BOOLEAN;
-            }
-            else if (argument is List<object?>)
-            {
-                return Keywords.LIST;
-            }
-            else if (argument is null)
-            {
-                return Keywords.NULL;
-            }
-            else
-            {
-                return argument.ToString();
-            }
+                null => Keywords.NULL,
+                double => Keywords.NUMBER,
+                string => Keywords.STRING,
+                bool => Keywords.BOOLEAN,
+                List<object?> => Keywords.LIST,
+                IClassCallable => Keywords.CLASS,
+                ICallable => Keywords.FUNCTION,
+                Instance => Keywords.INSTANCE,
+                PModule => Keywords.MODULE,
+                PFile => Keywords.FILE,
+                var other => throw new InvalidOperationException(
+                    $"typ(): nieobsłużony typ wartości {other.GetType().Name}")
+            };
         }
+
     }
 }

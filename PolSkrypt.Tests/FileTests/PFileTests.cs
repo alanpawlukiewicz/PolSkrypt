@@ -613,7 +613,7 @@ namespace PolSkrypt.Tests.FileTests
         {
             var f = Open(CreateFile("a.txt", "abc"), "r");
 
-            f.ToString().Should().Be(Keywords.FILE_STRING);
+            f.ToString().Should().Be(Keywords.FILE);
         }
     }
 }

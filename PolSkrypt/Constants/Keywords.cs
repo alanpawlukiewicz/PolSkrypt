@@ -11,7 +11,10 @@
         public const string LIST = "LISTA";
         public const string SELF = "ja";
         public const string SUPER = "super";
-        public const string FILE = "Plik";
-        public const string FILE_STRING = "PLIK";
+        public const string FILE = "PLIK";
+        public const string CLASS = "KLASA";
+        public const string FUNCTION = "FUNKCJA";
+        public const string INSTANCE = "INSTANCJA";
+        public const string MODULE = "MODUŁ";
     }
 }

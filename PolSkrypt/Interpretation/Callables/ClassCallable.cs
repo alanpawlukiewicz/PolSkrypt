@@ -23,6 +23,8 @@ namespace PolSkrypt.Interpretation.Callables
 
         public int? Arity => FindMethod(FunctionConstants.CONSTRUCTOR)?.Arity ?? 0;
 
+        public ClassCallable? Superclass => _superclass;
+
         public ICallable? FindStaticMethod(string name)
         {
             if (_staticMethods.ContainsKey(name))
@@ -30,9 +32,9 @@ namespace PolSkrypt.Interpretation.Callables
                 return _staticMethods[name];
             }
 
-            if (_superclass != null)
+            if (Superclass != null)
             {
-                return _superclass.FindStaticMethod(name);
+                return Superclass.FindStaticMethod(name);
             }
 
             return null;
@@ -61,9 +63,9 @@ namespace PolSkrypt.Interpretation.Callables
                 return _methods[name];
             }
 
-            if (_superclass != null)
+            if (Superclass != null)
             {
-                return _superclass.FindMethod(name);
+                return Superclass.FindMethod(name);
             }
 
             return null;

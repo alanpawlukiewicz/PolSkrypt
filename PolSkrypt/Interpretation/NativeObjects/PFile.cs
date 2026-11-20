@@ -181,6 +181,6 @@ namespace PolSkrypt.Interpretation.NativeObjects
 
         public void Dispose() => Close();
 
-        public override string ToString() => Keywords.FILE_STRING;
+        public override string ToString() => Keywords.FILE;
     }
 }

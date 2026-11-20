@@ -37,7 +37,8 @@ namespace PolSkrypt.Interpretation
             _builtins.Define("liczba", new NumberCallable());
             _builtins.Define("napis", new StringCallable());
             _builtins.Define("typ", new TypeCallable());
-            _builtins.Define(Keywords.FILE, new FileClassCallable());
+            _builtins.Define("jest_instancją", new IsInstanceCallable());
+            _builtins.Define("Plik", new FileClassCallable());
 
             _globals = new Env(_builtins);
             _environment = _globals;
