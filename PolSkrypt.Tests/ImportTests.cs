@@ -514,6 +514,17 @@ zmienna dalej = 1;
         }
 
         [Fact]
+        public void NativeFunctionErrorInModule_ReportsModuleFileNameAndLine()
+        {
+            CreateFile("parser.pols", "funkcja parsuj(t)\n{\n    zwróć liczba(t);\n}");
+
+            RunMain("importuj parsuj zsw \"parser.pols\";\nzmienna x = parsuj(\"abc\");");
+
+            ErrorHandler.HadRuntimeError.Should().BeTrue();
+            _errorOutput.ToString().Should().Contain("parser.pols, Linia 3] Błąd: Argument musi być liczbą.");
+        }
+
+        [Fact]
         public void RuntimeErrorInMainFile_KeepsFormatWithoutFileName()
         {
             CreateFile("mat.pols", MathModule);
