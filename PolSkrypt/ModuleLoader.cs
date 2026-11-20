@@ -31,7 +31,6 @@ namespace PolSkrypt
             _dirs.Push(Path.GetDirectoryName(fullPath)!);
         }
 
-        // file: nazwa pliku pokazywana w komunikatach błędów (null = bez nazwy, np. plik główny lub REPL).
         public List<Stmt>? Compile(string source, bool promptMode = false, string? file = null)
         {
             var tokens = new Scanner(source, file).ScanTokens();
@@ -87,8 +86,6 @@ namespace PolSkrypt
             }
         }
 
-        // Ścieżka względem katalogu roboczego (np. "lib\helper.pols"), żeby odróżnić
-        // moduły o tej samej nazwie w różnych katalogach.
         private static string DisplayName(string fullPath)
         {
             return Path.GetRelativePath(Directory.GetCurrentDirectory(), fullPath);
