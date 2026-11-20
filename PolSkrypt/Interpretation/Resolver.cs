@@ -447,5 +447,13 @@ namespace PolSkrypt.Interpretation
 
             return null;
         }
+
+        // Claude: generating method
+        public object? VisitImportStmt(Import statement)
+        {
+            if (_scopes.Count > 0)
+                ErrorHandler.Error(statement.Keyword, "Import jest dozwolony tylko na najwyższym poziomie pliku.");
+            return null;
+        }
     }
 }

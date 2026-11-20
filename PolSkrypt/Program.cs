@@ -5,6 +5,7 @@ using PolSkrypt.Helpers;
 using PolSkrypt.Interpretation;
 using PolSkrypt.Lexing;
 using PolSkrypt.Parsing;
+using System.Text;
 
 public class Program
 {
@@ -34,7 +35,9 @@ public class Program
 
     private static void RunFile(string filePath)
     {
-        string source = File.ReadAllText(filePath, System.Text.Encoding.UTF8);
+        string fullPath = Path.GetFullPath(filePath);
+        _interpreter.Modules.RegisterEntryFile(fullPath);
+        string source = File.ReadAllText(fullPath, Encoding.UTF8);
         Run(source);
 
         if (ErrorHandler.HadError)
@@ -66,24 +69,8 @@ public class Program
 
     private static void Run(string source, bool promptMode = false)
     {
-        Scanner scanner = new Scanner(source);
-        List<Token> tokens = scanner.ScanTokens();
-        Parser parser = new Parser(tokens, promptMode);
-        var stmts = parser.Parse();
-
-        if (ErrorHandler.HadError)
-        {
-            return;
-        }
-
-        Resolver resolver = new Resolver(_interpreter);
-        resolver.Resolve(stmts);
-
-        if (ErrorHandler.HadError)
-        {
-            return;
-        }
-
+        var stmts = _interpreter.Modules.Compile(source, promptMode);
+        if (stmts == null) return;
         _interpreter.Interpret(stmts);
     }
 }

@@ -43,9 +43,12 @@ namespace PolSkrypt.Lexing
             { "jako", TokenType.AS }
         };
 
-        public Scanner(string source)
+        private readonly string? _file;
+
+        public Scanner(string source, string? file = null)
         {
             _source = source;
+            _file = file;
         }
 
         public List<Token> ScanTokens()
@@ -56,7 +59,7 @@ namespace PolSkrypt.Lexing
                 ScanToken();
             }
 
-            _tokens.Add(new Token(TokenType.EOF, string.Empty, null, _line)); // Add an EOF token at the end
+            _tokens.Add(new Token(TokenType.EOF, string.Empty, null, _line, _file)); // Add an EOF token at the end
             return _tokens;
         }
 
@@ -198,7 +201,7 @@ namespace PolSkrypt.Lexing
                     }
                     else
                     {
-                        ErrorHandler.Error(_line, $"Nieoczekiwany znak: '{c}'");
+                        ErrorHandler.Error(_line, _file, $"Nieoczekiwany znak: '{c}'");
                     }
                     break;
             }
@@ -207,7 +210,7 @@ namespace PolSkrypt.Lexing
         private void AddToken(TokenType type, object? literal = null)
         {
             string text = _source.Substring(_start, _current - _start);
-            _tokens.Add(new Token(type, text, literal, _line));
+            _tokens.Add(new Token(type, text, literal, _line, _file));
         }
 
         private char Advance()
@@ -240,7 +243,7 @@ namespace PolSkrypt.Lexing
 
             if (IsAtEnd())
             {
-                ErrorHandler.Error(_line, "Nieoczekiwany koniec pliku w stringu.");
+                ErrorHandler.Error(_line, _file, "Nieoczekiwany koniec pliku w stringu.");
                 return;
             }
 

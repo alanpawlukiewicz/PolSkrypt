@@ -28,18 +28,23 @@ namespace PolSkrypt.Errors
 
         public static void Error(int line, string message)
         {
-            Report(line, string.Empty, message);
+            Report(line, null, string.Empty, message);
+        }
+
+        public static void Error(int line, string? file, string message)
+        {
+            Report(line, file, string.Empty, message);
         }
 
         public static void Error(Token token, string message)
         {
             if (token.Type == TokenType.EOF)
             {
-                Report(token.Line, " na końcu", message);
+                Report(token.Line, token.File, " na końcu", message);
             }
             else
             {
-                Report(token.Line, $" na '{token.Lexeme}'", message);
+                Report(token.Line, token.File, $" na '{token.Lexeme}'", message);
             }
 
         }
@@ -58,14 +63,20 @@ namespace PolSkrypt.Errors
                 _hadRuntimeError = true;
                 return;
             }
-            WriteError($"[Linia {ex.Token.Line}] Błąd: {ex.Message}");
+            WriteError($"{Location(ex.Token.Line, ex.Token.File)} Błąd: {ex.Message}");
             _hadRuntimeError = true;
         }
 
-        private static void Report(int line, string where, string message)
+        private static void Report(int line, string? file, string where, string message)
         {
-            WriteError($"[Linia {line}] Błąd {where}: {message}");
+            WriteError($"{Location(line, file)} Błąd {where}: {message}");
             _hadError = true;
+        }
+
+        // "[Linia 3]" albo, gdy znany jest plik (np. importowany moduł), "[mat.pols, Linia 3]".
+        private static string Location(int line, string? file)
+        {
+            return file == null ? $"[Linia {line}]" : $"[{file}, Linia {line}]";
         }
     }
 }

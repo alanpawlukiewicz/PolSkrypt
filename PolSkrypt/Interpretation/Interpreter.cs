@@ -11,26 +11,47 @@ using PolSkrypt.Lexing;
 using PolSkrypt.Parsing.Expressions;
 using PolSkrypt.Parsing.Expressions.ListExpressions;
 using PolSkrypt.Parsing.Statements;
+using System.Reflection;
 
 namespace PolSkrypt.Interpretation
 {
     public class Interpreter : IExprVisitor<object?>, IStmtVisitor<object?>
     {
-        private readonly Env _globals = new Env();
-        public Env Globals => _globals;
+        private readonly Env _globals;
         private Env _environment;
         private readonly Dictionary<Expr, int> _locals = new();
 
+        private readonly Env _builtins;
+        public Env Builtins => _builtins;
+
+        private readonly ModuleLoader _modules;
+        public ModuleLoader Modules => _modules;
+
         public Interpreter()
         {
+            _builtins = new Env();
+
+            _builtins.Define("zegar", new ClockCallable());
+            _builtins.Define("wypisz", new PrintCallable());
+            _builtins.Define("wprowadź", new InputCallable());
+            _builtins.Define("liczba", new NumberCallable());
+            _builtins.Define("napis", new StringCallable());
+            _builtins.Define("typ", new TypeCallable());
+            _builtins.Define(Keywords.FILE, new FileClassCallable());
+
+            _globals = new Env(_builtins);
             _environment = _globals;
-            _globals.Define("zegar", new ClockCallable());
-            _globals.Define("wypisz", new PrintCallable());
-            _globals.Define("wprowadź", new InputCallable());
-            _globals.Define("liczba", new NumberCallable());
-            _globals.Define("napis", new StringCallable());
-            _globals.Define("typ", new TypeCallable());
-            _globals.Define(Keywords.FILE, new FileClassCallable());
+
+            _modules = new(this);
+        }
+
+        // Claude: generating method
+        private Env ModuleGlobals()
+        {
+            Env env = _environment;
+            while (env.Enclosing != null && env.Enclosing != _builtins)
+                env = env.Enclosing;
+            return env;
         }
 
         public void Interpret(List<Stmt> statements)
@@ -230,7 +251,7 @@ namespace PolSkrypt.Interpretation
             }
             else
             {
-                return _globals.Get(name);
+                return ModuleGlobals().Get(name);
             }
         }
 
@@ -255,7 +276,7 @@ namespace PolSkrypt.Interpretation
             }
             else
             {
-                _globals.Assign(expression.Name, value);
+                ModuleGlobals().Assign(expression.Name, value);
             }
 
             return value;
@@ -401,7 +422,7 @@ namespace PolSkrypt.Interpretation
                         }
                         else
                         {
-                            _globals.Assign(variable.Name, newValue);
+                            ModuleGlobals().Assign(variable.Name, newValue);
                         }
 
                         return newValue;
@@ -556,6 +577,12 @@ namespace PolSkrypt.Interpretation
                 return new FileStreamCallable(file, expression.Name);
             }
 
+            if (obj is PModule module)
+            {
+                return module.Get(expression.Name);
+            }
+                
+
             throw new RuntimeException(expression.Name, "Tylko instancje i klasy mają właściwości.");
         }
 
@@ -588,7 +615,7 @@ namespace PolSkrypt.Interpretation
                 {
                     throw new RuntimeException(expression.Method, $"Nie można było znaleźć klasy nadrzędnej.");
                 }
-                Instance? obj = (Instance?)_environment.GetAt(distance - 1, new Token(TokenType.SELF, Keywords.SELF, null, expression.Keyword.Line));
+                Instance? obj = (Instance?)_environment.GetAt(distance - 1, new Token(TokenType.SELF, Keywords.SELF, null, expression.Keyword.Line, expression.Keyword.File));
                 if (obj == null)
                 {
                     throw new RuntimeException(expression.Method, $"Nie można było znaleźć instancji klasy.");
@@ -660,5 +687,38 @@ namespace PolSkrypt.Interpretation
                 throw new RuntimeException(expression.Bracket, "Indeks znajduje się poza zakresem listy.");
             }
         }
+
+        // Claude: generating method
+        public object? VisitImportStmt(Import statement)
+        {
+            string relative = (string)statement.Path.Literal!;
+            string fullPath = Path.GetFullPath(Path.Combine(_modules.CurrentDirectory, relative));
+            PModule module = _modules.LoadModule(fullPath, statement.Keyword);
+
+            if (statement.Alias != null)
+            {
+                DefineImported(statement.Alias, module);
+            }
+            else
+            {
+                foreach (var name in statement.Imports!)
+                    DefineImported(name, module.Get(name));
+            }
+
+            return null;
+        }
+
+        // Claude: generating method
+        private void DefineImported(Token name, object? value)
+        {
+            if (_environment.TryGetOwn(name.Lexeme, out _))
+            {
+                throw new RuntimeException(name,
+                    $"Nie można zaimportować '{name.Lexeme}': nazwa jest już zdefiniowana w tym pliku.");
+            }
+
+            _environment.Define(name.Lexeme, value);
+        }
+
     }
 }

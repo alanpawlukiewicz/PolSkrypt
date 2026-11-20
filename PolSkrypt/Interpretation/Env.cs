@@ -84,5 +84,13 @@ namespace PolSkrypt.Interpretation
         {
             Ancestor(distance, name)._values[name.Lexeme] = value;
         }
+
+        public bool TryGetOwn(string name, out object? value)
+        {
+            return _values.TryGetValue(name, out value);
+        }
+
+        public IEnumerable<string> OwnNames => _values.Keys;
+
     }
 }
