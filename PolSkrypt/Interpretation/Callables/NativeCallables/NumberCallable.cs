@@ -12,6 +12,11 @@ namespace PolSkrypt.Interpretation.Callables.NativeCallables
         public object? Call(Interpreter interpreter, List<object?> arguments)
         {
             var argument = arguments[0];
+            if (argument is double d)
+            {
+                return d;
+            }
+
             if (argument is string s &&
                 double.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out double result))
             {

@@ -19,7 +19,8 @@ namespace PolSkrypt.Interpretation.Callables.NativeCallables
                     .Replace("\\t", "\t")
                     .Replace("\\r", "\r")} ";
             }
-            str = str.Remove(str.Length - 1);
+            if (str.Length > 0)
+                str = str.Remove(str.Length - 1);
             Console.Write(str);
             return null;
         }

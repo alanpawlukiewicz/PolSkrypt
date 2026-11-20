@@ -106,7 +106,7 @@ namespace PolSkrypt.Interpretation.Callables
             {
                 for (int i = 0; i < _list.Count; i++)
                 {
-                    if (_list[i]!.Equals(arguments[0]))
+                    if (Equals(_list[i], arguments[0]))
                     {
                         return (double)i;
                     }
@@ -118,7 +118,7 @@ namespace PolSkrypt.Interpretation.Callables
                 int counter = 0;
                 for (int i = 0; i < _list.Count; i++)
                 {
-                    if (_list[i]!.Equals(arguments[0]))
+                    if (Equals(_list[i], arguments[0]))
                     {
                         counter++;
                     }
