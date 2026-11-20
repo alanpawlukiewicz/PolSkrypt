@@ -45,13 +45,79 @@ namespace PolSkrypt.Tests
             WithCulture(culture, () => Eval("zmienna wynik = liczba(napis(3.25));")).Should().Be(3.25);
         }
 
-        [Fact(Skip = "Znany błąd: liczba() używa double.TryParse z kulturą systemu, więc na polskim Windowsie liczba(\"3.5\") zgłasza błąd, choć w kodzie źródłowym liczby zapisuje się z kropką.")]
-        public void Liczba_ParsesDotAsDecimalSeparator_RegardlessOfCulture()
+        [Theory]
+        [InlineData("pl-PL")]
+        [InlineData("en-US")]
+        [InlineData("")]
+        public void Liczba_ParsesDotAsDecimalSeparator_RegardlessOfCulture(string culture)
         {
-            WithCulture("pl-PL", () => Eval("zmienna wynik = liczba(\"3.5\");")).Should().Be(3.5);
+            WithCulture(culture, () => Eval("zmienna wynik = liczba(\"3.5\");")).Should().Be(3.5);
+        }
+
+        [Theory]
+        [InlineData("1e3", 1000.0)]
+        [InlineData("-2.5E-1", -0.25)]
+        [InlineData(".5", 0.5)]
+        [InlineData("+7", 7.0)]
+        public void Liczba_AcceptsSignsAndExponentNotation(string text, double expected)
+        {
+            WithCulture("pl-PL", () => Eval($"zmienna wynik = liczba(\"{text}\");")).Should().Be(expected);
+        }
+
+        [Theory]
+        [InlineData("pl-PL")]
+        [InlineData("en-US")]
+        public void Liczba_CommaIsNotADecimalOrThousandsSeparator(string culture)
+        {
+            WithCulture(culture, () =>
+            {
+                AssertRuntimeError("zmienna wynik = liczba(\"1,5\");", "Argument musi być liczbą.");
+                AssertRuntimeError("zmienna wynik = liczba(\"1,000\");", "Argument musi być liczbą.");
+                return 0;
+            });
         }
 
         // ---------- napis ----------
+
+        [Theory]
+        [InlineData("pl-PL")]
+        [InlineData("en-US")]
+        [InlineData("")]
+        public void Napis_UsesDotAsDecimalSeparator_RegardlessOfCulture(string culture)
+        {
+            WithCulture(culture, () => Eval("zmienna wynik = napis(3.5);")).Should().Be("3.5");
+        }
+
+        [Theory]
+        [InlineData("napis(1 / 4)", "0.25")]
+        [InlineData("napis(0.1 + 0.2)", "0.30000000000000004")]
+        [InlineData("napis(-1.5)", "-1.5")]
+        [InlineData("napis(1000000 * 1000000)", "1000000000000")]
+        [InlineData("\"x\" & 1.5", "x1.5")]
+        [InlineData("napis([1.5, [2.25]])", "[1.5, [2.25]]")]
+        public void Stringify_FractionalNumbersInEveryContext_UseDot_InPolishCulture(string expression, string expected)
+        {
+            WithCulture("pl-PL", () => Eval($"zmienna wynik = {expression};")).Should().Be(expected);
+        }
+
+        [Fact]
+        public void Wypisz_FractionalNumber_UsesDot_InPolishCulture()
+        {
+            var output = WithCulture("pl-PL", () => CaptureOutput(() => ExecuteSource("wypisz(2.5, [0.5]);")));
+
+            output.Should().Be("2.5 [0.5]");
+        }
+
+        [Theory]
+        [InlineData("napis(10 ** 400)", "nieskończoność")]
+        [InlineData("napis(-(10 ** 400))", "-nieskończoność")]
+        [InlineData("napis(10 ** 400 - 10 ** 400)", "nie-liczba")]
+        [InlineData("napis(-0)", "0")]
+        [InlineData("napis(0 * -1)", "0")]
+        public void Napis_SpecialNumberValues_UsePolishNames(string expression, string expected)
+        {
+            Eval($"zmienna wynik = {expression};").Should().Be(expected);
+        }
 
         [Theory]
         [InlineData("napis(12)", "12")]
@@ -65,12 +131,6 @@ namespace PolSkrypt.Tests
         public void Napis_ConvertsValueToItsTextualForm(string expression, string expected)
         {
             Eval($"zmienna wynik = {expression};").Should().Be(expected);
-        }
-
-        [Fact(Skip = "Znany błąd: StringHelper.Stringify używa double.ToString() z kulturą systemu, więc na polskim Windowsie napis(3.5) zwraca \"3,5\", a ten sam program wypisuje co innego na różnych komputerach.")]
-        public void Napis_UsesDotAsDecimalSeparator_RegardlessOfCulture()
-        {
-            WithCulture("pl-PL", () => Eval("zmienna wynik = napis(3.5);")).Should().Be("3.5");
         }
 
         [Fact]
@@ -128,7 +188,7 @@ zmienna wynik = opisz(1) & opisz(""1"");").Should().Be("liczbainne");
         {
             var output = CaptureOutput(() => ExecuteSource("wypisz(1, \"a\", prawda, wartość_pusta);"));
 
-            output.Should().StartWith($"1 a {Keywords.TRUE} {Keywords.NULL}");
+            output.Should().Be($"1 a {Keywords.TRUE} {Keywords.NULL}");
         }
 
         [Fact]

@@ -190,11 +190,21 @@ zmienna wynik = l[0][0];");
             Eval($"zmienna wynik = {expression};").Should().BeNull();
         }
 
-        [Fact(Skip = "Znany błąd: ListCallable wywołuje _list[i]!.Equals(...) i rzuca NullReferenceException, gdy lista zawiera wartość_pusta (interpreter kończy się bez obsługi błędu).")]
-        public void Szukaj_ListContainingNull_DoesNotCrash()
+        [Theory]
+        [InlineData("[wartość_pusta, 1].szukaj(1)", 1.0)]
+        [InlineData("[1, wartość_pusta].szukaj(wartość_pusta)", 1.0)]
+        [InlineData("[wartość_pusta, wartość_pusta].szukaj(wartość_pusta)", 0.0)]
+        public void Szukaj_ListContainingNull_FindsElements(string expression, double expected)
         {
-            Eval("zmienna wynik = [wartość_pusta, 1].szukaj(1);").Should().Be(1.0);
-            Eval("zmienna wynik = [1, wartość_pusta].szukaj(wartość_pusta);").Should().Be(1.0);
+            Eval($"zmienna wynik = {expression};").Should().Be(expected);
+        }
+
+        [Theory]
+        [InlineData("[wartość_pusta].szukaj(1)")]
+        [InlineData("[1, 2].szukaj(wartość_pusta)")]
+        public void Szukaj_ListContainingNull_NotFound_ReturnsNull(string expression)
+        {
+            Eval($"zmienna wynik = {expression};").Should().BeNull();
         }
 
         // ---------- policz ----------
@@ -209,11 +219,25 @@ zmienna wynik = l[0][0];");
             Eval($"zmienna wynik = {expression};").Should().Be(expected);
         }
 
-        [Fact(Skip = "Znany błąd: ListCallable wywołuje _list[i]!.Equals(...) i rzuca NullReferenceException, gdy lista zawiera wartość_pusta (interpreter kończy się bez obsługi błędu).")]
-        public void Policz_ListContainingNull_DoesNotCrash()
+        [Theory]
+        [InlineData("[1, wartość_pusta, 1].policz(1)", 2.0)]
+        [InlineData("[wartość_pusta, 1, wartość_pusta].policz(wartość_pusta)", 2.0)]
+        [InlineData("[1, 2].policz(wartość_pusta)", 0.0)]
+        public void Policz_ListContainingNull_CountsCorrectly(string expression, double expected)
         {
-            Eval("zmienna wynik = [1, wartość_pusta, 1].policz(1);").Should().Be(2.0);
-            Eval("zmienna wynik = [wartość_pusta, wartość_pusta].policz(wartość_pusta);").Should().Be(2.0);
+            Eval($"zmienna wynik = {expression};").Should().Be(expected);
+        }
+
+        [Fact]
+        public void SzukajAndPolicz_UseSameEqualityAsEqualsOperator()
+        {
+            var interpreter = ExecuteSource(@"
+zmienna l = [1, ""1"", prawda, wartość_pusta];
+zmienna s = [l.szukaj(1), l.szukaj(""1""), l.szukaj(prawda), l.szukaj(wartość_pusta)];
+zmienna p = [l.policz(1), l.policz(""1""), l.policz(prawda), l.policz(wartość_pusta)];");
+
+            AsList(Global(interpreter, "s")).Should().Equal(0.0, 1.0, 2.0, 3.0);
+            AsList(Global(interpreter, "p")).Should().Equal(1.0, 1.0, 1.0, 1.0);
         }
 
         // ---------- wyczyść ----------
