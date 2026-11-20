@@ -1,6 +1,7 @@
 ﻿using PolSkrypt.Constants;
 using PolSkrypt.Contracts;
 using PolSkrypt.Errors.Exceptions;
+using System.Globalization;
 
 namespace PolSkrypt.Interpretation.Callables.NativeCallables
 {
@@ -11,12 +12,8 @@ namespace PolSkrypt.Interpretation.Callables.NativeCallables
         public object? Call(Interpreter interpreter, List<object?> arguments)
         {
             var argument = arguments[0];
-            if (argument is double d)
-            {
-                return d;
-            }
-
-            if (double.TryParse(argument?.ToString(), out double result))
+            if (argument is string s &&
+                double.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out double result))
             {
                 return result;
             }
